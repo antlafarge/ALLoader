@@ -76,7 +76,7 @@
 					ske = json;
 
 					AnimationUtils.processInitMatrix( json );
-					skeleton = AnimationUtils.createSkeleton2( json, 10 );
+					skeleton = AnimationUtils.createSkeleton( json, 10 );
 
 					scene.add( skeleton );
 
@@ -128,26 +128,42 @@
 					head = AnimationUtils.applySkeleton( head, ske );
 					combi = AnimationUtils.applySkeleton( combi, ske );
 
+					var geometry = new THREE.Geometry();
+					AnimationUtils.merge( geometry, head.geometry );
+					AnimationUtils.merge( geometry, combi.geometry );
+					gordon = new THREE.SkinnedMesh( geometry, new THREE.MeshFaceMaterial() );
+					gordon = AnimationUtils.applySkeleton( gordon, ske );
+
+					gordonWire = AnimationUtils.createWireframe( gordon );
+
 					head.material.transparent = true;
 					head.material.opacity = 0.5;
 					combi.material.transparent = true;
 					combi.material.opacity = 0.5;
 
+					scene.add( skeleton );
 					scene.add( head );
 					scene.add( combi );
-					scene.add( skeleton );
+					//scene.add( gordon );
+					//scene.add( gordonWire );
 
-					animation = new THREE.Animation( head, "gordon_idle" );
-					animation2 = new THREE.Animation( combi, "gordon_idle" );
-					animation3 = new THREE.Animation( skeleton, "gordon_idle" );
+					animation = new THREE.Animation( skeleton, "gordon_idle" );
+					animation2 = new THREE.Animation( head, "gordon_idle" );
+					animation3 = new THREE.Animation( combi, "gordon_idle" );
+					animation4 = new THREE.Animation( gordon, "gordon_idle" );
+					animation5 = new THREE.Animation( gordonWire, "gordon_idle" );
 
 					animation.timeScale = 0.5;
 					animation2.timeScale = 0.5;
 					animation3.timeScale = 0.5;
+					animation4.timeScale = 0.5;
+					animation5.timeScale = 0.5;
 
 					animation.play();
 					animation2.play();
 					animation3.play();
+					animation4.play();
+					animation5.play();
 				}
 				
 				// renderer
