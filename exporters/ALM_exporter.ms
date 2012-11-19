@@ -1,35 +1,24 @@
-clearListener()
-
---filepath = GetSaveFileName()
-filename = "model.alm"
-/*
-filepath = GetSaveFileName()
-if filepath == undefined then
-(
-	exit
-)
-*/
-deleteFile filename
-global file = createFile filename
-
 function processMaterial mat =
 (
-	materialName = myMesh.material.name
-	textureName = myMesh.material.diffuseMap.bitmap.filename
+	textureFilePath = mat.diffuseMap.bitmap.filename
+	tokens = ( filterString textureFilePath "\\" )
+	textureFileName = tokens[ tokens.count ]
 	if textureName == undefined then
 	(
 		textureName = ""
 	)
 
 	format "\t\t{\n" to:file
-	format "\t\t\t\"name\":\"%\",\n" materialName to:file
-	format "\t\t\t\"texture\":\"%\"\n" textureName to:file
+	format "\t\t\t\"name\":\"%\",\n" mat.name to:file
+	format "\t\t\t\"texture\":\"%\"\n" textureFileName to:file
 	format "\t\t}\n" to:file
 )
 
-function processMesh mymesh =
+function processMesh mymesh matName =
 (
 	format "\t\t{\n" to:file
+	
+	format "\t\t\t\"material\":\"%\",\n" matName to:file
 
 	vertexBuffer = #()
 	normalBuffer = #()
@@ -145,24 +134,68 @@ function processMesh mymesh =
 	format "\t\t}\n" to:file
 )
 
+-- MAIN
+clearListener()
+
+--filepath = GetSaveFileName()
+filename = "model.alm"
+/*
+filepath = GetSaveFileName()
+if filepath == undefined then
+(
+	exit
+)
+*/
+
+-- FILE START
+deleteFile filename
+global file = createFile filename
 format "{\n" to:file
 
 -- MATERIALS
 format "\t\"materials\":[\n" to:file
-
---processMaterial( myMesh.material )
-
+for i = 1 to selection.count do
+(
+	if i > 1 then
+	(
+		format "\t\t,\n" to:file
+	)
+	
+	myobj = selection[i]
+	mymesh = snapshotAsMesh myobj
+	
+	mat = myobj.material
+	if mat != undefined then
+	(
+		processMaterial( mat )
+	)
+)
 format "\t],\n" to:file
-
+	
 -- MESHES
-myMesh = snapshotAsMesh selection[1]
-
 format "\t\"meshes\":[\n" to:file
-processMesh( myMesh )
+for i = 1 to selection.count do
+(
+	if i > 1 then
+	(
+		format "\t\t,\n" to:file
+	)
+	
+	myobj = selection[i]
+	mymesh = snapshotAsMesh myobj
+	
+	matName = ""
+	mat = myobj.material
+	if mat != undefined then
+	(
+		matName = mat.name
+	)
+	
+	processMesh mymesh matName
+	
+)
 format "\t]\n" to:file
 
 -- FILE END
-
 format "}\n" to:file
-
 close file

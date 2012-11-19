@@ -132,7 +132,7 @@ THREE.ALMLoader.prototype.createModel = function ( json, callback, texturePath )
 		
 		geometry.name = jsonMesh.name;
 		
-		var skinning = ( jsonMesh.skinWeights.length && jsonMesh.skinIndices.length );
+		var skinning = ( jsonMesh.skinIndices && jsonMesh.skinWeights && jsonMesh.skinIndices.length && jsonMesh.skinWeights.length );
 		// There is only 1 material per mesh
 		var materialId = getMatIdFromName( jsonMesh.material );
 		if ( materialId === -1 )
