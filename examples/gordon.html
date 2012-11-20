@@ -75,10 +75,8 @@
 				{
 					ske = json;
 
-					AnimationUtils.processInitMatrix( json );
-					skeleton = AnimationUtils.createSkeleton( json, 10 );
-
-					scene.add( skeleton );
+					AnimationUtils.processInitMatrix( ske );
+					skeleton = AnimationUtils.createSkeleton( ske, 10 );
 
 					skeletonLoaded = true;
 					if ( animLoaded && modelLoaded )
@@ -142,10 +140,11 @@
 					combi.material.opacity = 0.5;
 
 					scene.add( skeleton );
+					console.log( skeleton )
 					scene.add( head );
 					scene.add( combi );
 					//scene.add( gordon );
-					//scene.add( gordonWire );
+					scene.add( gordonWire );
 
 					animation = new THREE.Animation( skeleton, "gordon_idle" );
 					animation2 = new THREE.Animation( head, "gordon_idle" );

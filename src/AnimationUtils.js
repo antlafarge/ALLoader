@@ -15,7 +15,7 @@ AnimationUtils.wireOpacity = 0.2;
 AnimationUtils.boneSize = 0.1;
 AnimationUtils.boneType = AnimationUtils.sphere;
 
-AnimationUtils.createSkeleton = function( json, boneScale )
+AnimationUtils.createSkeleton = function( ske, boneScale )
 {
 	if ( boneScale == null )
 		boneScale = 1;
@@ -27,9 +27,9 @@ AnimationUtils.createSkeleton = function( json, boneScale )
 	threeObjects[-1] = root;
 
 	// Create Object3D
-	for ( var i=0 ; i < json.length ; i++ )
+	for ( var i=0 ; i < ske.bones.length ; i++ )
 	{
-		var bone = json[ i ];
+		var bone = ske.bones[ i ];
 
 		var obj = new THREE.Object3D();
 		obj.name = bone.name;
@@ -52,9 +52,9 @@ AnimationUtils.createSkeleton = function( json, boneScale )
 	}
 
 	// Add Object3D to parent
-	for ( var i=0 ; i < json.length ; i++ )
+	for ( var i=0 ; i < ske.bones.length ; i++ )
 	{
-		var bone = json[ i ];
+		var bone = ske.bones[ i ];
 		var obj = threeObjects[ i ];
 		threeObjects[ bone.parent ].add( obj );
 	}
@@ -67,9 +67,9 @@ AnimationUtils.createSkeleton = function( json, boneScale )
 	skeletonGeometry.materials.push( new THREE.MeshLambertMaterial( { ambient:AnimationUtils.linkColor, wireframe:true, skinning:true } ) );
 
 	// Copy bones
-	for ( var i=0 ; i < json.length ; i++ )
+	for ( var i=0 ; i < ske.bones.length ; i++ )
 	{
-		var bone = json[ i ];
+		var bone = ske.bones[ i ];
 		var bone2 = {};
 		bone2.name = bone.name;
 		bone2.parent = bone.parent;
@@ -160,13 +160,13 @@ AnimationUtils.createSkeleton = function( json, boneScale )
 	return skeleton;
 }
 
-AnimationUtils.processInitMatrix = function( json )
+AnimationUtils.processInitMatrix = function( ske )
 {
-	for ( var i in json )
+	for ( var i in ske.bones )
 	{
-		var bone = json[ i ];
+		var bone = ske.bones[ i ];
 		//bone.parentName = bone.parent;
-		bone.parent = getBoneIdFromName( json, bone.parent );
+		bone.parent = getBoneIdFromName( ske.bones, bone.parent );
 
 		var im = bone.initMatrix;
 		bone.initMatrix = new THREE.Matrix4( im[0],im[3],im[6],im[9], im[1],im[4],im[7],im[10], im[2],im[5],im[8],im[11], 0,0,0,1 );
@@ -184,11 +184,11 @@ AnimationUtils.processInitMatrix = function( json )
 		return -1;
 	}
 
-	for ( var i in json )
+	for ( var i in ske.bones )
 	{
-		var bone = json[ i ];
+		var bone = ske.bones[ i ];
 
-		var parent = json[ bone.parent ];
+		var parent = ske.bones[ bone.parent ];
 
 		if ( parent )
 		{
@@ -210,22 +210,22 @@ AnimationUtils.processInitMatrix = function( json )
 	}
 
 	// clean bones
-	for ( var i in json )
+	for ( var i in ske.bones )
 	{
-		var bone = json [ i ];
+		var bone = ske.bones [ i ];
 		//delete bone.initMatrix;
 		//delete bone.invInitMatrix;
 		//delete bone.mat;
 	}
 }
 
-AnimationUtils.applySkeleton = function( skinnedMesh, skeleton )
+AnimationUtils.applySkeleton = function( skinnedMesh, ske )
 {
 	skinnedMesh.geometry.bones = [];
 
-	for ( var i in ske )
+	for ( var i in ske.bones )
 	{
-		var bone = ske[ i ];
+		var bone = ske.bones[ i ];
 		var bone2 = {};
 		bone2.name = bone.name;
 		bone2.parent = bone.parent;

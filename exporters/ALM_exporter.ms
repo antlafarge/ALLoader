@@ -138,7 +138,7 @@ function processMesh mymesh matName =
 clearListener()
 
 --filepath = GetSaveFileName()
-filename = "model.alm"
+filename = "test.alm"
 /*
 filepath = GetSaveFileName()
 if filepath == undefined then
