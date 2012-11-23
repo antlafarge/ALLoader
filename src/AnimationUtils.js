@@ -167,6 +167,9 @@ AnimationUtils.processInitMatrix = function( ske )
 		var bone = ske.bones[ i ];
 		//bone.parentName = bone.parent;
 		bone.parent = getBoneIdFromName( ske.bones, bone.parent );
+		
+		if ( bone.transform && ! bone.initMatrix )
+			bone.initMatrix = bone.transform;
 
 		var im = bone.initMatrix;
 		bone.initMatrix = new THREE.Matrix4( im[0],im[3],im[6],im[9], im[1],im[4],im[7],im[10], im[2],im[5],im[8],im[11], 0,0,0,1 );
@@ -192,6 +195,8 @@ AnimationUtils.processInitMatrix = function( ske )
 
 		if ( parent )
 		{
+			//bone.mat = bone.invInitMatrix.clone();
+			//bone.mat.multiplySelf( parent.initMatrix );
 			bone.mat = parent.initMatrix.clone();
 			bone.mat.multiplySelf( bone.invInitMatrix );
 		}

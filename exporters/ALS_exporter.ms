@@ -5,21 +5,31 @@ function pf3 f =
 
 function formatMatrix3 m =
 (
-	preRotateX m 90
-	m = inverse m
-	mr1x = pf3 m.row1.x
-	mr1y = pf3 m.row1.y
-	mr1z = pf3 m.row1.z
-	mr2x = pf3 m.row2.x
-	mr2y = pf3 m.row2.y
-	mr2z = pf3 m.row2.z
-	mr3x = pf3 m.row3.x
-	mr3y = pf3 m.row3.y
-	mr3z = pf3 m.row3.z
-	mr4x = pf3 m.row4.x
-	mr4y = pf3 m.row4.y
-	mr4z = pf3 m.row4.z
-	format "%,%,%,%,%,%,%,%,%,%,%,%" mr1x mr1y mr1z mr2x mr2y mr2z mr3x mr3y mr3z mr4x mr4y mr4z to:file
+	m1x = m.row1.x
+	m1y = m.row1.y
+	m1z = m.row1.z
+	m2x = m.row2.x
+	m2y = m.row2.y
+	m2z = m.row2.z
+	m3x = m.row3.x
+	m3y = m.row3.y
+	m3z = m.row3.z
+	m4x = m.row4.x
+	m4y = m.row4.y
+	m4z = m.row4.z
+	/*m1x = pf3 m.row1.x
+	m1y = pf3 m.row1.y
+	m1z = pf3 m.row1.z
+	m2x = pf3 m.row2.x
+	m2y = pf3 m.row2.y
+	m2z = pf3 m.row2.z
+	m3x = pf3 m.row3.x
+	m3y = pf3 m.row3.y
+	m3z = pf3 m.row3.z
+	m4x = pf3 m.row4.x
+	m4y = pf3 m.row4.y
+	m4z = pf3 m.row4.z*/
+	format "%,%,%,%,%,%,%,%,%,%,%,%" m1x m1y m1z m2x m2y m2z m3x m3y m3z m4x m4y m4z to:file
 )
 
 function processBone b =
@@ -31,24 +41,23 @@ function processBone b =
 		parentName = parent.name
 	)
 	
-	im = b.transform
+	im = ( rotate ( copy b.transform ) QUAT_TRANSFORM )
 	
 	format "\t\t{\n" to:file
 	-- name
 	format "\t\t\t\"name\":\"%\",\n" b.name to:file
 	-- parent
 	format "\t\t\t\"parent\":\"%\",\n" parentName to:file
-	-- initMatrix
-	format "\t\t\t\"initMatrix\":[" to:file
-	formatMatrix3( copy im )
-	format "],\n"  to:file
 	
-	-- extra info (to remove)
-	format "\t\t\t\"transform\":\"%\",\n" b.transform to:file
-	format "\t\t\t\"pos\":\"%\",\n" b.pos to:file
-	format "\t\t\t\"rotation\":\"%\",\n" b.rotation to:file
-	format "\t\t\t\"scale\":\"%\",\n" b.scale to:file
-	format "\t\t\t\"objectTransform\":\"%\",\n" b.objectTransform to:file
+	-- data
+	format "\t\t\t\"transform\":[" to:file
+	formatMatrix3( b.transform )
+	format "],\n"  to:file
+	format "\t\t\t\"pos\":[%,%,%],\n" b.pos.x b.pos.y b.pos.z to:file
+	format "\t\t\t\"rotq\":[%,%,%,%],\n" b.rotation.x b.rotation.y b.rotation.z b.rotation.w to:file
+	format "\t\t\t\"scl\":[%,%,%]\n" b.scale.x b.scale.y b.scale.z to:file
+	
+	/*format "\t\t\t\"objectTransform\":\"%\",\n" b.objectTransform to:file
 	format "\t\t\t\"objectOffsetPos\":\"%\",\n" b.objectOffsetPos to:file
 	format "\t\t\t\"objectOffsetRot\":\"%\",\n" b.objectOffsetRot to:file
 	format "\t\t\t\"objectOffsetScale\":\"%\",\n" b.objectOffsetScale to:file
@@ -56,7 +65,8 @@ function processBone b =
 	format "\t\t\t\"max\":\"%\",\n" b.max to:file
 	format "\t\t\t\"min\":\"%\",\n" b.min to:file
 	format "\t\t\t\"center\":\"%\",\n" b.center to:file
-	format "\t\t\t\"pivot\":\"%\",\n" b.pivot to:file
+	format "\t\t\t\"pivot\":\"%\"\n" b.pivot to:file*/
+	
 	format "\t\t}\n" to:file
 )
 

@@ -78,15 +78,20 @@
 					AnimationUtils.processInitMatrix( ske );
 					skeleton = AnimationUtils.createSkeleton( ske, 10 );
 
+					scene.add( skeleton );
+					
+					console.log( ske );
+					console.log( skeleton );
+					
 					skeletonLoaded = true;
 					if ( animLoaded && modelLoaded )
 					{
-						processAll();
+						//processAll();
 					}
 				}
 				
 				var skeletonLoader = new THREE.ALSLoader();
-				skeletonLoader.load( "skeletons/gordon.als", processSkeleton );
+				skeletonLoader.load( "../exporters/test.als", processSkeleton );
 				
 				function processAnim( json )
 				{
@@ -102,7 +107,7 @@
 				}
 				
 				var animLoader = new THREE.ALALoader();
-				animLoader.load( "animations/gordon_idle.ala", processAnim );
+				//animLoader.load( "animations/gordon_idle.ala", processAnim );
 				
 				function processModel( myObject3d )
 				{
@@ -119,7 +124,7 @@
 				}
 				
 				var modelLoader = new THREE.ALMLoader();
-				modelLoader.load( "models/gordon.alm", processModel, "textures" );
+				//modelLoader.load( "models/test.alm", processModel, "textures" );
 
 				function processAll()
 				{
