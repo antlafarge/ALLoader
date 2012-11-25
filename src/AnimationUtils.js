@@ -197,13 +197,14 @@ AnimationUtils.processInitMatrix = function( ske )
 		{
 			//bone.mat = bone.invInitMatrix.clone();
 			//bone.mat.multiplySelf( parent.initMatrix );
-			bone.mat = parent.initMatrix.clone();
-			bone.mat.multiplySelf( bone.invInitMatrix );
+			bone.mat = parent.invInitMatrix.clone();
+			bone.mat.multiplySelf( bone.initMatrix );
 		}
 		else
 		{
 			bone.mat = bone.invInitMatrix.clone();
 		}
+		//bone.parent = -1;
 
 		// Extract components
 		var pos = new THREE.Vector3();

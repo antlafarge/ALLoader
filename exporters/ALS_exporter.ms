@@ -1,3 +1,6 @@
+QUAT_TRANSFORM_1 = quat 90 [0,1,0]
+QUAT_TRANSFORM_2 = quat 180 [0,0,1]
+
 function pf3 f =
 (
 	ceil( f * 1000 ) / 1000
@@ -41,7 +44,9 @@ function processBone b =
 		parentName = parent.name
 	)
 	
-	im = ( rotate ( copy b.transform ) QUAT_TRANSFORM )
+	im = copy b.transform
+	im = ( rotate im QUAT_TRANSFORM_1 )
+	im = ( rotate im QUAT_TRANSFORM_2 )
 	
 	format "\t\t{\n" to:file
 	-- name
@@ -51,7 +56,7 @@ function processBone b =
 	
 	-- data
 	format "\t\t\t\"transform\":[" to:file
-	formatMatrix3( b.transform )
+	formatMatrix3( im )
 	format "],\n"  to:file
 	format "\t\t\t\"pos\":[%,%,%],\n" b.pos.x b.pos.y b.pos.z to:file
 	format "\t\t\t\"rotq\":[%,%,%,%],\n" b.rotation.x b.rotation.y b.rotation.z b.rotation.w to:file
