@@ -16,6 +16,46 @@
 
 		<div id="container"></div>
 
+		<script id="fragmentShader" type="x-shader/x-fragment">
+
+			precision mediump float;
+
+			//uniform float time;
+			//uniform vec2 resolution;
+
+			//varying vec2 vUv;
+
+			void main( void ) {
+
+				//vec2 position = -1.0 + 2.0 * vUv;
+
+				//float red = abs( sin( position.x * position.y + time / 5.0 ) );
+				//float green = abs( sin( position.x * position.y + time / 4.0 ) );
+				//float blue = abs( sin( position.x * position.y + time / 3.0 ) );
+				//gl_FragColor = vec4( red, green, blue, 1.0 );
+				gl_FragColor = vec4( 1, 0, 0, 1 );
+
+			}
+
+		</script>
+
+		<script id="vertexShader" type="x-shader/x-vertex">
+
+			//varying vec2 vUv;
+			uniform float tt;
+
+			void main()
+			{
+				//vUv = uv;
+				//position[0] += tt;
+				vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+				//mvPosition.x += tt;
+				gl_Position = projectionMatrix * mvPosition;
+				//gl_Position.x += tt;
+			}
+
+		</script>
+
 		<script src="js/three.js"></script>
 		<script src="js/TrackballControls.js"></script>
 		<script src="../src/ALSLoader.js"></script>
@@ -71,15 +111,27 @@
 				light = new THREE.AmbientLight( 0xffffff );
 				scene.add( light );
 
-				function processModel( myObject3d )
-				{
-					object3d = myObject3d;
-
-					scene.add( object3d );
-				}
+				// Shader Box
 				
-				var modelLoader = new THREE.ALMLoader();
-				modelLoader.load( "models/crate.alm", processModel, "textures" );
+				uniforms1 = {
+					tt: { type: "f", value: 0.0 }
+					//time: { type: "f", value: 1.0 },
+					//resolution: { type: "v2", value: new THREE.Vector2() }
+				};
+
+				material = new THREE.ShaderMaterial(
+				{
+					uniforms: uniforms1,
+					vertexShader: document.getElementById( 'vertexShader' ).textContent,
+					fragmentShader: document.getElementById( 'fragmentShader' ).textContent
+				});
+
+				mesh = new THREE.Mesh( new THREE.CubeGeometry( 40, 40, 40 ), material );
+
+				scene.add( mesh );
+			
+				//var modelLoader = new THREE.ALMLoader();
+				//modelLoader.load( "models/crate.alm", processModel, "textures" );
 
 				// renderer
 
@@ -116,7 +168,7 @@
 			}
 
 			function render() {
-
+				uniforms1.tt.value+=0.1;
 				requestAnimationFrame( render );
 				var delta = clock.getDelta();
 				THREE.AnimationHandler.update( delta );

@@ -16,8 +16,71 @@
 
 		<div id="container"></div>
 
+		<script id="fragmentShader" type="x-shader/x-fragment">
+
+			void main( void )
+			{
+				gl_FragColor = vec4( 1, 1, 1, 1 );
+			}
+
+		</script>
+
+		<script id="vertexShader" type="x-shader/x-vertex">
+
+			//precision highp float;
+
+			attribute vec4 boneIndex;
+			attribute vec4 boneWeight;
+			uniform mat4 boneMatrices[ 42 ];
+
+			void main()
+			{
+				mat4 animMat = mat4(1);
+				/*
+				// INDEX 1
+				int bIndex = int( boneIndex[0] );
+				if ( bIndex != -1 )
+				{
+					animMat += boneWeight[0] * boneMatrices[bIndex];
+
+					// INDEX 2
+					bIndex = int( boneIndex[1] );
+					if ( bIndex != -1 )
+					{
+						animMat += boneWeight[1] * boneMatrices[bIndex];
+
+						// INDEX 3
+						bIndex = int( boneIndex[2] );
+						if ( bIndex != -1 )
+						{
+							animMat += boneWeight[2] * boneMatrices[bIndex];
+
+							// INDEX 4
+							bIndex = int( boneIndex[3] );
+							if ( bIndex != -1 )
+							{
+								animMat += boneWeight[3] * boneMatrices[bIndex];
+							}
+						}
+					}
+				}
+				*/
+				vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+				gl_Position = projectionMatrix * animMat * mvPosition;
+			}
+
+		</script>
+
 		<script src="js/three.js"></script>
 		<script src="js/TrackballControls.js"></script>
+		<script src="meshSkin.js"></script>
+		<script src="skAnimation.js"></script>
+		<script src="skAnimBone.js"></script>
+		<script src="skAnimChannel.js"></script>
+		<script src="skAnimPlayer.js"></script>
+		<script src="skAnimSubChannel.js"></script>
+		<script src="../src/OKMLoader.js"></script>
+		<script src="../src/OKALoader.js"></script>
 		<script src="../src/ALSLoader.js"></script>
 		<script src="../src/ALMLoader.js"></script>
 		<script src="../src/ALALoader.js"></script>
@@ -27,7 +90,7 @@
 		<script src="js/Stats.js"></script>
 		
 		<script>
-		
+
 			if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 
 			var container, stats;
@@ -35,7 +98,7 @@
 			var camera, controls, scene, renderer;
 			
 			var ske;
-			var anim, animation;
+			var animPlayer, anim, animation;
 			var object3d, gordon;
 
 			var skeleton;
@@ -76,12 +139,60 @@
 				light = new THREE.AmbientLight( 0xffffff );
 				scene.add( light );
 
+				// animPlayer
+
+				animPlayer = new SkAnimPlayer();
+				
+				animPlayer.setBlendMode(EBlendMode.SKBLEND_LERP);
+				animPlayer.enableLoop(0, true);
+				animPlayer.setSpeed(0, 1);
+				animPlayer.setTime(0, 0);
+				animPlayer.activateChannel(0, true);
+
+				// Shader
+
+				attributes = {
+					boneIndex: { type: "v4", value: [] },
+					boneWeight: { type: "v4", value: [] }
+				};
+				uniforms = {
+					boneMatrices: { type: "m4v", value: [] }
+				};
+
+				var i = 64;
+				while( i-- )
+					uniforms.boneMatrices.value.push( new THREE.Matrix4() )
+
+				vShader = document.getElementById( 'vertexShader' ).textContent;
+				fShader = document.getElementById( 'fragmentShader' ).textContent;
+
+				material1 = new THREE.ShaderMaterial(
+				{
+					attributes: attributes,
+					uniforms: uniforms,
+					vertexShader: vShader,
+					fragmentShader: fShader
+				});
+				material1.wireframe = true;
+				material2 = new THREE.ShaderMaterial(
+				{
+					attributes: attributes,
+					uniforms: uniforms,
+					vertexShader: vShader,
+					fragmentShader: fShader
+				});
+
 				function processSkeleton( json )
 				{
 					ske = json;
 
-					AnimationUtils.processInitMatrix( ske );
 					skeleton = AnimationUtils.createSkeleton( ske, 10 );
+
+					attributes.boneIndex.value = skeleton.skin.boneIndex;
+					attributes.boneWeight.value = skeleton.skin.boneWeight;
+
+					skeleton.geometry.materials[0] = material1;
+					skeleton.geometry.materials[1] = material2;
 
 					scene.add( skeleton );
 					
@@ -91,18 +202,26 @@
 					skeletonLoaded = true;
 					if ( animLoaded && modelLoaded )
 					{
-						//processAll();
+						processAll();
 					}
 				}
 				
 				var skeletonLoader = new THREE.ALSLoader();
-				skeletonLoader.load( "../exporters/test.als", processSkeleton );
+				skeletonLoader.load( "skeletons/gordon.als", processSkeleton );
 				
-				function processAnim( json )
+				function processAnim( anim )
 				{
-					anim = json;
+					animation = anim;
 
-					THREE.AnimationHandler.add( anim );
+					/*console.log( animation );
+
+					animPlayer.attachAnim(0, animation, 300);
+					animPlayer.setTime(0, 0);
+					animPlayer.enableLoop(0, 1);
+
+					animPlayer.setSkin( skeleton.skin );
+					//this.animPlayer.update(0, 100);
+					var boneMatListTmp = animPlayer.getBoneFinalMat43Array();*/
 
 					animLoaded = true;
 					if ( skeletonLoaded && modelLoaded )
@@ -111,15 +230,17 @@
 					}
 				}
 				
-				var animLoader = new THREE.ALALoader();
-				//animLoader.load( "animations/gordon_idle.ala", processAnim );
-				
+				var animLoader = new THREE.OKALoader();
+				animLoader.load( "animations/gordon_idle.OKA", processAnim );
+
 				function processModel( myObject3d )
 				{
 					object3d = myObject3d;
 
-					combi = object3d.children[0];
-					head = object3d.children[1];
+					//combi = object3d.children[0];
+					//head = object3d.children[1];
+
+					//scene.add( object3d );
 
 					modelLoaded = true;
 					if ( skeletonLoaded && animLoaded )
@@ -129,51 +250,15 @@
 				}
 				
 				var modelLoader = new THREE.ALMLoader();
-				//modelLoader.load( "models/test.alm", processModel, "textures" );
+				modelLoader.load( "models/gordon2.alm", processModel, "textures" );
 
 				function processAll()
 				{
-					head = AnimationUtils.applySkeleton( head, ske );
-					combi = AnimationUtils.applySkeleton( combi, ske );
-
-					var geometry = new THREE.Geometry();
-					AnimationUtils.merge( geometry, head.geometry );
-					AnimationUtils.merge( geometry, combi.geometry );
-					gordon = new THREE.SkinnedMesh( geometry, new THREE.MeshFaceMaterial() );
-					gordon = AnimationUtils.applySkeleton( gordon, ske );
-
-					gordonWire = AnimationUtils.createWireframe( gordon );
-
-					head.material.transparent = true;
-					head.material.opacity = 0.5;
-					combi.material.transparent = true;
-					combi.material.opacity = 0.5;
-					
-					console.log( ske );
-
-					scene.add( skeleton );
+					//scene.add( skeleton );
 					//scene.add( head );
 					//scene.add( combi );
 					//scene.add( gordon );
 					//scene.add( gordonWire );
-
-					/*animation = new THREE.Animation( skeleton, "gordon_idle" );
-					animation2 = new THREE.Animation( head, "gordon_idle" );
-					animation3 = new THREE.Animation( combi, "gordon_idle" );
-					animation4 = new THREE.Animation( gordon, "gordon_idle" );
-					animation5 = new THREE.Animation( gordonWire, "gordon_idle" );
-
-					animation.timeScale = 0.5;
-					animation2.timeScale = 0.5;
-					animation3.timeScale = 0.5;
-					animation4.timeScale = 0.5;
-					animation5.timeScale = 0.5;
-
-					animation.play();
-					animation2.play();
-					animation3.play();
-					animation4.play();
-					animation5.play();*/
 				}
 				
 				// renderer
@@ -190,15 +275,15 @@
 				stats.domElement.style.zIndex = 100;
 				container.appendChild( stats.domElement );
 
-				//
+				// end init
 
 				window.addEventListener( 'resize', onWindowResize, false );
 
 				render();
 			}
 
-			function onWindowResize() {
-
+			function onWindowResize()
+			{
 				camera.aspect = window.innerWidth / window.innerHeight;
 				camera.updateProjectionMatrix();
 
@@ -207,18 +292,34 @@
 				controls.handleResize();
 
 				render();
-
 			}
 
-			function render() {
+			function animLoop( ms )
+			{
+				if ( skeleton )
+				{
+					animPlayer.setSkin( skeleton.skin );
 
+					this.animPlayer.update(0, ms);
+					
+					var boneMatListTmp = animPlayer.getBoneFinalMat43Array();
+
+					var m = boneMatListTmp.length;
+					while( m-- )
+					{
+						uniforms.boneMatrices.value[ m ] = boneMatListTmp[ m ];
+					}
+				}
+			}
+
+			function render()
+			{
 				requestAnimationFrame( render );
 				var delta = clock.getDelta();
-				THREE.AnimationHandler.update( delta );
+				animLoop( delta * 1000 );
 				controls.update();
 				renderer.render( scene, camera );
 				stats.update();
-
 			}
 
 		</script>

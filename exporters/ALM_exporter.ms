@@ -1,36 +1,69 @@
+-- MESH EXPORTER (ALM)
+
+include "tools.ms"
+
 function processMaterial mat =
 (
-	textureFilePath = mat.diffuseMap.bitmap.filename
-	tokens = ( filterString textureFilePath "\\" )
-	textureFileName = tokens[ tokens.count ]
-	if textureName == undefined then
+	if classof mat == Multimaterial then -- multi material
 	(
-		textureName = ""
+		for i = 1 to mat.numsubs do
+		(
+			if i > 1 then
+			(
+				format "\t\t,\n" to:file
+			)
+			processMaterial mat.materialList[ i ]
+		)
 	)
+	else -- standard material
+	(
+		textureFilePath = mat.diffuseMap.bitmap.filename
+		tokens = ( filterString textureFilePath "\\" )
+		textureFileName = tokens[ tokens.count ]
+		if textureName == undefined then
+		(
+			textureName = ""
+		)
 
-	format "\t\t{\n" to:file
-	format "\t\t\t\"name\":\"%\",\n" mat.name to:file
-	format "\t\t\t\"texture\":\"%\"\n" textureFileName to:file
-	format "\t\t}\n" to:file
+		format "\t\t{\n" to:file
+		format "\t\t\t\"name\":\"%\",\n" mat.name to:file
+		format "\t\t\t\"texture\":\"%\"\n" textureFileName to:file
+		format "\t\t}\n" to:file
+	)
 )
 
-function processMesh mymesh matName =
+function processMesh myMesh matName =
 (
 	format "\t\t{\n" to:file
 	
 	format "\t\t\t\"material\":\"%\",\n" matName to:file
+
+	/*skin = mymesh.skin
+	numberBones = skinOps.GetNumberBones skin
+	numberVertices = skinOps.GetNumberVertices skin*/
+	
+	/*skinOps.GetVertexWeight <Skin> <vertex_integer> <vertex_bone_integer>
+	skinOps.GetVertexWeightBoneID <Skin> <vertex_integer> <vertex_bone_integer>
+	skinOps.GetVertexWeightCount <Skin> <vertex_integer>
+	skinOps.GetBoneName <Skin> <bone_integer> <nameflag_index>*/
 
 	vertexBuffer = #()
 	normalBuffer = #()
 	indexBuffer = #()
 	colorBuffer = #()
 	textCoordBuffer = #()
+	skinIndices = #()
+	skinWeights = #()
+	matIDs = #()
 
 	indexCount = 0
 	for f = 1 to myMesh.numfaces do
 	(
 		-- Face
 		face = getFace myMesh f
+		-- MatID
+		matID = getFaceMatID myMesh f
+		format "matID = %\n" matID to:file
 		-- Vertices
 		v1 = getVert myMesh face.x
 		v2 = getVert myMesh face.y
@@ -137,65 +170,72 @@ function processMesh mymesh matName =
 -- MAIN
 clearListener()
 
---filepath = GetSaveFileName()
-filename = "test.alm"
-/*
 filepath = GetSaveFileName()
 if filepath == undefined then
 (
 	exit
 )
-*/
 
--- FILE START
-deleteFile filename
-global file = createFile filename
+-- DELETE AND CREATE FILE
+deleteFile filepath
+global file = createFile filepath
+
+-- START FILE
 format "{\n" to:file
 
 -- MATERIALS
 format "\t\"materials\":[\n" to:file
-for i = 1 to selection.count do
+matCount = 0
+for i = 1 to objects.count do
 (
-	if i > 1 then
-	(
-		format "\t\t,\n" to:file
-	)
-	
-	myobj = selection[i]
+	myobj = objects[ i ]
 	mymesh = snapshotAsMesh myobj
 	
 	mat = myobj.material
 	if mat != undefined then
 	(
-		processMaterial( mat )
+		if matCount > 1 then
+		(
+			format "\t\t,\n" to:file
+		)
+		
+		processMaterial mat
+		matCount = matCount + 1
 	)
 )
 format "\t],\n" to:file
-	
+
 -- MESHES
+
 format "\t\"meshes\":[\n" to:file
-for i = 1 to selection.count do
+meshCount = 0
+for i = 1 to objects.count do
 (
-	if i > 1 then
+	myObj = objects[i]
+	myMesh = snapshotAsMesh myObj
+	
+	if ( isBone myobj ) == false then
 	(
-		format "\t\t,\n" to:file
+		if meshCount > 1 then
+		(
+			format "\t\t,\n" to:file
+		)
+	
+		matName = ""
+		mat = myobj.material
+		if mat != undefined then
+		(
+			matName = mat.name
+		)
+		
+		processMesh myMesh matName
+		meshCount = meshCount + 1
 	)
-	
-	myobj = selection[i]
-	mymesh = snapshotAsMesh myobj
-	
-	matName = ""
-	mat = myobj.material
-	if mat != undefined then
-	(
-		matName = mat.name
-	)
-	
-	processMesh mymesh matName
-	
 )
 format "\t]\n" to:file
 
--- FILE END
+-- END FILE
 format "}\n" to:file
+
+-- CLOSE FILE
 close file

@@ -235,7 +235,7 @@ THREE.ALMLoader.prototype.createModel = function ( json, callback, texturePath )
 	{
 		if ( geometry.bones == null )
 			geometry.bones = [];
-	
+
 		for ( var i=0 ; i < xmlBones.length ; i++ )
 		{
 			var bone = {};
