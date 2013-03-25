@@ -79,8 +79,6 @@
 		<script src="skAnimChannel.js"></script>
 		<script src="skAnimPlayer.js"></script>
 		<script src="skAnimSubChannel.js"></script>
-		<script src="../src/OKMLoader.js"></script>
-		<script src="../src/OKALoader.js"></script>
 		<script src="../src/ALSLoader.js"></script>
 		<script src="../src/ALMLoader.js"></script>
 		<script src="../src/ALALoader.js"></script>
@@ -230,8 +228,8 @@
 					}
 				}
 				
-				var animLoader = new THREE.OKALoader();
-				animLoader.load( "animations/gordon_idle.OKA", processAnim );
+				var animLoader = new THREE.ALALoader();
+				animLoader.load( "animations/gordon_idle.ala", processAnim );
 
 				function processModel( myObject3d )
 				{
