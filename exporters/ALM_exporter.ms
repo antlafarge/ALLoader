@@ -34,10 +34,6 @@ function processMaterial mat =
 
 function processMesh myMesh matName =
 (
-	format "\t\t{\n" to:file
-	
-	format "\t\t\t\"material\":\"%\",\n" matName to:file
-
 	/*skin = mymesh.skin
 	numberBones = skinOps.GetNumberBones skin
 	numberVertices = skinOps.GetNumberVertices skin*/
@@ -46,16 +42,9 @@ function processMesh myMesh matName =
 	skinOps.GetVertexWeightBoneID <Skin> <vertex_integer> <vertex_bone_integer>
 	skinOps.GetVertexWeightCount <Skin> <vertex_integer>
 	skinOps.GetBoneName <Skin> <bone_integer> <nameflag_index>*/
-
-	vertexBuffer = #()
-	normalBuffer = #()
-	indexBuffer = #()
-	colorBuffer = #()
-	textCoordBuffer = #()
-	skinIndices = #()
-	skinWeights = #()
-	matIDs = #()
-
+	
+	subMeshes = #()
+	
 	indexCount = 0
 	for f = 1 to myMesh.numfaces do
 	(
@@ -63,18 +52,36 @@ function processMesh myMesh matName =
 		face = getFace myMesh f
 		-- MatID
 		matID = getFaceMatID myMesh f
-		format "matID = %\n" matID to:file
+
+		-- get / create submesh
+		found = false
+		for i = 1 to subMeshes.count do
+		(
+			if subMeshes[i].matID == matID then
+			(
+				subMesh = subMeshes[i]
+				found = true
+			)
+		)
+		if found == false then
+		(
+			struct SubMesh (matID, materialName = "", vertices = #(), indices = #(), normals = #(), colors = #(), uvs = #(), skinIndices = #(), skinWeights = #())
+			subMesh = SubMesh matID:matID
+			append subMeshes subMesh
+		)
+		
+		--print matID
 		-- Vertices
 		v1 = getVert myMesh face.x
 		v2 = getVert myMesh face.y
 		v3 = getVert myMesh face.z
-		append vertexBuffer v1
-		append vertexBuffer v2
-		append vertexBuffer v3
+		append subMesh.vertices v1
+		append subMesh.vertices v2
+		append subMesh.vertices v3
 		-- Indices
-		append indexBuffer indexCount
-		append indexBuffer (indexCount+1)
-		append indexBuffer (indexCount+2)
+		append subMesh.indices indexCount
+		append subMesh.indices (indexCount+1)
+		append subMesh.indices (indexCount+2)
 		indexCount += 3;
 		-- Normals
 		normals = #()
@@ -93,78 +100,97 @@ function processMesh myMesh matName =
 				normals = #(n, n, n)
 			)
 		)
-		append normalBuffer normals[1]
-		append normalBuffer normals[2]
-		append normalBuffer normals[3]
+		append subMesh.normals normals[1]
+		append subMesh.normals normals[2]
+		append subMesh.normals normals[3]
 		-- Colors
-		append colorBuffer (color 1 1 1 1)
-		append colorBuffer (color 1 1 1 1)
-		append colorBuffer (color 1 1 1 1)
+		append subMesh.colors (color 1 1 1 1)
+		append subMesh.colors (color 1 1 1 1)
+		append subMesh.colors (color 1 1 1 1)
 		-- Texture Coord
 		t1 = getTVert myMesh face.x
 		t2 = getTVert myMesh face.y
 		t3 = getTVert myMesh face.z
-		append textCoordBuffer t1
-		append textCoordBuffer t2
-		append textCoordBuffer t3
+		append subMesh.uvs t1
+		append subMesh.uvs t2
+		append subMesh.uvs t3
 	)
+	
+	for i = 1 to subMeshes.count do
+	(
+		if i != 1 then
+			format ",\n" to:file
+		
+		format "%" (formatSubMesh subMeshes[i] matName) to:file
+	)
+)
+
+function formatSubMesh subMesh matName =
+(
+	str = stringStream ""
+	
+	format "\t\t{\n" to:str
+	
+	format "\t\t\t\"material\":\"%\",\n" matName to:str
 
 	-- Write vertices
-	format "\t\t\t\"vertices\":[" to:file
-	for v = 1 to vertexBuffer.count do
+	format "\t\t\t\"vertices\":[" to:str
+	for v = 1 to subMesh.vertices.count do
 	(
-		vert = vertexBuffer[v]
+		vert = subMesh.vertices[v]
 		if ( v != 1 ) then
-			format "," to:file
-		format "%,%,%" vert.x vert.y vert.z to:file
+			format "," to:str
+		format "%,%,%" vert.x vert.y vert.z to:str
 	)
-	format "],\n" to:file
+	format "],\n" to:str
 
 	-- Write indices
-	format "\t\t\t\"indices\":[" to:file
-	for i = 1 to indexBuffer.count do
+	format "\t\t\t\"indices\":[" to:str
+	for i = 1 to subMesh.indices.count do
 	(
-		index = indexBuffer[i]
-		format "%" (index as integer) to:file
-		if ( i != indexBuffer.count ) then
-			format "," to:file
+		index = subMesh.indices[i]
+		format "%" (index as integer) to:str
+		if ( i != subMesh.indices.count ) then
+			format "," to:str
 	)
-	format "],\n" to:file
+	format "],\n" to:str
 
 	-- Write normals
-	format "\t\t\t\"normals\":[" to:file
-	for n = 1 to normalBuffer.count do
+	format "\t\t\t\"normals\":[" to:str
+	for n = 1 to subMesh.normals.count do
 	(
-		normal = normalBuffer[n]
+		normal = subMesh.normals[n]
 		if ( n != 1 ) then
-			format "," to:file
-		format "%,%,%" normal.x normal.y normal.z to:file
+			format "," to:str
+		format "%,%,%" normal.x normal.y normal.z to:str
 	)
-	format "],\n" to:file
+	format "],\n" to:str
 
 	-- Write colors
-	format "\t\t\t\"colors\":[" to:file
-	for c = 1 to colorBuffer.count do
+	format "\t\t\t\"colors\":[" to:str
+	for c = 1 to subMesh.colors.count do
 	(
-		colo = colorBuffer[c]
+		colo = subMesh.colors[c]
 		if ( c != 1 ) then
-			format "," to:file
-		format "%,%,%,%" colo.r colo.v colo.b colo.a to:file
+			format "," tostr
+		format "%,%,%,%" colo.r colo.v colo.b colo.a to:str
 	)
-	format "],\n" to:file
+	format "],\n" to:str
 
 	-- Write texture coords
-	format "\t\t\t\"texcoord\":[" to:file
-	for t = 1 to textCoordBuffer.count do
+	format "\t\t\t\"texcoord\":[" to:str
+	for t = 1 to subMesh.uvs.count do
 	(
-		texture = textCoordBuffer[t]
+		uv = subMesh.uvs[t]
 		if ( t != 1 ) then
-			format "," to:file
-		format "%,%" texture.x texture.y to:file
+			format "," to:str
+		format "%,%" uv.x uv.y to:str
 	)
-	format "]\n" to:file
-
-	format "\t\t}\n" to:file
+	format "]\n" to:str
+	
+	format "\t\t}" to:str
+	
+	(str as string)
 )
 
 -- MAIN
