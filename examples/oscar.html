@@ -20,12 +20,9 @@
 		<script src="libs/three.js/examples/js/loaders/OBJLoader.js"></script>
 		<script src="libs/three.js/examples/js/loaders/MTLLoader.js"></script>
 		<script src="libs/three.js/examples/js/loaders/OBJMTLLoader.js"></script>
-		<script src="../src/ALSLoader.js"></script>
-		<script src="../src/AnimationUtils.js"></script>
-		
 		<script src="libs/three.js/examples/js/Detector.js"></script>
 		<script src="libs/three.js/examples/js/libs/stats.min.js"></script>
-		
+
 		<script>
 			if (! Detector.webgl)
 			{
@@ -51,8 +48,8 @@
 
 			window.onload = init;
 
-			function init() {
-
+			function init()
+			{
 				camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.01, 1000);
 				camera.position.set(1, 2, 3);
 

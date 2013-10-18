@@ -2,37 +2,42 @@
 
 include "tools.ms"
 
+MAT_TRANSFORM = matrix3 [1,0,0] [0,0,-1] [0,1,0] [0,0,0]
+
 function processMaterial mat =
 (
-	if classof mat == Multimaterial then -- multi material
+	if (classof mat == Multimaterial) then -- multi material
 	(
 		for i = 1 to mat.numsubs do
 		(
-			if i > 1 then
+			if (i > 1) then
 			(
-				format "\t\t,\n" to:file
+				format ",\n" to:file
 			)
-			processMaterial mat.materialList[ i ]
+			processMaterial mat.materialList[i]
 		)
 	)
 	else -- standard material
 	(
 		textureFilePath = mat.diffuseMap.bitmap.filename
-		tokens = ( filterString textureFilePath "\\" )
-		textureFileName = tokens[ tokens.count ]
-		if textureName == undefined then
-		(
-			textureName = ""
-		)
-
+		tokens = (filterString textureFilePath "\\")
+		textureFileName = tokens[tokens.count]
+		
 		format "\t\t{\n" to:file
 		format "\t\t\t\"name\":\"%\",\n" mat.name to:file
-		format "\t\t\t\"texture\":\"%\"\n" textureFileName to:file
-		format "\t\t}\n" to:file
+		if (textureFileName != undefined) then
+		(
+			format "\t\t\t\"texture\":\"%\",\n" textureFileName to:file
+		)
+		format "\t\t\t\"ambient\":[%,%,%],\n" mat.ambient.r mat.ambient.g mat.ambient.b to:file
+		format "\t\t\t\"diffuse\":[%,%,%],\n" mat.diffuse.r mat.diffuse.g mat.diffuse.b to:file
+		format "\t\t\t\"specular\":[%,%,%],\n" mat.specular.r mat.specular.g mat.specular.b to:file
+		format "\t\t\t\"opacity\":%\n" (mat.opacity / 100) to:file
+		format "\t\t}" to:file
 	)
 )
 
-function processMesh myMesh matName =
+function processMesh myMesh mat =
 (
 	/*skin = mymesh.skin
 	numberBones = skinOps.GetNumberBones skin
@@ -45,19 +50,26 @@ function processMesh myMesh matName =
 	
 	subMeshes = #()
 	
-	indexCount = 0
 	for f = 1 to myMesh.numfaces do
 	(
 		-- Face
 		face = getFace myMesh f
 		-- MatID
 		matID = getFaceMatID myMesh f
+		if (classof mat == Multimaterial) then
+		(
+			subMat = mat.materialList[matID]
+		)
+		else
+		(
+			subMat = mat
+		)
 
 		-- get / create submesh
 		found = false
 		for i = 1 to subMeshes.count do
 		(
-			if subMeshes[i].matID == matID then
+			if (subMeshes[i].matID == matID) then
 			(
 				subMesh = subMeshes[i]
 				found = true
@@ -65,24 +77,26 @@ function processMesh myMesh matName =
 		)
 		if found == false then
 		(
-			struct SubMesh (matID, materialName = "", vertices = #(), indices = #(), normals = #(), colors = #(), uvs = #(), skinIndices = #(), skinWeights = #())
-			subMesh = SubMesh matID:matID
+			struct SubMesh (matID = undefined, mat = undefined, indexCount = 0, materialName = "", vertices = #(), indices = #(), normals = #(), colors = #(), uvs = #(), skinIndices = #(), skinWeights = #())
+			subMesh = SubMesh matID:matID mat:subMat
 			append subMeshes subMesh
 		)
 		
-		--print matID
 		-- Vertices
 		v1 = getVert myMesh face.x
 		v2 = getVert myMesh face.y
 		v3 = getVert myMesh face.z
+		v1 = v1 * MAT_TRANSFORM
+		v2 = v2 * MAT_TRANSFORM
+		v3 = v3 * MAT_TRANSFORM
 		append subMesh.vertices v1
 		append subMesh.vertices v2
 		append subMesh.vertices v3
 		-- Indices
-		append subMesh.indices indexCount
-		append subMesh.indices (indexCount+1)
-		append subMesh.indices (indexCount+2)
-		indexCount += 3;
+		append subMesh.indices subMesh.indexCount
+		append subMesh.indices (subMesh.indexCount+1)
+		append subMesh.indices (subMesh.indexCount+2)
+		subMesh.indexCount += 3;
 		-- Normals
 		normals = #()
 		if (getfacesmoothgroup myMesh f) == 0 then
@@ -118,27 +132,28 @@ function processMesh myMesh matName =
 	
 	for i = 1 to subMeshes.count do
 	(
-		if i != 1 then
+		if (i != 1) then
+		(
 			format ",\n" to:file
-		
-		format "%" (formatSubMesh subMeshes[i] matName) to:file
+		)
+		format "%" (formatSubMesh subMeshes[i] subMeshes[i].mat) to:file
 	)
 )
 
-function formatSubMesh subMesh matName =
+function formatSubMesh subMesh mat =
 (
 	str = stringStream ""
 	
 	format "\t\t{\n" to:str
 	
-	format "\t\t\t\"material\":\"%\",\n" matName to:str
+	format "\t\t\t\"material\":\"%\",\n" mat.name to:str
 
 	-- Write vertices
 	format "\t\t\t\"vertices\":[" to:str
 	for v = 1 to subMesh.vertices.count do
 	(
 		vert = subMesh.vertices[v]
-		if ( v != 1 ) then
+		if (v != 1) then
 			format "," to:str
 		format "%,%,%" vert.x vert.y vert.z to:str
 	)
@@ -150,7 +165,7 @@ function formatSubMesh subMesh matName =
 	(
 		index = subMesh.indices[i]
 		format "%" (index as integer) to:str
-		if ( i != subMesh.indices.count ) then
+		if (i != subMesh.indices.count) then
 			format "," to:str
 	)
 	format "],\n" to:str
@@ -160,7 +175,7 @@ function formatSubMesh subMesh matName =
 	for n = 1 to subMesh.normals.count do
 	(
 		normal = subMesh.normals[n]
-		if ( n != 1 ) then
+		if (n != 1) then
 			format "," to:str
 		format "%,%,%" normal.x normal.y normal.z to:str
 	)
@@ -171,8 +186,8 @@ function formatSubMesh subMesh matName =
 	for c = 1 to subMesh.colors.count do
 	(
 		colo = subMesh.colors[c]
-		if ( c != 1 ) then
-			format "," tostr
+		if (c != 1) then
+			format "," to:str
 		format "%,%,%,%" colo.r colo.v colo.b colo.a to:str
 	)
 	format "],\n" to:str
@@ -197,7 +212,7 @@ function formatSubMesh subMesh matName =
 clearListener()
 
 filepath = GetSaveFileName()
-if filepath == undefined then
+if (filepath == undefined) then
 (
 	exit
 )
@@ -229,7 +244,7 @@ for i = 1 to objects.count do
 		matCount = matCount + 1
 	)
 )
-format "\t],\n" to:file
+format "\n\t],\n" to:file
 
 -- MESHES
 
@@ -240,21 +255,14 @@ for i = 1 to objects.count do
 	myObj = objects[i]
 	myMesh = snapshotAsMesh myObj
 	
-	if ( isBone myobj ) == false then
+	if (isBone myobj) == false then
 	(
 		if meshCount > 1 then
 		(
 			format "\t\t,\n" to:file
 		)
 	
-		matName = ""
-		mat = myobj.material
-		if mat != undefined then
-		(
-			matName = mat.name
-		)
-		
-		processMesh myMesh matName
+		processMesh myMesh myobj.material
 		meshCount = meshCount + 1
 	)
 )

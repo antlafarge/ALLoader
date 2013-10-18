@@ -2,18 +2,18 @@
 
 function isGeometry o =
 (
-	Superclassof o == GeometryClass and classof o != BoneGeometry
+	return (Superclassof o == GeometryClass and classof o != BoneGeometry)
 )
 
 function isBone o =
 (
-	classof o == BoneGeometry
+	return (classof o == BoneGeometry)
 )
 
 function pf3 f =
 (
-	--ceil( f * 1000 ) / 1000
-	f
+	--return ((ceil (f * 10000)) / 10000) 
+	return f
 )
 
 function formatVector3 v =
@@ -23,7 +23,7 @@ function formatVector3 v =
 	z = pf3 v.z
 	str = stringStream ""
 	format "[%,%,%]" x y z to:str
-	(str as string)
+	return (str as string)
 )
 
 function formatQuaternion q =
@@ -34,7 +34,7 @@ function formatQuaternion q =
 	w = pf3 q.w
 	str = stringStream ""
 	format "[%,%,%,%]" x y z w to:str
-	(str as string)
+	return (str as string)
 )
 
 function formatMatrix3 m =
@@ -53,5 +53,5 @@ function formatMatrix3 m =
 	m4z = pf3 m.row4.z
 	str = stringStream ""
 	format "[%,%,%,%,%,%,%,%,%,%,%,%]" m1x m1y m1z m2x m2y m2z m3x m3y m3z m4x m4y m4z to:str
-	(str as string)
+	return (str as string)
 )
