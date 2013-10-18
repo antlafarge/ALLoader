@@ -21,7 +21,7 @@
 		<script src="libs/three.js/examples/js/libs/stats.min.js"></script>
 
 		<script src="../src/ALMLoader.js"></script>
-		<script src="../src/ALSLoader.js"></script>
+		<!--<script src="../src/ALSLoader.js"></script>-->
 		<script src="../src/ALALoader.js"></script>
 		<script src="../src/AnimationUtils.js"></script>
 		
@@ -53,7 +53,8 @@
 			function init()
 			{
 				camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.01, 1000);
-				camera.position.set(1, 2, 3);
+				//camera.position.set(16, 32, 48);
+				camera.position.set(32, -32, 32);
 
 				controls = new THREE.TrackballControls(camera);
 				controls.rotateSpeed = 1.0;
@@ -89,7 +90,7 @@
 				}.bind(this));
 				objMtlLoader.load('data/oscar.obj', 'data/oscar.mtl');*/
 
-				function processSkeleton(json)
+				/*function processSkeleton(json)
 				{
 					ske = json;
 
@@ -112,8 +113,8 @@
 						processAll();
 					}
 				}
-				var skeletonLoader = new THREE.ALSLoader();
-				//skeletonLoader.load("skeletons/gordon.als", processSkeleton);
+				//var skeletonLoader = new THREE.ALSLoader();
+				//skeletonLoader.load("skeletons/gordon.als", processSkeleton);*/
 				
 				function processAnim(anim)
 				{
@@ -140,6 +141,7 @@
 
 				function processALM(myObject3d)
 				{
+					console.log(myObject3d)
 					object3d = myObject3d;
 
 					//combi = object3d.children[0];

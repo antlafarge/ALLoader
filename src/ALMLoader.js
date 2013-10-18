@@ -190,15 +190,33 @@ THREE.ALMLoader.prototype.createModel = function (json, callback, texturePath) {
 			// SKININDEX && SKINWEIGHT
 			for (var i=0; i < jsonMesh.skinIndices.length; i+=4)
 			{
-				var si0 = treatSkinIndex(jsonMesh.skinIndices[i ]);
-				var si1 = treatSkinIndex(jsonMesh.skinIndices[i+1]);
+				// NEW
+				
+				var bi0 = jsonMesh.skinIndices[i+0];
+				var bi1 = jsonMesh.skinIndices[i+1];
+				//var bi2 = jsonMesh.skinIndices[i+2];
+				//var bi3 = jsonMesh.skinIndices[i+3];
+				geometry.skinIndices.push(new THREE.Vector4(bi0, bi1, 0, 0));
+				
+				var bw0 = jsonMesh.skinWeights[i+0];
+				var bw1 = jsonMesh.skinWeights[i+1];
+				//var bw2 = jsonMesh.skinWeights[i+2];
+				//var bw3 = jsonMesh.skinWeights[i+3];
+				geometry.skinWeights.push(new THREE.Vector4(bw0, bw1, 0, 0));
+				
+				geometry.bones = jsonMesh.bones;
+				
+				// OLD
+				
+				//var si0 = treatSkinIndex(jsonMesh.skinIndices[i ]);
+				//var si1 = treatSkinIndex(jsonMesh.skinIndices[i+1]);
 				//var si2 = treatSkinIndex(bi[i+2]);
 				//var si3 = treatSkinIndex(bi[i+3]);
 				//geometry.skinIndices.push(new THREE.Vector4(si0, si1, si2, si3));
-				geometry.skinIndices.push(new THREE.Vector4(si0, si1, 0, 0));
+				//geometry.skinIndices.push(new THREE.Vector4(si0, si1, 0, 0));
 
 				//geometry.skinWeights.push(new THREE.Vector4(bw[i], bw[i+1], bw[i+2], bw[i+3]));
-				geometry.skinWeights.push(new THREE.Vector4(jsonMesh.skinWeights[i], jsonMesh.skinWeights[i+1], 0, 0));
+				//geometry.skinWeights.push(new THREE.Vector4(jsonMesh.skinWeights[i], jsonMesh.skinWeights[i+1], 0, 0));
 			}
 		}
 		

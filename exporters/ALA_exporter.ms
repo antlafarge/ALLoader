@@ -2,8 +2,8 @@
 
 include "tools.ms"
 
-QUAT_TRANSFORM_1 = quat 90 [0,1,0]
-QUAT_TRANSFORM_2 = quat 180 [0,0,1]
+--QUAT_TRANSFORM_1 = quat 90 [0,1,0]
+--QUAT_TRANSFORM_2 = quat 180 [0,0,1]
 
 function arrayToString array separator =
 (
