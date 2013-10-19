@@ -4,7 +4,7 @@ clearListener()
 
 include "tools.ms"
 
-struct subMesh (matID = undefined, material = undefined, indexCount = 0, materialName = "", vertices = #(), indices = #(), normals = #(), colors = #(), uvs = #(), boneIndices = #(), boneNames = #(), boneWeights = #(), bones = #())
+struct subMesh (matID = undefined, material = undefined, indexCount = 0, materialName = "", vertices = #(), indices = #(), normals = #(), colors = #(), uvs = #(), skinIndices = #(), boneNames = #(), skinWeights = #(), bones = #())
 
 --global MAT_TRANSFORM = matrix3 [1,0,0] [0,0,-1] [0,1,0] [0,0,0]
 global MAT_TRANSFORM = matrix3 [1,0,0] [0,1,0] [0,0,1] [0,0,0]
@@ -42,6 +42,34 @@ function processMaterial mat =
 	)
 )
 
+function processBoneForOneVertex mySkin mySubMesh vertID =
+(
+	-- skin informations
+	vertex_bone_count = skinOps.GetVertexWeightCount mySkin vertID
+	bn2 = 1
+	for bn1 = 1 to vertex_bone_count do
+	(
+		-- boneIndexes
+		bindex = skinops.getvertexweightboneid mySkin vertID bn1
+		append mySubMesh.skinIndices bindex
+		
+		-- boneNames
+		--nm = skinops.getbonename mySkin bn
+		--append mySubMesh.boneNames nm
+		
+		-- skinWeights
+		bweight = skinops.getvertexweight mySkin vertID bn1
+		append mySubMesh.skinWeights bweight
+		bn2 = bn1
+	)
+	while bn2 < 4 do
+	(
+		append mySubMesh.skinIndices 0
+		append mySubMesh.skinWeights 0
+		bn2 = bn2  + 1
+	)
+)
+
 function processMesh myObj mat =
 (
 	myMesh = /*snapshotAsMesh*/ myObj
@@ -51,11 +79,14 @@ function processMesh myObj mat =
 	
 	mySkin = myMesh.modifiers[#skin]
 	
-	boneNames = #()
-	bonesCount = skinops.getnumberbones mySkin
-	for i = 1 to bonesCount do
+	if (mySkin != undefined) then
 	(
-		append boneNames (skinops.getbonename mySkin i 1)
+		boneNames = #()
+		bonesCount = skinops.getnumberbones mySkin
+		for i = 1 to bonesCount do
+		(
+			append boneNames (skinops.getbonename mySkin i 1)
+		)
 	)
 	
 	allSubMeshes = #()
@@ -87,13 +118,13 @@ function processMesh myObj mat =
 				break
 			)
 		)
-		if found == false then
+		if (found == false) then
 		(
 			mySubMesh = (subMesh matID:matID material:mySubMat)
 			append allSubMeshes mySubMesh
 		)
 		
-		if mySubMesh == undefined then
+		if ((mySkin != undefined) and (mySubMesh.bones == undefined)) then
 		(
 			mySubMesh.bones = bonesArray
 		)
@@ -149,37 +180,12 @@ function processMesh myObj mat =
 		append mySubMesh.uvs t2
 		append mySubMesh.uvs t3
 		
-		fn processBoneForOneVertex mySkin mySubMesh vertID =
+		if (mySkin != undefined) then
 		(
-			-- skin informations
-			vertex_bone_count = skinOps.GetVertexWeightCount mySkin vertID
-			bn2 = 1
-			for bn1 = 1 to vertex_bone_count do
-			(
-				-- boneIndexes
-				bindex = skinops.getvertexweightboneid mySkin vertID bn1
-				append mySubMesh.boneIndices bindex
-				
-				-- boneNames
-				--nm = skinops.getbonename mySkin bn
-				--append mySubMesh.boneNames nm
-				
-				-- boneWeights
-				bweight = skinops.getvertexweight mySkin vertID bn1
-				append mySubMesh.boneWeights bweight
-				bn2 = bn1
-			)
-			while bn2 < 4 do
-			(
-				append mySubMesh.boneIndices 0
-				append mySubMesh.boneWeights 0
-				bn2 = bn2  + 1
-			)
+			processBoneForOneVertex mySkin mySubMesh face.x
+			processBoneForOneVertex mySkin mySubMesh face.y
+			processBoneForOneVertex mySkin mySubMesh face.z
 		)
-		
-		processBoneForOneVertex mySkin mySubMesh face.x
-		processBoneForOneVertex mySkin mySubMesh face.y
-		processBoneForOneVertex mySkin mySubMesh face.z
 	)
 	
 	for i = 1 to allSubMeshes.count do
@@ -272,55 +278,58 @@ function formatSubMesh mySubMesh mat =
 	)
 	format "],\n" to:str
 	
-	-- Write boneIndices
-	format "\t\t\t\"skinIndices\":[" to:str
-	for bii = 1 to mySubMesh.boneIndices.count do
+	if ((mySubMesh.skinIndices.count != 0) and (mySubMesh.skinWeights.count != 0) and (mySubMesh.boneNames.count != 0)) then
 	(
-		bi = mySubMesh.boneIndices[bii]
-		if (bii != 1) then
+		-- Write skinIndices
+		format "\t\t\t\"skinIndices\":[" to:str
+		for bii = 1 to mySubMesh.skinIndices.count do
 		(
-			format "," to:str
-		)
-		format "%" bi to:str
-	)
-	format "],\n" to:str
-	
-	-- Write boneWeights
-	format "\t\t\t\"skinWeights\":[" to:str
-	for bwi = 1 to mySubMesh.boneWeights.count do
-	(
-		bw = mySubMesh.boneWeights[bwi]
-		if (bwi != 1) then
-		(
-			format "," to:str
-		)
-		format "%" bw to:str
-	)
-	format "],\n" to:str
-	
-	-- Write bones hierarchy
-	format "\t\t\t\"bones\":[\n" to:str
-	for bni = 1 to mySubMesh.boneNames.count do
-	(
-		boneName = mySubMesh.boneNames[bni]
-		b = (getnodebyname boneName)
-		if (bni != 1) then
-		(
-			format ",\n" to:str
-		)
-		
-		parentName = ""
-		parent = b.parent
-		parentBoneID = -1
-		if parent != undefined then
-		(
-			parentName = parent.name
-			for bni2 = 1 to mySubMesh.boneNames.count do
+			bi = mySubMesh.skinIndices[bii]
+			if (bii != 1) then
 			(
-				if (mySubMesh.boneNames[bni2] == parentName) then
+				format "," to:str
+			)
+			format "%" bi to:str
+		)
+		format "],\n" to:str
+		
+		-- Write skinWeights
+		format "\t\t\t\"skinWeights\":[" to:str
+		for bwi = 1 to mySubMesh.skinWeights.count do
+		(
+			bw = mySubMesh.skinWeights[bwi]
+			if (bwi != 1) then
+			(
+				format "," to:str
+			)
+			format "%" bw to:str
+		)
+		format "],\n" to:str
+		
+		-- Write bones hierarchy
+		format "\t\t\t\"bones\":[\n" to:str
+		for bni = 1 to mySubMesh.boneNames.count do
+		(
+			boneName = mySubMesh.boneNames[bni]
+			b = (getnodebyname boneName)
+			if (bni != 1) then
+			(
+				format ",\n" to:str
+			)
+			
+			parentName = ""
+			parent = b.parent
+			parentBoneID = -1
+			if parent != undefined then
+			(
+				parentName = parent.name
+				for bni2 = 1 to mySubMesh.boneNames.count do
 				(
-					parentBoneID = bni2 - 1
-					break
+					if (mySubMesh.boneNames[bni2] == parentName) then
+					(
+						parentBoneID = bni2 - 1
+						break
+					)
 				)
 			)
 		)
@@ -396,7 +405,8 @@ for i = 1 to objects.count do
 	myObj = objects[i]
 	--myMesh = snapshotAsMesh myObj
 	
-	if (isBone myobj) == false then
+	ib = (isBone myObj) 
+	if (ib == false) then
 	(
 		if meshCount > 1 then
 		(

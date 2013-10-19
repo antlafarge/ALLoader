@@ -2,12 +2,12 @@
 
 function isGeometry o =
 (
-	return (Superclassof o == GeometryClass and classof o != BoneGeometry)
+	return (((Superclassof o) == GeometryClass) and ((classof o) != BoneGeometry))
 )
 
 function isBone o =
 (
-	return (classof o == BoneGeometry)
+	return ((classof o) == BoneGeometry)
 )
 
 function pf3 f =

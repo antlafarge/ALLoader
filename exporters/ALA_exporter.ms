@@ -5,7 +5,7 @@ include "tools.ms"
 --QUAT_TRANSFORM_1 = quat 90 [0,1,0]
 --QUAT_TRANSFORM_2 = quat 180 [0,0,1]
 
-function arrayToString array separator =
+function arrayToString arr separator =
 (
 	string str
 	for c = 1 to array.count do
@@ -14,7 +14,7 @@ function arrayToString array separator =
 		(
 			str += separator
 		)
-		str += array[c]
+		str += arr[c]
 	)
 	str
 )
@@ -122,7 +122,7 @@ function isBone o =
 clearListener()
 
 filepath = GetSaveFileName()
-if filepath == undefined then
+if (filepath == undefined) then
 (
 	exit
 )
