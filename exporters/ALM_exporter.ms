@@ -2,24 +2,83 @@
 
 clearListener()
 
-include "tools.ms"
-
-struct subMesh (matID = undefined, material = undefined, indexCount = 0, materialName = "", vertices = #(), indices = #(), normals = #(), colors = #(), uvs = #(), skinIndices = #(), boneNames = #(), skinWeights = #(), bones = #())
+struct subMesh (name = "", matID = undefined, material = undefined, indexCount = 0, materialName = "", vertices = #(), indices = #(), normals = #(), colors = #(), uvs = #(), skinIndices = #(), skinWeights = #(), bones = #())
 
 --global MAT_TRANSFORM = matrix3 [1,0,0] [0,0,-1] [0,1,0] [0,0,0]
 global MAT_TRANSFORM = matrix3 [1,0,0] [0,1,0] [0,0,1] [0,0,0]
 
-function processMaterial mat =
+function isGeometry o =
 (
+	return (((Superclassof o) == GeometryClass) and ((classof o) != BoneGeometry))
+)
+
+function isBone o =
+(
+	return ((classof o) == BoneGeometry)
+)
+
+function pf3 f =
+(
+	--return ((ceil (f * 10000)) / 10000) 
+	return f
+)
+
+function formatVector3 v =
+(
+	x = pf3 v.x
+	y = pf3 v.y
+	z = pf3 v.z
+	v3str = stringStream ""
+	format "[%,%,%]" x y z to:v3str
+	return (v3str as string)
+)
+
+function formatQuaternion q =
+(
+	x = pf3 q.x
+	y = pf3 q.y
+	z = pf3 q.z
+	w = pf3 q.w
+	qstr = stringStream ""
+	format "[%,%,%,%]" x y z w to:qstr
+	return (qstr as string)
+)
+
+function formatMatrix3 m =
+(
+	m1x = pf3 m.row1.x
+	m1y = pf3 m.row1.y
+	m1z = pf3 m.row1.z
+	m2x = pf3 m.row2.x
+	m2y = pf3 m.row2.y
+	m2z = pf3 m.row2.z
+	m3x = pf3 m.row3.x
+	m3y = pf3 m.row3.y
+	m3z = pf3 m.row3.z
+	m4x = pf3 m.row4.x
+	m4y = pf3 m.row4.y
+	m4z = pf3 m.row4.z
+	m3str = stringStream ""
+	format "[%,%,%,%,%,%,%,%,%,%,%,%]" m1x m1y m1z m2x m2y m2z m3x m3y m3z m4x m4y m4z to:m3str
+	return (m3str as string)
+)
+
+function formatMaterial mat str =
+(
+	if (str == undefined) then
+	(
+		str = stringStream ""
+	)
+	
 	if (classof mat == Multimaterial) then -- multi material
 	(
 		for i = 1 to mat.numsubs do
 		(
 			if (i > 1) then
 			(
-				format ",\n" to:file
+				format ",\n" to:str
 			)
-			processMaterial mat.materialList[i]
+			formatMaterial mat.materialList[i] str
 		)
 	)
 	else -- standard material
@@ -28,18 +87,20 @@ function processMaterial mat =
 		tokens = (filterString textureFilePath "\\")
 		textureFileName = tokens[tokens.count]
 		
-		format "\t\t{\n" to:file
-		format "\t\t\t\"name\":\"%\",\n" mat.name to:file
+		format "\t\t{\n" to:str
+		format "\t\t\t\"name\":\"%\",\n" mat.name to:str
 		if (textureFileName != undefined) then
 		(
-			format "\t\t\t\"texture\":\"%\",\n" textureFileName to:file
+			format "\t\t\t\"texture\":\"%\",\n" textureFileName to:str
 		)
-		format "\t\t\t\"ambient\":[%,%,%],\n" mat.ambient.r mat.ambient.g mat.ambient.b to:file
-		format "\t\t\t\"diffuse\":[%,%,%],\n" mat.diffuse.r mat.diffuse.g mat.diffuse.b to:file
-		format "\t\t\t\"specular\":[%,%,%],\n" mat.specular.r mat.specular.g mat.specular.b to:file
-		format "\t\t\t\"opacity\":%\n" (mat.opacity / 100) to:file
-		format "\t\t}" to:file
+		format "\t\t\t\"ambient\":[%,%,%],\n" mat.ambient.r mat.ambient.g mat.ambient.b to:str
+		format "\t\t\t\"diffuse\":[%,%,%],\n" mat.diffuse.r mat.diffuse.g mat.diffuse.b to:str
+		format "\t\t\t\"specular\":[%,%,%],\n" mat.specular.r mat.specular.g mat.specular.b to:str
+		format "\t\t\t\"opacity\":%\n" (mat.opacity / 100) to:str
+		format "\t\t}" to:str
 	)
+	
+	return (str as string)
 )
 
 function processBoneForOneVertex mySkin mySubMesh vertID =
@@ -53,14 +114,15 @@ function processBoneForOneVertex mySkin mySubMesh vertID =
 		bindex = skinops.getvertexweightboneid mySkin vertID bn1
 		append mySubMesh.skinIndices bindex
 		
-		-- boneNames
-		--nm = skinops.getbonename mySkin bn
-		--append mySubMesh.boneNames nm
-		
 		-- skinWeights
 		bweight = skinops.getvertexweight mySkin vertID bn1
 		append mySubMesh.skinWeights bweight
 		bn2 = bn1
+		
+		-- bones
+		--bname = skinops.getbonename mySkin bn1 1
+		--b = getnodebyname bname
+		--append mySubMesh.bones b
 	)
 	while bn2 < 4 do
 	(
@@ -78,14 +140,16 @@ function processMesh myObj mat =
 	max modify mode
 	
 	mySkin = myMesh.modifiers[#skin]
+	myBones = #()
 	
 	if (mySkin != undefined) then
 	(
-		boneNames = #()
 		bonesCount = skinops.getnumberbones mySkin
 		for i = 1 to bonesCount do
 		(
-			append boneNames (skinops.getbonename mySkin i 1)
+			bname = skinops.getbonename mySkin i 1
+			b = getnodebyname bname
+			append myBones b
 		)
 	)
 	
@@ -120,7 +184,7 @@ function processMesh myObj mat =
 		)
 		if (found == false) then
 		(
-			mySubMesh = (subMesh matID:matID material:mySubMat)
+			mySubMesh = (subMesh name:myMesh.name matID:matID material:mySubMat bones:myBones)
 			append allSubMeshes mySubMesh
 		)
 		
@@ -188,19 +252,17 @@ function processMesh myObj mat =
 		)
 	)
 	
-	for i = 1 to allSubMeshes.count do
+	if (allSubMeshes.count > 1) then
 	(
-		-- populate skeleton hierarchy
-		allSubMeshes[i].boneNames = boneNames
-		
-		if (i != 1) then
+		for sm = 1 to allSubMeshes.count do
 		(
-			format ",\n" to:file
+			allSubMeshes[sm].name = (allSubMeshes[sm].name + "_" + (sm as string))
 		)
-		format "%" (formatSubMesh allSubMeshes[i] allSubMeshes[i].material) to:file
 	)
-		
-	deselect msh
+	
+	deselect myMesh
+	
+	return allSubMeshes
 )
 
 function formatSubMesh mySubMesh mat =
@@ -209,7 +271,7 @@ function formatSubMesh mySubMesh mat =
 	
 	format "\t\t{\n" to:str
 	
-	format "\t\t\t\"name\":\"%\",\n" mat.name to:str
+	format "\t\t\t\"name\":\"%\",\n" mySubMesh.name to:str
 
 	format "\t\t\t\"material\":\"%\",\n" mat.name to:str
 
@@ -278,7 +340,7 @@ function formatSubMesh mySubMesh mat =
 	)
 	format "],\n" to:str
 	
-	if ((mySubMesh.skinIndices.count != 0) and (mySubMesh.skinWeights.count != 0) and (mySubMesh.boneNames.count != 0)) then
+	if ((mySubMesh.skinIndices.count != 0) and (mySubMesh.skinWeights.count != 0) and (mySubMesh.bones.count != 0)) then
 	(
 		-- Write skinIndices
 		format "\t\t\t\"skinIndices\":[" to:str
@@ -308,47 +370,43 @@ function formatSubMesh mySubMesh mat =
 		
 		-- Write bones hierarchy
 		format "\t\t\t\"bones\":[\n" to:str
-		for bni = 1 to mySubMesh.boneNames.count do
+		for bi = 1 to mySubMesh.bones.count do
 		(
-			boneName = mySubMesh.boneNames[bni]
-			b = (getnodebyname boneName)
-			if (bni != 1) then
+			b = mySubMesh.bones[bi]
+			if (bi != 1) then
 			(
 				format ",\n" to:str
 			)
 			
-			parentName = ""
-			parent = b.parent
 			parentBoneID = -1
-			if parent != undefined then
+			if (parent != undefined) then
 			(
-				parentName = parent.name
-				for bni2 = 1 to mySubMesh.boneNames.count do
+				for bi2 = 1 to mySubMesh.bones.count do
 				(
-					if (mySubMesh.boneNames[bni2] == parentName) then
+					if (mySubMesh.bones[bi2].name == b.parent.name) then
 					(
-						parentBoneID = bni2 - 1
+						parentBoneID = bi2 - 1
 						break
 					)
 				)
 			)
+			
+			format "\t\t\t\t{\n" to:str
+			-- name
+			format "\t\t\t\t\t\"name\":\"%\",\n" b.name to:str
+			-- parent
+			--format "\t\t\t\t\t\"parentName\":\"%\",\n" parentName to:str
+			format "\t\t\t\t\t\"parent\":%,\n" parentBoneID to:str
+			
+			-- data
+			--format "\t\t\t\"transform\":%\n" (formatMatrix3 im) to:file
+			format "\t\t\t\t\t\"pos\":%,\n" (formatVector3 b.position) to:str
+			format "\t\t\t\t\t\"rot\":[0,0,0],\n" to:str
+			format "\t\t\t\t\t\"rotq\":%,\n" (formatQuaternion b.rotation) to:str
+			format "\t\t\t\t\t\"scl\":%\n" (formatVector3 b.scale) to:str
+			
+			format "\t\t\t\t}" to:str
 		)
-		
-		format "\t\t\t\t{\n" to:str
-		-- name
-		format "\t\t\t\t\t\"name\":\"%\",\n" b.name to:str
-		-- parent
-		format "\t\t\t\t\t\"parentName\":\"%\",\n" parentName to:str
-		format "\t\t\t\t\t\"parent\":%,\n" parentBoneID to:str
-		
-		-- data
-		--format "\t\t\t\"transform\":%\n" (formatMatrix3 im) to:file
-		format "\t\t\t\t\t\"pos\":%,\n" (formatVector3 b.position) to:str
-		format "\t\t\t\t\t\"rot\": [0,0,0],\n" to:str
-		format "\t\t\t\t\t\"rotq\":%,\n" (formatQuaternion b.rotation) to:str
-		format "\t\t\t\t\t\"scl\":%\n" (formatVector3 b.scale) to:str
-		
-		format "\t\t\t\t}" to:str
 	)
 	format "\n" to:str
 	format "\t\t\t]\n" to:str
@@ -390,7 +448,7 @@ for i = 1 to objects.count do
 			format "\t\t,\n" to:file
 		)
 		
-		processMaterial mat
+		format "%" (formatMaterial mat undefined) to:file
 		matCount = matCount + 1
 	)
 )
@@ -413,8 +471,20 @@ for i = 1 to objects.count do
 			format "\t\t,\n" to:file
 		)
 	
-		processMesh myObj myobj.material
-		meshCount = meshCount + 1
+		subMeshes = (processMesh myObj myObj.material)
+		
+		for i = 1 to subMeshes.count do
+		(
+			mySubMesh = subMeshes[i]
+			
+			if (i != 1) then
+			(
+				format ",\n" to:file
+			)
+			format "%" (formatSubMesh mySubMesh mySubMesh.material) to:file
+		)
+		
+		meshCount = meshCount + subMeshes.count
 	)
 )
 format "\n" to:file
