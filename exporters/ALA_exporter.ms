@@ -32,25 +32,6 @@ function formatQuaternion q =
 	return (qstr as string)
 )
 
-function formatMatrix3 m =
-(
-	m1x = pf3 m.row1.x
-	m1y = pf3 m.row1.y
-	m1z = pf3 m.row1.z
-	m2x = pf3 m.row2.x
-	m2y = pf3 m.row2.y
-	m2z = pf3 m.row2.z
-	m3x = pf3 m.row3.x
-	m3y = pf3 m.row3.y
-	m3z = pf3 m.row3.z
-	m4x = pf3 m.row4.x
-	m4y = pf3 m.row4.y
-	m4z = pf3 m.row4.z
-	m3str = stringStream ""
-	format "[%,%,%,%,%,%,%,%,%,%,%,%]" m1x m1y m1z m2x m2y m2z m3x m3y m3z m4x m4y m4z to:m3str
-	return (m3str as string)
-)
-
 function arrayToString arr separator =
 (
 	dzastr = string
@@ -139,7 +120,10 @@ for k = 0 to 41 do
 		b = myBones[i]
 		bjs = myBonesjs[i]
 		
-		append bjs.keys (keyjs time:k pos:b.position rot:b.rotation scl:b.scale)
+		bpos = (in coordsys parent(b.position))
+		brot = (in coordsys parent(b.rotation))
+		bscl = (in coordsys parent(b.scale))
+		append bjs.keys (keyjs time:k pos:bpos rot:brot scl:bscl)
 	)
 )
 sliderTime = 0

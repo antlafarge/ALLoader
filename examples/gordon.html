@@ -78,100 +78,6 @@
 				light = new THREE.AmbientLight(0xffffff);
 				scene.add(light);
 
-
-				// load oscar
-
-				/*var objMtlLoader = new THREE.OBJMTLLoader();
-				objMtlLoader.addEventListener('load', function (event) {
-					var oscar = event.content;
-					oscar.traverse(function(child){
-					});
-					scene.add(oscar);
-				}.bind(this));
-				objMtlLoader.load('data/oscar.obj', 'data/oscar.mtl');*/
-
-				/*function processSkeleton(json)
-				{
-					ske = json;
-
-					skeleton = AnimationUtils.createSkeleton(ske, 10);
-
-					attributes.boneIndex.value = skeleton.skin.boneIndex;
-					attributes.boneWeight.value = skeleton.skin.boneWeight;
-
-					skeleton.geometry.materials[0].material.wireframe = true;
-					//skeleton.geometry.materials[1] = material2;
-
-					scene.add(skeleton);
-					
-					console.log(ske);
-					console.log(skeleton);
-					
-					skeletonLoaded = true;
-					if (animLoaded && modelLoaded)
-					{
-						processAll();
-					}
-				}
-				//var skeletonLoader = new THREE.ALSLoader();
-				//skeletonLoader.load("skeletons/gordon.als", processSkeleton);*/
-				
-				function processAnim(anim)
-				{
-					animation = anim;
-
-					THREE.AnimationHandler.add(animation);
-
-					/*console.log(animation);
-
-					animPlayer.attachAnim(0, animation, 300);
-					animPlayer.setTime(0, 0);
-					animPlayer.enableLoop(0, 1);
-
-					animPlayer.setSkin(skeleton.skin);
-					//this.animPlayer.update(0, 100);
-					var boneMatListTmp = animPlayer.getBoneFinalMat43Array();*/
-
-					animLoaded = true;
-					if (/*skeletonLoaded &&*/ modelLoaded)
-					{
-						processAll();
-					}
-				}
-				(new THREE.ALALoader).load("data/gordon_idle.ala", processAnim);
-
-				function processALM(myObject3d)
-				{
-					object3d = myObject3d;
-
-					combi = object3d.children[0];
-					head = object3d.children[1];
-
-					modelLoaded = true;
-					if (/*skeletonLoaded &&*/ animLoaded)
-					{
-						processAll();
-					}
-				}
-				(new THREE.ALMLoader).load("data/gordon.alm", processALM, "textures");
-
-				function processAll()
-				{
-					scene.add(object3d);
-
-					anim_idle = new THREE.Animation(combi, "gordon.idle");
-					anim_idle.play();
-
-					anim_idle2 = new THREE.Animation(head, "gordon.idle");
-					anim_idle2.play();
-
-					//scene.add(skeleton);
-					//scene.add(head);
-					//scene.add(combi);
-					//scene.add(gordon);
-					//scene.add(gordonWire);
-				}
-				
 				// renderer
 
 				renderer = new THREE.WebGLRenderer();
@@ -187,6 +93,77 @@
 				stats.domElement.style.zIndex = 100;
 				container.appendChild(stats.domElement);
 
+				// meshes
+
+				function processAnim(anim)
+				{
+					animation = anim;
+
+					THREE.AnimationHandler.add(animation);
+
+					animLoaded = true;
+					if (modelLoaded)
+					{
+						processAll();
+					}
+				}
+				(new THREE.ALALoader).load("data/gordon_idle.ala", processAnim);
+
+				function processALM(myObject3d)
+				{
+					object3d = myObject3d;
+
+					combi = object3d.children[0];
+					head = object3d.children[1];
+
+					combi.material.opacity = 0.5;
+					combi.material.transparent = true;
+					head.material.opacity = 0.5;
+					head.material.transparent = true;
+
+					wiremat = new THREE.MeshBasicMaterial();
+					wiremat.color = new THREE.Color(0xbfbfbf);
+					wiremat.wireframe = true;
+					wiremat.skinning = true;
+					combi_wire = combi.clone();
+					head_wire = head.clone();
+					combi_wire.material = wiremat;
+					head_wire.material = wiremat;
+
+					modelLoaded = true;
+					if (animLoaded)
+					{
+						processAll();
+					}
+				}
+				(new THREE.ALMLoader).load("data/gordon.alm", processALM, "textures");
+
+				function processAll()
+				{
+					scene.add(object3d);
+
+					combi_anim_idle = new THREE.Animation(combi, "gordon.idle");
+					combi_anim_idle.play();
+
+					head_anim_idle = new THREE.Animation(head, "gordon.idle");
+					head_anim_idle.play();
+
+					scene.add(combi_wire)
+					scene.add(head_wire)
+
+					combi_anim_idle2 = new THREE.Animation(combi_wire, "gordon.idle");
+					combi_anim_idle2.play();
+
+					head_anim_idle2 = new THREE.Animation(head_wire, "gordon.idle");
+					head_anim_idle2.play();
+
+					skeleton = AnimationUtils.createSkeleton(combi, 4);
+					scene.add(skeleton);
+
+					skeleton_anim_idle = new THREE.Animation(skeleton, "gordon.idle");
+					skeleton_anim_idle.play();
+				}
+				
 				// end init
 
 				window.addEventListener('resize', onWindowResize, false);

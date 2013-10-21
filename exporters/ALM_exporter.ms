@@ -397,15 +397,13 @@ function formatSubMesh mySubMesh mat =
 			-- name
 			format "\t\t\t\t\t\"name\":\"%\",\n" b.name to:str
 			-- parent
-			--format "\t\t\t\t\t\"parentName\":\"%\",\n" parentName to:str
 			format "\t\t\t\t\t\"parent\":%,\n" parentBoneID to:str
 			
 			-- data
-			--format "\t\t\t\"transform\":%\n" (formatMatrix3 im) to:file
-			format "\t\t\t\t\t\"pos\":%,\n" (formatVector3 b.position) to:str
+			format "\t\t\t\t\t\"pos\":%,\n" (in coordsys parent(formatVector3 b.position)) to:str
 			format "\t\t\t\t\t\"rot\":[0,0,0],\n" to:str
-			format "\t\t\t\t\t\"rotq\":%,\n" (formatQuaternion b.rotation) to:str
-			format "\t\t\t\t\t\"scl\":%\n" (formatVector3 b.scale) to:str
+			format "\t\t\t\t\t\"rotq\":%,\n" (in coordsys parent(formatQuaternion b.rotation)) to:str
+			format "\t\t\t\t\t\"scl\":%\n" (in coordsys parent(formatVector3 b.scale)) to:str
 			
 			format "\t\t\t\t}" to:str
 		)
