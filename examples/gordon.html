@@ -120,6 +120,8 @@
 				{
 					animation = anim;
 
+					THREE.AnimationHandler.add(animation);
+
 					/*console.log(animation);
 
 					animPlayer.attachAnim(0, animation, 300);
@@ -131,26 +133,22 @@
 					var boneMatListTmp = animPlayer.getBoneFinalMat43Array();*/
 
 					animLoaded = true;
-					if (skeletonLoaded && modelLoaded)
+					if (/*skeletonLoaded &&*/ modelLoaded)
 					{
 						processAll();
 					}
 				}
-				//var animLoader = new THREE.ALALoader();
-				//animLoader.load("animations/gordon_idle.ala", processAnim);
+				(new THREE.ALALoader).load("data/gordon_idle.ala", processAnim);
 
 				function processALM(myObject3d)
 				{
-					console.log(myObject3d)
 					object3d = myObject3d;
 
-					//combi = object3d.children[0];
-					//head = object3d.children[1];
-
-					scene.add(object3d);
+					combi = object3d.children[0];
+					head = object3d.children[1];
 
 					modelLoaded = true;
-					if (skeletonLoaded && animLoaded)
+					if (/*skeletonLoaded &&*/ animLoaded)
 					{
 						processAll();
 					}
@@ -159,6 +157,14 @@
 
 				function processAll()
 				{
+					scene.add(object3d);
+
+					anim_idle = new THREE.Animation(combi, "gordon.idle");
+					anim_idle.play();
+
+					anim_idle2 = new THREE.Animation(head, "gordon.idle");
+					anim_idle2.play();
+
 					//scene.add(skeleton);
 					//scene.add(head);
 					//scene.add(combi);
@@ -200,7 +206,7 @@
 
 			function animLoop(ms)
 			{
-				if (skeleton)
+				/*if (skeleton)
 				{
 					animPlayer.setSkin(skeleton.skin);
 
@@ -213,7 +219,7 @@
 					{
 						uniforms.boneMatrices.value[ m ] = boneMatListTmp[ m ];
 					}
-				}
+				}*/
 			}
 
 			function render()
@@ -221,6 +227,7 @@
 				requestAnimationFrame(render);
 				var delta = clock.getDelta();
 				//animLoop(delta * 1000);
+				THREE.AnimationHandler.update(delta);
 				controls.update();
 				renderer.render(scene, camera);
 				stats.update();

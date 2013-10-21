@@ -65,110 +65,10 @@ function arrayToString arr separator =
 	return dzastr
 )
 
-function formatBone b =
-(
-	tmpStr = stringStream ""
-	parentName = ""
-	parent = b.parent
-	if parent != undefined then
-	(
-		parentName = parent.name
-	)
-	
-	format "\t\t{\n" to:tmpStr
-	-- name
-	format "\t\t\t\"name\":\"%\",\n" b.name to:tmpStr
-	-- parent
-	format "\t\t\t\"parent\":\"%\",\n" parentName to:tmpStr
-	
-	-- keys
-	keys = #()
-	pkeys = b.position.controller.keys
-	for k = 1 to pkeys.count do
-	(
-		appendIfUnique keys k
-		appendIfUnique globalKeys k
-	)
-	rkeys = b.rotation.controller.keys
-	for k = 1 to rkeys.count do
-	(
-		appendIfUnique keys k
-		appendIfUnique globalKeys k
-	)
-	
-	for k = 1 to keys.count do
-	(
-		--sliderTime = keys[k]
-		print keys[k]
-		--im = copy b.transform
-		--im = ( rotate im QUAT_TRANSFORM_1 )
-		--im = ( rotate im QUAT_TRANSFORM_2 )
-
-		if ( k > 1 ) then
-		(
-			format "\t\t\t,\n" to:tmpStr
-		)
-		format "\t\t\t{\n" to:tmpStr
-
-		format "\t\t\t\t\"time\":%,\n" k to:tmpStr
-
-		--format "\t\t\t\t\"transform\":%,\n" (formatMatrix3 im) to:file
-
-		format "\t\t\t\t\"pos\":%,\n" (formatVector3 b.position) to:tmpStr
-		format "\t\t\t\t\"rot\":%,\n" (formatQuaternion b.rotation) to:tmpStr
-		format "\t\t\t\t\"rotq\":%,\n" (formatQuaternion b.rotation) to:tmpStr
-		format "\t\t\t\t\"scl\":%\n" (formatVector3 b.scale) to:tmpStr
-
-		/*format "\t\t\t\t\"posInParent\":%,\n" (formatVector3 b.posInParent) to:tmpStr
-		format "\t\t\t\t\"rotInParent\":%,\n" (formatVector3 b.rotInParent) to:tmpStr
-		format "\t\t\t\t\"scaleOrientInParent\":%,\n" (formatVector3 b.scaleOrientInParent) to:tmpStr
-		format "\t\t\t\t\"scaleInParent\":%,\n" (formatVector3 b.scaleInParent) to:tmpStr*/
-
-		format "\t\t\t}\n" to:tmpStr
-	)
-
-	/*format "\t\t\t\"objectTransform\":\"%\",\n" b.objectTransform to:file
-	format "\t\t\t\"objectOffsetPos\":\"%\",\n" b.objectOffsetPos to:file
-	format "\t\t\t\"objectOffsetRot\":\"%\",\n" b.objectOffsetRot to:file
-	format "\t\t\t\"objectOffsetScale\":\"%\",\n" b.objectOffsetScale to:file
-	format "\t\t\t\"dir\":\"%\",\n" b.dir to:file
-	format "\t\t\t\"max\":\"%\",\n" b.max to:file
-	format "\t\t\t\"min\":\"%\",\n" b.min to:file
-	format "\t\t\t\"center\":\"%\",\n" b.center to:file
-	format "\t\t\t\"pivot\":\"%\"\n" b.pivot to:file*/
-	
-	format "\t\t}\n" to:tmpStr
-
-	/*
-	format "%\n" b.name to:file
-	
-	format "\t%\n" b.position.controller.keys to:file
-	
-	--format "\t%\n" b.position.controller to:file
-	--format "%\n" b.keys to:file
-	
-	browse keys
-	for i = 1 to keys.count do
-	(
-		sliderTime = keys[i]
-		mesh = snapshotAsMesh selection[1]
-	)
-	*/
-	
-	return (tmpStr as string)
-)
-
-function isGeometry o =
-(
-	Superclassof o == GeometryClass and classof o != BoneGeometry
-)
-
 function isBone o =
 (
 	classof o == BoneGeometry
 )
-
--- MAIN
 
 filepath = GetSaveFileName()
 if (filepath == undefined) then
@@ -191,8 +91,6 @@ format "\t\"length\":%,\n" (((animationRange.end - animationRange.start + 1) as 
 format "\t\"JIT\":0,\n" to:file
 format "\t\"loop\":%,\n" timeConfiguration.playbackLoop to:file
 
-global globalKeys = #()
-
 myMesh = getnodebyname "gordon"
 select myMesh
 mySkin = myMesh.modifiers[#skin]
@@ -208,7 +106,7 @@ if (mySkin != undefined) then
 	bonesCount = skinops.getnumberbones mySkin
 	for i = 1 to bonesCount do
 	(
-		bname = skinops.getbonename mySkin i 1
+		bname = skinops.getbonename mySkin i 0
 		b = getnodebyname bname
 		append myBones b
 		
@@ -248,6 +146,20 @@ sliderTime = 0
 
 -- FORMAT
 
+function formatKeyjs thekeyjs =
+(
+	opxstr = stringStream ""
+	
+	format "{\n" to:opxstr
+	format "\t\t\t\t\t\"time\":%,\n" (((thekeyjs.time as time) as float) / 4800) to:opxstr
+	format "\t\t\t\t\t\"pos\":%,\n" (formatVector3 thekeyjs.pos) to:opxstr
+	format "\t\t\t\t\t\"rot\":%,\n" (formatQuaternion thekeyjs.rot) to:opxstr
+	format "\t\t\t\t\t\"scl\":%\n" (formatVector3 thekeyjs.scl) to:opxstr
+	format "\t\t\t\t}" to:opxstr
+	
+	return (opxstr as string)
+)
+
 function formatBonejs thebonejs =
 (
 	adqstr = stringStream ""
@@ -276,20 +188,6 @@ function formatBonejs thebonejs =
 	return (adqstr as string)
 )
 
-function formatKeyjs thekeyjs =
-(
-	opxstr = stringStream ""
-	
-	format "{\n" to:opxstr
-	format "\t\t\t\t\t\"time\":%,\n" (((thekeyjs.time as time) as float) / 4800) to:opxstr
-	format "\t\t\t\t\t\"pos\":%,\n" (formatVector3 thekeyjs.pos) to:opxstr
-	format "\t\t\t\t\t\"rot\":%,\n" (formatQuaternion thekeyjs.rot) to:opxstr
-	format "\t\t\t\t\t\"scl\":%\n" (formatVector3 thekeyjs.scl) to:opxstr
-	format "\t\t\t\t}" to:opxstr
-	
-	return (opxstr as string)
-)
-
 format "\t\"hierarchy\":[\n" to:file
 for i = 1 to myBonesjs.count do
 (
@@ -299,23 +197,8 @@ for i = 1 to myBonesjs.count do
 		format ",\n" to:file
 	)
 	format "%" (formatBonejs bjs) to:file
-	/*for j = 1 to bjs.keys.count do
-	(
-		kjs = bjs.keys[j]
-		if (j > 1) then
-		(
-			format "\t\t,\n" to:file
-		)
-		
-		format "%" (formatBonejs obj) to:file
-	)*/
 )
-format "\t]\n" to:file
-
---format "\t\"keyCount\":\"%\",\n" globalKeys.count to:file
---sort globalKeys
---keyTimeList = (arrayToString globalKeys.count " ")
---format "\t\"keyTimeList\":\"%\"\n" keyTimeList to:file
+format "\n\t]\n" to:file
 
 -- END FILE
 format "}\n" to:file
