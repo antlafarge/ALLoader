@@ -135,13 +135,13 @@ function processBoneForOneVertex mySkin mySubMesh vertID =
 function processMesh myObj mat =
 (
 	myMesh = /*snapshotAsMesh*/ myObj
-		
+	
 	select myMesh
 	max modify mode
 	
 	mySkin = myMesh.modifiers[#skin]
-	myBones = #()
 	
+	myBones = #()
 	if (mySkin != undefined) then
 	(
 		bonesCount = skinops.getnumberbones mySkin
@@ -379,7 +379,9 @@ function formatSubMesh mySubMesh mat =
 			)
 			
 			parentBoneID = -1
-			if (parent != undefined) then
+			
+			-- retrive parent boneID
+			if (b.parent != undefined) then
 			(
 				for bi2 = 1 to mySubMesh.bones.count do
 				(
