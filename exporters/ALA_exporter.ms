@@ -116,6 +116,32 @@ keyStart = (animationRange.start as integer) / 160
 keyEnd = (animationRange.end as integer) / 160
 keyCount = keyEnd - keyStart + 1
 
+function in_array arr needle =
+(
+	for ai = 1 to arr.count do
+	(
+		if (arr[ai] == needle) then
+		(
+			return true
+		)
+	)
+	
+	return false
+)
+
+function in_array_time arr needle =
+(
+	for ai = 1 to arr.count do
+	(
+		if (arr[ai].time == needle) then
+		(
+			return true
+		)
+	)
+	
+	return false
+)
+
 for k = keyStart to keyEnd do
 (
 	sliderTime = k
@@ -123,12 +149,35 @@ for k = keyStart to keyEnd do
 	(
 		b = myBones[i]
 		bjs = myBonesjs[i]
+
+		kastime = (k as time)
 		
-		bpos = (in coordsys parent(b.position))
-		brot = (in coordsys parent(b.rotation))
-		bscl = (in coordsys parent(b.scale))
-		btime = ((k as time) as float) / 4800
-		append bjs.keys (keyjs time:btime pos:bpos rot:brot scl:bscl)
+		createKey = false
+		
+		if (in_array_time mobile.position.controller.keys kastime) then
+		(
+			createKey = true
+		)
+		
+		if (in_array_time mobile.rotation.controller.keys kastime) then
+		(
+			createKey = true
+		)
+		
+		if (in_array_time mobile.rotation.controller.keys kastime) then
+		(
+			createKey = true
+		)
+		
+		if (createKey == true) then
+		(
+			print ("create key at time" + (kastime as string))
+			bpos = (in coordsys parent(b.position))
+			brot = (in coordsys parent(b.rotation))
+			bscl = (in coordsys parent(b.scale))
+			btime = (kastime as float) / 4800
+			append bjs.keys (keyjs time:btime pos:bpos rot:brot scl:bscl)
+		)
 	)
 )
 sliderTime = 0
