@@ -72,7 +72,7 @@ format "\t\"length\":%,\n" (((animationRange.end - animationRange.start + 1) as 
 format "\t\"JIT\":0,\n" to:file
 format "\t\"loop\":%,\n" timeConfiguration.playbackLoop to:file
 
-myMesh = getnodebyname "gordon"
+myMesh = getnodebyname "Gordon_Hi-ResDM1.smd"
 select myMesh
 mySkin = myMesh.modifiers[#skin]
 max modify mode
@@ -134,12 +134,10 @@ function formatKeyjs thekeyjs =
 (
 	opxstr = stringStream ""
 	
-	format "{\n" to:opxstr
-	format "\t\t\t\t\t\"time\":%,\n" (((thekeyjs.time as time) as float) / 4800) to:opxstr
-	format "\t\t\t\t\t\"pos\":%,\n" (formatVector3 thekeyjs.pos) to:opxstr
-	format "\t\t\t\t\t\"rot\":%,\n" (formatQuaternion thekeyjs.rot) to:opxstr
-	format "\t\t\t\t\t\"scl\":%\n" (formatVector3 thekeyjs.scl) to:opxstr
-	format "\t\t\t\t}" to:opxstr
+	format "{\"time\":%, " (((thekeyjs.time as time) as float) / 4800) to:opxstr
+	format "\"pos\":%, " (formatVector3 thekeyjs.pos) to:opxstr
+	format "\"rot\":%, " (formatQuaternion thekeyjs.rot) to:opxstr
+	format "\"scl\":%}" (formatVector3 thekeyjs.scl) to:opxstr
 	
 	return (opxstr as string)
 )

@@ -2,7 +2,7 @@
 
 clearListener()
 
-struct subMesh (name = "", matID = undefined, material = undefined, indexCount = 0, materialName = "", vertices = #(), indices = #(), normals = #(), colors = #(), uvs = #(), skinIndices = #(), skinWeights = #(), bones = #())
+struct subMesh (name = "", matID = undefined, material = undefined, indexCount = 0, materialName = "", vertices = #(), indices = #(), normals = #(), colors = #(), uvs = #(), skinIndices = #(), skinWeights = #(), skinNames = #(), skinIndices2 = #(), bones = #())
 
 --global MAT_TRANSFORM = matrix3 [1,0,0] [0,0,-1] [0,1,0] [0,0,0]
 global MAT_TRANSFORM = matrix3 [1,0,0] [0,1,0] [0,0,1] [0,0,0]
@@ -103,7 +103,20 @@ function formatMaterial mat str =
 	return (str as string)
 )
 
-function processBoneForOneVertex mySkin mySubMesh vertID =
+function getBoneID thebones bonename =
+(
+	for tbi = 1 to thebones.count do
+	(
+		if (thebones[tbi].name == bonename) then
+		(
+			return (tbi - 1)
+		)
+	)
+	
+	return -1
+)
+
+function processBoneForOneVertex mySkin mySubMesh vertID thebones =
 (
 	-- skin informations
 	vertex_bone_count = skinOps.GetVertexWeightCount mySkin vertID
@@ -120,14 +133,18 @@ function processBoneForOneVertex mySkin mySubMesh vertID =
 		bn2 = bn1
 		
 		-- bones
-		--bname = skinops.getbonename mySkin bn1 1
-		--b = getnodebyname bname
-		--append mySubMesh.bones b
+		bname = skinops.getbonename mySkin bn1 1
+		b = getnodebyname bname
+		append mySubMesh.skinNames b.name
+		bindex2 = getBoneID thebones bname
+		append mySubMesh.skinIndices2 bindex2
 	)
 	while bn2 < 4 do
 	(
 		append mySubMesh.skinIndices 0
 		append mySubMesh.skinWeights 0
+		append mySubMesh.skinNames ""
+		append mySubMesh.skinIndices2 0
 		bn2 = bn2  + 1
 	)
 )
@@ -205,7 +222,7 @@ function processMesh myObj mat =
 		append mySubMesh.vertices v3
 		
 		-- Indices
-		append mySubMesh.indices mySubMesh.indexCount
+		append mySubMesh.indices (mySubMesh.indexCount  )
 		append mySubMesh.indices (mySubMesh.indexCount+1)
 		append mySubMesh.indices (mySubMesh.indexCount+2)
 		mySubMesh.indexCount += 3;
@@ -246,9 +263,9 @@ function processMesh myObj mat =
 		
 		if (mySkin != undefined) then
 		(
-			processBoneForOneVertex mySkin mySubMesh face.x
-			processBoneForOneVertex mySkin mySubMesh face.y
-			processBoneForOneVertex mySkin mySubMesh face.z
+			processBoneForOneVertex mySkin mySubMesh face.x myBones
+			processBoneForOneVertex mySkin mySubMesh face.y myBones
+			processBoneForOneVertex mySkin mySubMesh face.z myBones
 		)
 	)
 	
@@ -343,10 +360,36 @@ function formatSubMesh mySubMesh mat =
 	if ((mySubMesh.skinIndices.count != 0) and (mySubMesh.skinWeights.count != 0) and (mySubMesh.bones.count != 0)) then
 	(
 		-- Write skinIndices
-		format "\t\t\t\"skinIndices\":[" to:str
+		/*format "\t\t\t\"skinIndices\":[" to:str
 		for bii = 1 to mySubMesh.skinIndices.count do
 		(
 			bi = mySubMesh.skinIndices[bii]
+			if (bii != 1) then
+			(
+				format "," to:str
+			)
+			format "%" bi to:str
+		)
+		format "],\n" to:str*/
+		
+		-- Write skinNames
+		format "\t\t\t\"skinNames\":[" to:str
+		for bni = 1 to mySubMesh.skinNames.count do
+		(
+			bn = mySubMesh.skinNames[bni]
+			if (bni != 1) then
+			(
+				format "," to:str
+			)
+			format "\"%\"" bn to:str
+		)
+		format "],\n" to:str
+		
+		-- Write skinIndices
+		format "\t\t\t\"skinIndices\":[" to:str
+		for bii = 1 to mySubMesh.skinIndices2.count do
+		(
+			bi = mySubMesh.skinIndices2[bii]
 			if (bii != 1) then
 			(
 				format "," to:str
@@ -393,19 +436,15 @@ function formatSubMesh mySubMesh mat =
 				)
 			)
 			
-			format "\t\t\t\t{\n" to:str
-			-- name
-			format "\t\t\t\t\t\"name\":\"%\",\n" b.name to:str
+			format "\t\t\t\t{\"name\":\"%\", " b.name to:str
 			-- parent
-			format "\t\t\t\t\t\"parent\":%,\n" parentBoneID to:str
+			format "\"parent\":%, " parentBoneID to:str
 			
 			-- data
-			format "\t\t\t\t\t\"pos\":%,\n" (in coordsys parent(formatVector3 b.position)) to:str
-			format "\t\t\t\t\t\"rot\":[0,0,0],\n" to:str
-			format "\t\t\t\t\t\"rotq\":%,\n" (in coordsys parent(formatQuaternion b.rotation)) to:str
-			format "\t\t\t\t\t\"scl\":%\n" (in coordsys parent(formatVector3 b.scale)) to:str
-			
-			format "\t\t\t\t}" to:str
+			format "\"pos\":%, " (in coordsys parent(formatVector3 b.position)) to:str
+			format "\"rot\":[0,0,0], " to:str
+			format "\"rotq\":%, " (in coordsys parent(formatQuaternion b.rotation)) to:str
+			format "\"scl\":%}" (in coordsys parent(formatVector3 b.scale)) to:str
 		)
 	)
 	format "\n" to:str
