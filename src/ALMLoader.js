@@ -36,7 +36,7 @@ THREE.ALMLoader.prototype.loadAjaxJSON = function (context, url, callback, textu
 				if (xhr.responseText) {
 				
 					var json = JSON.parse(xhr.responseText);
-					context.createModel(json, callback, texturePath);
+					context.parse(json, callback, texturePath);
 
 				} else {
 
@@ -83,7 +83,7 @@ THREE.ALMLoader.prototype.loadAjaxJSON = function (context, url, callback, textu
 
 };
 
-THREE.ALMLoader.prototype.createModel = function (json, callback, texturePath) {
+THREE.ALMLoader.prototype.parse = function (json, callback, texturePath) {
 
 	var materials = [];
 	for (var i=0; i < json.materials.length; i++)
@@ -113,13 +113,45 @@ THREE.ALMLoader.prototype.createModel = function (json, callback, texturePath) {
 	{
 		// MATERIAL
 		var material = new THREE.MeshPhongMaterial();
-		material.name = jsonMat.name;
-		
-		var tex = jsonMat.texture;
-		if (tex)
+
+		if (jsonMat.name)
 		{
-			material.map = THREE.ImageUtils.loadTexture(texturePath + '/' + tex);
-			//material.map.flipY = false;
+			material.name = jsonMat.name;
+		}
+
+		if (jsonMat.ambient)
+		{
+			material.ambient.r = jsonMat.ambient[0] / 255;
+			material.ambient.g = jsonMat.ambient[1] / 255;
+			material.ambient.b = jsonMat.ambient[2] / 255;
+		}
+		
+		if (jsonMat.diffuse)
+		{
+			material.color.r = jsonMat.diffuse[0] / 255;
+			material.color.g = jsonMat.diffuse[1] / 255;
+			material.color.b = jsonMat.diffuse[2] / 255;
+		}
+		
+		if (jsonMat.specular)
+		{
+			material.specular.r = jsonMat.specular[0] / 255;
+			material.specular.g = jsonMat.specular[1] / 255;
+			material.specular.b = jsonMat.specular[2] / 255;
+		}
+
+		if (jsonMat.opacity)
+		{
+			material.opacity = jsonMat.opacity;
+			if (jsonMat.opacity != 1)
+			{
+				material.transparent = true;
+			}
+		}
+		
+		if (jsonMat.texture)
+		{
+			material.map = THREE.ImageUtils.loadTexture(texturePath + '/' + jsonMat.texture);
 		}
 		
 		return material;
@@ -185,48 +217,24 @@ THREE.ALMLoader.prototype.createModel = function (json, callback, texturePath) {
 		if (skinning)
 		{
 			// BONES
-			//parseSkin(xmlMesh.querySelector("Skin"), geometry);
+			geometry.bones = jsonMesh.bones;
 			
 			// SKININDEX && SKINWEIGHT
 			for (var i=0; i < jsonMesh.skinIndices.length; i+=4)
 			{
-				// NEW
-				
 				var bi0 = jsonMesh.skinIndices[i+0];
 				var bi1 = jsonMesh.skinIndices[i+1];
-				//var bi2 = jsonMesh.skinIndices[i+2];
-				//var bi3 = jsonMesh.skinIndices[i+3];
+				var bi2 = jsonMesh.skinIndices[i+2];
+				var bi3 = jsonMesh.skinIndices[i+3];
 				geometry.skinIndices.push(new THREE.Vector4(bi0, bi1, 0, 0));
 				
 				var bw0 = jsonMesh.skinWeights[i+0];
 				var bw1 = jsonMesh.skinWeights[i+1];
-				//var bw2 = jsonMesh.skinWeights[i+2];
-				//var bw3 = jsonMesh.skinWeights[i+3];
+				var bw2 = jsonMesh.skinWeights[i+2];
+				var bw3 = jsonMesh.skinWeights[i+3];
 				geometry.skinWeights.push(new THREE.Vector4(bw0, bw1, 0, 0));
 				
-				geometry.bones = jsonMesh.bones;
-				
-				// OLD
-				
-				//var si0 = treatSkinIndex(jsonMesh.skinIndices[i ]);
-				//var si1 = treatSkinIndex(jsonMesh.skinIndices[i+1]);
-				//var si2 = treatSkinIndex(bi[i+2]);
-				//var si3 = treatSkinIndex(bi[i+3]);
-				//geometry.skinIndices.push(new THREE.Vector4(si0, si1, si2, si3));
-				//geometry.skinIndices.push(new THREE.Vector4(si0, si1, 0, 0));
-
-				//geometry.skinWeights.push(new THREE.Vector4(bw[i], bw[i+1], bw[i+2], bw[i+3]));
-				//geometry.skinWeights.push(new THREE.Vector4(jsonMesh.skinWeights[i], jsonMesh.skinWeights[i+1], 0, 0));
 			}
-		}
-		
-		function treatSkinIndex(skinIndex)
-		{
-			if (skinIndex == -1)
-			{
-				return 0;
-			}
-			return skinIndex;
 		}
 		
 		// Post-processing
@@ -251,41 +259,11 @@ THREE.ALMLoader.prototype.createModel = function (json, callback, texturePath) {
 		return mesh;
 	}
 	
-	function parseSkin(xmlSkin, geometry)
-	{
-		if (geometry.bones == null)
-			geometry.bones = [];
-
-		for (var i=0; i < xmlBones.length; i++)
-		{
-			var bone = {};
-			bone.name = xmlBones[i].getAttribute("Name");
-			bone.parent = -1;
-
-			var im = xmlBones[i].getAttribute("InitMatrix").split(' ');
-			bone.initMatrix = new THREE.Matrix4(im[0],im[3],im[6],im[9], im[1],im[4],im[7],im[10], im[2],im[5],im[8],im[11], 0,0,0,1);
-			bone.invInitMatrix = new THREE.Matrix4().getInverse(bone.initMatrix);
-
-			bone.pos = [0, 0, 0];
-			bone.rotq = [0, 0, 0, 1];
-			bone.scl = [1,1,1];
-
-			geometry.bones.push(bone);
-		}
-	}
-	
 	var object3d = new THREE.Object3D();
-	if (meshes.length == 1)
+	for (var i=0; i<meshes.length; i++)
 	{
-		object3d = meshes[0];
+		object3d.add(meshes[i]);
 	}
-	else
-	{
-		object3d = new THREE.Object3D();
-		for (var i=0; i < meshes.length; i++)
-		{
-			object3d.add(meshes[i]);
-		}
-	}
+
 	callback(object3d);
 };

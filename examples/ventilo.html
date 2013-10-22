@@ -11,18 +11,20 @@
 		</style>
 	</head>
 	<body>
-		<div id="info">Oscar example for <a href="http://github.com/ant-lafarge/ALLoader">ALLoader</a></div>
+		<div id="info">Gordon example for <a href="http://github.com/ant-lafarge/ALLoader">ALLoader</a></div>
 
 		<div id="container"></div>
 
 		<script src="libs/three.js/build/three.js"></script>
 		<script src="libs/three.js/examples/js/controls/TrackballControls.js"></script>
-		<script src="libs/three.js/examples/js/loaders/OBJLoader.js"></script>
-		<script src="libs/three.js/examples/js/loaders/MTLLoader.js"></script>
-		<script src="libs/three.js/examples/js/loaders/OBJMTLLoader.js"></script>
 		<script src="libs/three.js/examples/js/Detector.js"></script>
 		<script src="libs/three.js/examples/js/libs/stats.min.js"></script>
 
+		<script src="../src/ALMLoader.js"></script>
+		<!--<script src="../src/ALSLoader.js"></script>-->
+		<script src="../src/ALALoader.js"></script>
+		<script src="../src/AnimationUtils.js"></script>
+		
 		<script>
 			if (! Detector.webgl)
 			{
@@ -51,7 +53,8 @@
 			function init()
 			{
 				camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.01, 1000);
-				camera.position.set(1, 2, 3);
+				//camera.position.set(16, 32, 48);
+				camera.position.set(32, -32, 32);
 
 				controls = new THREE.TrackballControls(camera);
 				controls.rotateSpeed = 1.0;
@@ -75,94 +78,6 @@
 				light = new THREE.AmbientLight(0xffffff);
 				scene.add(light);
 
-
-				// load oscar
-
-				var objMtlLoader = new THREE.OBJMTLLoader();
-				objMtlLoader.addEventListener('load', function (event) {
-					var oscar = event.content;
-					oscar.traverse(function(child){
-					});
-					scene.add(oscar);
-				}.bind(this));
-				objMtlLoader.load('data/oscar.obj', 'data/oscar.mtl');
-
-				function processSkeleton(json)
-				{
-					ske = json;
-
-					skeleton = AnimationUtils.createSkeleton(ske, 10);
-
-					attributes.boneIndex.value = skeleton.skin.boneIndex;
-					attributes.boneWeight.value = skeleton.skin.boneWeight;
-
-					skeleton.geometry.materials[0].material.wireframe = true;
-					//skeleton.geometry.materials[1] = material2;
-
-					scene.add(skeleton);
-					
-					console.log(ske);
-					console.log(skeleton);
-					
-					skeletonLoaded = true;
-					if (animLoaded && modelLoaded)
-					{
-						processAll();
-					}
-				}
-				var skeletonLoader = new THREE.ALSLoader();
-				//skeletonLoader.load("skeletons/gordon.als", processSkeleton);
-				
-				function processAnim(anim)
-				{
-					animation = anim;
-
-					/*console.log(animation);
-
-					animPlayer.attachAnim(0, animation, 300);
-					animPlayer.setTime(0, 0);
-					animPlayer.enableLoop(0, 1);
-
-					animPlayer.setSkin(skeleton.skin);
-					//this.animPlayer.update(0, 100);
-					var boneMatListTmp = animPlayer.getBoneFinalMat43Array();*/
-
-					animLoaded = true;
-					if (skeletonLoaded && modelLoaded)
-					{
-						processAll();
-					}
-				}
-				//var animLoader = new THREE.ALALoader();
-				//animLoader.load("animations/gordon_idle.ala", processAnim);
-
-				function processModel(myObject3d)
-				{
-					object3d = myObject3d;
-
-					//combi = object3d.children[0];
-					//head = object3d.children[1];
-
-					//scene.add(object3d);
-
-					modelLoaded = true;
-					if (skeletonLoaded && animLoaded)
-					{
-						processAll();
-					}
-				}
-				//var modelLoader = new THREE.ALMLoader();
-				//modelLoader.load("models/gordon2.alm", processModel, "textures");
-
-				function processAll()
-				{
-					//scene.add(skeleton);
-					//scene.add(head);
-					//scene.add(combi);
-					//scene.add(gordon);
-					//scene.add(gordonWire);
-				}
-				
 				// renderer
 
 				renderer = new THREE.WebGLRenderer();
@@ -178,6 +93,66 @@
 				stats.domElement.style.zIndex = 100;
 				container.appendChild(stats.domElement);
 
+				// meshes
+
+				function processAnim(anim)
+				{
+					animation = anim;
+
+					THREE.AnimationHandler.add(animation);
+
+					animLoaded = true;
+					if (modelLoaded)
+					{
+						processAll();
+					}
+				}
+				(new THREE.ALALoader).load("data/ventilo_working.ala", processAnim);
+
+				function processALM(myObject3d)
+				{
+					object3d = myObject3d;
+
+					ventilo = object3d.children[0];
+
+					ventilo.material.opacity = 0.5;
+					ventilo.material.transparent = true;
+
+					wiremat = new THREE.MeshBasicMaterial();
+					wiremat.color = new THREE.Color(0xbfbfbf);
+					wiremat.wireframe = true;
+					wiremat.skinning = true;
+					ventilo_wire = ventilo.clone();
+					ventilo_wire.material = wiremat;
+
+					skeleton = AnimationUtils.createSkeleton(ventilo, 0.4);
+
+					modelLoaded = true;
+					if (animLoaded)
+					{
+						processAll();
+					}
+				}
+				(new THREE.ALMLoader).load("data/ventilo.alm", processALM, "textures");
+
+				function processAll()
+				{
+					scene.add(object3d);
+
+					ventilo_anim = new THREE.Animation(ventilo, "working");
+					//ventilo_anim.play();
+
+					//scene.add(ventilo_wire)
+
+					//ventilo_anim2 = new THREE.Animation(ventilo_wire, "working");
+					//ventilo_anim2.play();
+
+					//scene.add(skeleton);
+
+					//skeleton_anim = new THREE.Animation(skeleton, "working");
+					//skeleton_anim.play();
+				}
+				
 				// end init
 
 				window.addEventListener('resize', onWindowResize, false);
@@ -197,7 +172,7 @@
 
 			function animLoop(ms)
 			{
-				if (skeleton)
+				/*if (skeleton)
 				{
 					animPlayer.setSkin(skeleton.skin);
 
@@ -210,7 +185,7 @@
 					{
 						uniforms.boneMatrices.value[ m ] = boneMatListTmp[ m ];
 					}
-				}
+				}*/
 			}
 
 			function render()
@@ -218,10 +193,13 @@
 				requestAnimationFrame(render);
 				var delta = clock.getDelta();
 				//animLoop(delta * 1000);
+				THREE.AnimationHandler.update(delta);
 				controls.update();
 				renderer.render(scene, camera);
 				stats.update();
 			}
 		</script>
+
 	</body>
 </html>
+

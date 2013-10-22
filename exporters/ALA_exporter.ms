@@ -2,12 +2,9 @@
 
 clearListener()
 
---QUAT_TRANSFORM_1 = quat 90 [0,1,0]
---QUAT_TRANSFORM_2 = quat 180 [0,0,1]
-
 function pf3 f =
 (
-	--return ((ceil (f * 10000)) / 10000) 
+	--return ((ceil (f * 10000)) / 10000)
 	return f
 )
 
@@ -61,24 +58,29 @@ if (filepath == undefined) then
 deleteFile filepath
 global file = createFile filepath
 
--- START FILE
-format "{\n" to:file
+if (selection.count == 0) then
+(
+	exit
+)
 
--- SKELETON NAME
-animName = "gordon.idle"
-format "\t\"name\":\"%\",\n" animName to:file
-format "\t\"fps\":%,\n" frameRate to:file
-format "\t\"length\":%,\n" (((animationRange.end - animationRange.start + 1) as float) / 4800) to:file
-format "\t\"JIT\":0,\n" to:file
-format "\t\"loop\":%,\n" timeConfiguration.playbackLoop to:file
-
-myMesh = getnodebyname "Gordon_Hi-ResDM1.smd"
-select myMesh
+myMesh = selection[1]
 mySkin = myMesh.modifiers[#skin]
 max modify mode
 
 struct bonejs (bone=undefined, parent=-1, keys=#())
 struct keyjs (time=0, pos=undefined, rot=undefined, scl=undefined)
+
+-- START FILE
+format "{\n" to:file
+
+-- SKELETON NAME
+animName = "animation"
+animName = getKBLine prompt:"Enter animation name"
+format "\t\"name\":\"%\",\n" animName to:file
+format "\t\"fps\":%,\n" frameRate to:file
+format "\t\"length\":%,\n" (((animationRange.end - animationRange.start + 1) as float) / 4800) to:file
+format "\t\"JIT\":0,\n" to:file
+format "\t\"loop\":%,\n" timeConfiguration.playbackLoop to:file
 
 myBones = #()
 myBonesjs = #()
@@ -110,9 +112,11 @@ if (mySkin != undefined) then
 	)
 )
 
-deselect myMesh
+keyStart = (animationRange.start as integer) / 160
+keyEnd = (animationRange.end as integer) / 160
+keyCount = keyEnd - keyStart + 1
 
-for k = 0 to 41 do
+for k = keyStart to keyEnd do
 (
 	sliderTime = k
 	for i = 1 to myBones.count do
@@ -123,7 +127,8 @@ for k = 0 to 41 do
 		bpos = (in coordsys parent(b.position))
 		brot = (in coordsys parent(b.rotation))
 		bscl = (in coordsys parent(b.scale))
-		append bjs.keys (keyjs time:k pos:bpos rot:brot scl:bscl)
+		btime = ((k as time) as float) / 4800
+		append bjs.keys (keyjs time:btime pos:bpos rot:brot scl:bscl)
 	)
 )
 sliderTime = 0
@@ -134,7 +139,7 @@ function formatKeyjs thekeyjs =
 (
 	opxstr = stringStream ""
 	
-	format "{\"time\":%, " (((thekeyjs.time as time) as float) / 4800) to:opxstr
+	format "{\"time\":%, " thekeyjs.time to:opxstr
 	format "\"pos\":%, " (formatVector3 thekeyjs.pos) to:opxstr
 	format "\"rot\":%, " (formatQuaternion thekeyjs.rot) to:opxstr
 	format "\"scl\":%}" (formatVector3 thekeyjs.scl) to:opxstr

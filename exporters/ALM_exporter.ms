@@ -70,7 +70,7 @@ function formatMaterial mat str =
 		str = stringStream ""
 	)
 	
-	if (classof mat == Multimaterial) then -- multi material
+	if ((classof mat) == MultiMaterial) then -- multi-material
 	(
 		for i = 1 to mat.numsubs do
 		(
@@ -83,14 +83,13 @@ function formatMaterial mat str =
 	)
 	else -- standard material
 	(
-		textureFilePath = mat.diffuseMap.bitmap.filename
-		tokens = (filterString textureFilePath "\\")
-		textureFileName = tokens[tokens.count]
-		
 		format "\t\t{\n" to:str
 		format "\t\t\t\"name\":\"%\",\n" mat.name to:str
-		if (textureFileName != undefined) then
+		if (mat.diffuseMap != undefined) then
 		(
+			textureFilePath = mat.diffuseMap.bitmap.filename
+			tokens = (filterString textureFilePath "\\")
+			textureFileName = tokens[tokens.count]
 			format "\t\t\t\"texture\":\"%\",\n" textureFileName to:str
 		)
 		format "\t\t\t\"ambient\":[%,%,%],\n" mat.ambient.r mat.ambient.g mat.ambient.b to:str
@@ -116,41 +115,59 @@ function getBoneID thebones bonename =
 	return -1
 )
 
+global reindexer = #()
+
 function processBoneForOneVertex mySkin mySubMesh vertID thebones =
 (
 	-- skin informations
 	vertex_bone_count = skinOps.GetVertexWeightCount mySkin vertID
+	if (vertex_bone_count > 4) then
+	(
+		vertex_bone_count = 4
+	)
+	
 	bn2 = 1
+	mySubMesh.skinIndices[reindexer[vertID]+1] = #()
+	mySubMesh.skinWeights[reindexer[vertID]+1] = #()
+	/*if (mySubMesh.skinNames[reindexer[vertID]+1] == undefined) then
+	(
+		mySubMesh.skinNames[reindexer[vertID]+1] = #()
+	)
+	mySubMesh.skinIndices2[reindexer[vertID]+1] = #()*/
+	
 	for bn1 = 1 to vertex_bone_count do
 	(
 		-- boneIndexes
 		bindex = skinops.getvertexweightboneid mySkin vertID bn1
-		append mySubMesh.skinIndices bindex
+		append mySubMesh.skinIndices[reindexer[vertID]+1] (bindex - 1)
 		
 		-- skinWeights
 		bweight = skinops.getvertexweight mySkin vertID bn1
-		append mySubMesh.skinWeights bweight
-		bn2 = bn1
+		append mySubMesh.skinWeights[reindexer[vertID]+1] bweight
 		
 		-- bones
-		bname = skinops.getbonename mySkin bn1 1
+		/*bname = skinops.getbonename mySkin bn1 1
 		b = getnodebyname bname
-		append mySubMesh.skinNames b.name
+		append mySubMesh.skinNames[reindexer[vertID]+1] b.name
 		bindex2 = getBoneID thebones bname
-		append mySubMesh.skinIndices2 bindex2
+		append mySubMesh.skinIndices2[reindexer[vertID]+1] bindex2*/
+		
+		bn2 = bn1
 	)
-	while bn2 < 4 do
+	while bn2 < 4 do -- padding empty unused bone slots
 	(
-		append mySubMesh.skinIndices 0
-		append mySubMesh.skinWeights 0
-		append mySubMesh.skinNames ""
-		append mySubMesh.skinIndices2 0
+		append mySubMesh.skinIndices[reindexer[vertID]+1] 0
+		append mySubMesh.skinWeights[reindexer[vertID]+1] 0
+		--append mySubMesh.skinNames[reindexer[vertID]+1] ""
+		--append mySubMesh.skinIndices2[reindexer[vertID]+1] 0
 		bn2 = bn2  + 1
 	)
 )
 
 function processMesh myObj mat =
 (
+	reindexer = #()
+	
 	myMesh = /*snapshotAsMesh*/ myObj
 	
 	select myMesh
@@ -210,6 +227,22 @@ function processMesh myObj mat =
 			mySubMesh.bones = bonesArray
 		)
 		
+		-- Indices
+		/*append mySubMesh.indices face.x
+		append mySubMesh.indices face.y
+		append mySubMesh.indices face.z*/
+		
+		append mySubMesh.indices (mySubMesh.indexCount  )
+		reindexer[face.x] = mySubMesh.indexCount
+		
+		append mySubMesh.indices (mySubMesh.indexCount+1)
+		reindexer[face.y] = mySubMesh.indexCount + 1
+		
+		append mySubMesh.indices (mySubMesh.indexCount+2)
+		reindexer[face.z] = mySubMesh.indexCount + 2
+		
+		mySubMesh.indexCount += 3;
+		
 		-- Vertices
 		v1 = getVert myMesh face.x
 		v2 = getVert myMesh face.y
@@ -217,15 +250,9 @@ function processMesh myObj mat =
 		v1 = v1 * MAT_TRANSFORM
 		v2 = v2 * MAT_TRANSFORM
 		v3 = v3 * MAT_TRANSFORM
-		append mySubMesh.vertices v1
-		append mySubMesh.vertices v2
-		append mySubMesh.vertices v3
-		
-		-- Indices
-		append mySubMesh.indices (mySubMesh.indexCount  )
-		append mySubMesh.indices (mySubMesh.indexCount+1)
-		append mySubMesh.indices (mySubMesh.indexCount+2)
-		mySubMesh.indexCount += 3;
+		mySubMesh.vertices[reindexer[face.x]+1] = v1
+		mySubMesh.vertices[reindexer[face.y]+1] = v2
+		mySubMesh.vertices[reindexer[face.z]+1] = v3
 		
 		-- Normals
 		normals = #()
@@ -244,22 +271,22 @@ function processMesh myObj mat =
 				normals = #(n, n, n)
 			)
 		)
-		append mySubMesh.normals normals[1]
-		append mySubMesh.normals normals[2]
-		append mySubMesh.normals normals[3]
+		mySubMesh.normals[reindexer[face.x]+1] = normals[1]
+		mySubMesh.normals[reindexer[face.y]+1] = normals[2]
+		mySubMesh.normals[reindexer[face.z]+1] = normals[3]
 		
 		-- Colors
-		append mySubMesh.colors (color 1 1 1 1)
-		append mySubMesh.colors (color 1 1 1 1)
-		append mySubMesh.colors (color 1 1 1 1)
+		mySubMesh.colors[reindexer[face.x]+1] = color 1 1 1 1
+		mySubMesh.colors[reindexer[face.y]+1] =color 1 1 1 1
+		mySubMesh.colors[reindexer[face.z]+1] = color 1 1 1 1
 		
 		-- UVs
-		t1 = (getTVert myMesh face.x)
-		t2 = (getTVert myMesh face.y)
-		t3 = (getTVert myMesh face.z)
-		append mySubMesh.uvs t1
-		append mySubMesh.uvs t2
-		append mySubMesh.uvs t3
+		t1 = getTVert myMesh face.x
+		t2 = getTVert myMesh face.y
+		t3 = getTVert myMesh face.z
+		mySubMesh.uvs[reindexer[face.x]+1] = t1
+		mySubMesh.uvs[reindexer[face.y]+1] = t2
+		mySubMesh.uvs[reindexer[face.z]+1] = t3
 		
 		if (mySkin != undefined) then
 		(
@@ -290,8 +317,11 @@ function formatSubMesh mySubMesh mat =
 	
 	format "\t\t\t\"name\":\"%\",\n" mySubMesh.name to:str
 
-	format "\t\t\t\"material\":\"%\",\n" mat.name to:str
-
+	if (mat != undefined) then
+	(
+		format "\t\t\t\"material\":\"%\",\n" mat.name to:str
+	)
+	
 	-- Write vertices
 	format "\t\t\t\"vertices\":[" to:str
 	for v = 1 to mySubMesh.vertices.count do
@@ -360,7 +390,7 @@ function formatSubMesh mySubMesh mat =
 	if ((mySubMesh.skinIndices.count != 0) and (mySubMesh.skinWeights.count != 0) and (mySubMesh.bones.count != 0)) then
 	(
 		-- Write skinIndices
-		/*format "\t\t\t\"skinIndices\":[" to:str
+		format "\t\t\t\"skinIndices\":[" to:str
 		for bii = 1 to mySubMesh.skinIndices.count do
 		(
 			bi = mySubMesh.skinIndices[bii]
@@ -368,12 +398,12 @@ function formatSubMesh mySubMesh mat =
 			(
 				format "," to:str
 			)
-			format "%" bi to:str
+			format "%,%,%,%" bi[1] bi[2] bi[3] bi[4] to:str
 		)
-		format "],\n" to:str*/
+		format "],\n" to:str
 		
 		-- Write skinNames
-		format "\t\t\t\"skinNames\":[" to:str
+		/*format "\t\t\t\"skinNames\":[" to:str
 		for bni = 1 to mySubMesh.skinNames.count do
 		(
 			bn = mySubMesh.skinNames[bni]
@@ -381,12 +411,12 @@ function formatSubMesh mySubMesh mat =
 			(
 				format "," to:str
 			)
-			format "\"%\"" bn to:str
+			format "\"%\",\"%\",\"%\",\"%\"" bn[1] bn[2] bn[3] bn[4] to:str
 		)
-		format "],\n" to:str
+		format "],\n" to:str*/
 		
 		-- Write skinIndices
-		format "\t\t\t\"skinIndices\":[" to:str
+		/*format "\t\t\t\"skinIndices\":[" to:str
 		for bii = 1 to mySubMesh.skinIndices2.count do
 		(
 			bi = mySubMesh.skinIndices2[bii]
@@ -394,9 +424,9 @@ function formatSubMesh mySubMesh mat =
 			(
 				format "," to:str
 			)
-			format "%" bi to:str
+			format "%,%,%,%" bi[1] bi[2] bi[3] bi[4] to:str
 		)
-		format "],\n" to:str
+		format "],\n" to:str*/
 		
 		-- Write skinWeights
 		format "\t\t\t\"skinWeights\":[" to:str
@@ -407,7 +437,7 @@ function formatSubMesh mySubMesh mat =
 			(
 				format "," to:str
 			)
-			format "%" bw to:str
+			format "%,%,%,%" bw[1] bw[2] bw[3] bw[4] to:str
 		)
 		format "],\n" to:str
 		
@@ -468,15 +498,17 @@ if (filepath == undefined) then
 deleteFile filepath
 global file = createFile filepath
 
+mySelection = getCurrentSelection()
+
 -- START FILE
 format "{\n" to:file
 
 -- MATERIALS
 format "\t\"materials\":[\n" to:file
 matCount = 0
-for i = 1 to objects.count do
+for i = 1 to mySelection.count do
 (
-	myObj = objects[i]
+	myObj = mySelection[i]
 	--myMesh = snapshotAsMesh myObj
 	
 	mat = myObj.material
@@ -497,9 +529,9 @@ format "\n\t],\n" to:file
 
 format "\t\"meshes\":[\n" to:file
 meshCount = 0
-for i = 1 to objects.count do
+for i = 1 to mySelection.count do
 (
-	myObj = objects[i]
+	myObj = mySelection[i]
 	--myMesh = snapshotAsMesh myObj
 	
 	ib = (isBone myObj) 
@@ -534,3 +566,5 @@ format "}\n" to:file
 
 -- CLOSE FILE
 close file
+
+select mySelection
