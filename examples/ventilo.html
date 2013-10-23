@@ -53,8 +53,7 @@
 			function init()
 			{
 				camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.01, 1000);
-				//camera.position.set(16, 32, 48);
-				camera.position.set(32, -32, 32);
+				camera.position.set(1, -1, 1);
 
 				controls = new THREE.TrackballControls(camera);
 				controls.rotateSpeed = 1.0;
@@ -125,7 +124,7 @@
 					ventilo_wire = ventilo.clone();
 					ventilo_wire.material = wiremat;
 
-					skeleton = AnimationUtils.createSkeleton(ventilo, 0.4);
+					skeleton = AnimationUtils.createSkeleton(ventilo, 0.3);
 
 					modelLoaded = true;
 					if (animLoaded)
@@ -140,17 +139,17 @@
 					scene.add(object3d);
 
 					ventilo_anim = new THREE.Animation(ventilo, "working");
-					//ventilo_anim.play();
+					ventilo_anim.play();
 
-					//scene.add(ventilo_wire)
+					scene.add(ventilo_wire)
 
-					//ventilo_anim2 = new THREE.Animation(ventilo_wire, "working");
-					//ventilo_anim2.play();
+					ventilo_anim2 = new THREE.Animation(ventilo_wire, "working");
+					ventilo_anim2.play();
 
-					//scene.add(skeleton);
+					scene.add(skeleton);
 
-					//skeleton_anim = new THREE.Animation(skeleton, "working");
-					//skeleton_anim.play();
+					skeleton_anim = new THREE.Animation(skeleton, "working");
+					skeleton_anim.play();
 				}
 				
 				// end init

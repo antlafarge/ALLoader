@@ -78,7 +78,7 @@ animName = "animation"
 animName = getKBLine prompt:"Enter animation name"
 format "\t\"name\":\"%\",\n" animName to:file
 format "\t\"fps\":%,\n" frameRate to:file
-format "\t\"length\":%,\n" (((animationRange.end - animationRange.start + 1) as float) / 4800) to:file
+format "\t\"length\":%,\n" (((animationRange.end - animationRange.start) as float) / 4800) to:file
 format "\t\"JIT\":0,\n" to:file
 format "\t\"loop\":%,\n" timeConfiguration.playbackLoop to:file
 
@@ -154,24 +154,23 @@ for k = keyStart to keyEnd do
 		
 		createKey = false
 		
-		if (in_array_time mobile.position.controller.keys kastime) then
+		if (in_array_time b.position.controller.keys kastime) then
 		(
 			createKey = true
 		)
 		
-		if (in_array_time mobile.rotation.controller.keys kastime) then
+		if (in_array_time b.rotation.controller.keys kastime) then
 		(
 			createKey = true
 		)
 		
-		if (in_array_time mobile.rotation.controller.keys kastime) then
+		if (in_array_time b.rotation.controller.keys kastime) then
 		(
 			createKey = true
 		)
 		
 		if (createKey == true) then
 		(
-			print ("create key at time" + (kastime as string))
 			bpos = (in coordsys parent(b.position))
 			brot = (in coordsys parent(b.rotation))
 			bscl = (in coordsys parent(b.scale))
