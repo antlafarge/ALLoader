@@ -181,29 +181,10 @@
 				controls.handleResize();
 			}
 
-			function animLoop(ms)
-			{
-				/*if (skeleton)
-				{
-					animPlayer.setSkin(skeleton.skin);
-
-					this.animPlayer.update(0, ms);
-					
-					var boneMatListTmp = animPlayer.getBoneFinalMat43Array();
-
-					var m = boneMatListTmp.length;
-					while(m--)
-					{
-						uniforms.boneMatrices.value[ m ] = boneMatListTmp[ m ];
-					}
-				}*/
-			}
-
 			function render()
 			{
 				requestAnimationFrame(render);
 				var delta = clock.getDelta();
-				//animLoop(delta * 1000);
 				THREE.AnimationHandler.update(delta);
 				controls.update();
 				renderer.render(scene, camera);

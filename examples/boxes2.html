@@ -53,7 +53,7 @@
 			function init()
 			{
 				camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.01, 1000);
-				camera.position.set(1, -1, 1);
+				camera.position.set(150, -150, 150);
 
 				controls = new THREE.TrackballControls(camera);
 				controls.rotateSpeed = 1.0;
@@ -106,25 +106,24 @@
 						processAll();
 					}
 				}
-				(new THREE.ALALoader).load("data/ventilo_working.ala", processAnim);
+				(new THREE.ALALoader).load("data/boxes2_anim.ala", processAnim);
 
 				function processALM(myObject3d)
 				{
 					object3d = myObject3d;
 
-					ventilo = object3d.children[0];
+					boxes = object3d.children[0];
 
-					ventilo.material.opacity = 0.5;
-					ventilo.material.transparent = true;
+					boxes.material.materials.map(function(mat){mat.opacity = 0.5; mat.transparent = true;});
 
 					wiremat = new THREE.MeshBasicMaterial();
 					wiremat.color = new THREE.Color(0xbfbfbf);
 					wiremat.wireframe = true;
 					wiremat.skinning = true;
-					ventilo_wire = ventilo.clone();
-					ventilo_wire.material = wiremat;
+					boxes_wire = boxes.clone();
+					boxes_wire.material = wiremat;
 
-					skeleton = AnimationUtils.createSkeleton(ventilo, 0.3);
+					skeleton = AnimationUtils.createSkeleton(boxes, 50);
 
 					modelLoaded = true;
 					if (animLoaded)
@@ -132,23 +131,23 @@
 						processAll();
 					}
 				}
-				(new THREE.ALMLoader).load("data/ventilo.alm", processALM, "textures");
+				(new THREE.ALMLoader).load("data/boxes2.alm", processALM, "textures");
 
 				function processAll()
 				{
 					scene.add(object3d);
 
-					ventilo_anim = new THREE.Animation(ventilo, "working");
+					ventilo_anim = new THREE.Animation(boxes, "anim");
 					ventilo_anim.play();
 
-					scene.add(ventilo_wire)
+					scene.add(boxes_wire);
 
-					ventilo_anim2 = new THREE.Animation(ventilo_wire, "working");
+					ventilo_anim2 = new THREE.Animation(boxes_wire, "anim");
 					ventilo_anim2.play();
 
 					scene.add(skeleton);
 
-					skeleton_anim = new THREE.Animation(skeleton, "working");
+					skeleton_anim = new THREE.Animation(skeleton, "anim");
 					skeleton_anim.play();
 				}
 				

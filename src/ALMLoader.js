@@ -91,69 +91,95 @@ THREE.ALMLoader.prototype.parse = function (json, callback, texturePath) {
 		materials.push(parseMaterial(json.materials[i]));
 	}
 
+	// for multi-materials
+	for (var i in materials)
+	{
+		var material = materials[i];
+		if (material instanceof THREE.MeshFaceMaterial)
+		{
+			for (var j in material.multi)
+			{
+				var matName = material.multi[j];
+				material.materials.push(getMaterialFromName(matName));
+			}
+		}
+	}
+
 	var meshes = [];
 	for (var i=0; i < json.meshes.length; i++)
 	{
 		meshes.push(parseMesh(json.meshes[i]));
 	}
 
-	function getMatIdFromName(name)
+	function getMaterialFromName(name)
 	{
 		for (var i=0; i < materials.length; i++)
 		{
 			if (materials[i].name == name)
 			{
-				return i;
+				return materials[i];
 			}
 		}
-		return -1;
+		return null;
 	}
 
 	function parseMaterial(jsonMat)
 	{
 		// MATERIAL
-		var material = new THREE.MeshPhongMaterial();
+		var material = null;
+		if (jsonMat.multi)
+		{
+			material = new THREE.MeshFaceMaterial();
+			material.multi = jsonMat.multi;
+		}
+		else
+		{
+			material = new THREE.MeshPhongMaterial();
+
+			//material.wireframe = true;
+			material.side = THREE.DoubleSide;
+
+			if (jsonMat.ambient)
+			{
+				material.ambient.r = jsonMat.ambient[0] / 255;
+				material.ambient.g = jsonMat.ambient[1] / 255;
+				material.ambient.b = jsonMat.ambient[2] / 255;
+			}
+			
+			if (jsonMat.diffuse)
+			{
+				material.color.r = jsonMat.diffuse[0] / 255;
+				material.color.g = jsonMat.diffuse[1] / 255;
+				material.color.b = jsonMat.diffuse[2] / 255;
+			}
+			
+			if (jsonMat.specular)
+			{
+				material.specular.r = jsonMat.specular[0] / 255;
+				material.specular.g = jsonMat.specular[1] / 255;
+				material.specular.b = jsonMat.specular[2] / 255;
+			}
+
+			if (jsonMat.opacity)
+			{
+				material.opacity = jsonMat.opacity;
+				if (jsonMat.opacity != 1)
+				{
+					material.transparent = true;
+				}
+			}
+			
+			if (jsonMat.texture)
+			{
+				material.map = THREE.ImageUtils.loadTexture(texturePath + '/' + jsonMat.texture);
+			}
+		}
 
 		if (jsonMat.name)
 		{
 			material.name = jsonMat.name;
 		}
 
-		if (jsonMat.ambient)
-		{
-			material.ambient.r = jsonMat.ambient[0] / 255;
-			material.ambient.g = jsonMat.ambient[1] / 255;
-			material.ambient.b = jsonMat.ambient[2] / 255;
-		}
-		
-		if (jsonMat.diffuse)
-		{
-			material.color.r = jsonMat.diffuse[0] / 255;
-			material.color.g = jsonMat.diffuse[1] / 255;
-			material.color.b = jsonMat.diffuse[2] / 255;
-		}
-		
-		if (jsonMat.specular)
-		{
-			material.specular.r = jsonMat.specular[0] / 255;
-			material.specular.g = jsonMat.specular[1] / 255;
-			material.specular.b = jsonMat.specular[2] / 255;
-		}
-
-		if (jsonMat.opacity)
-		{
-			material.opacity = jsonMat.opacity;
-			if (jsonMat.opacity != 1)
-			{
-				material.transparent = true;
-			}
-		}
-		
-		if (jsonMat.texture)
-		{
-			material.map = THREE.ImageUtils.loadTexture(texturePath + '/' + jsonMat.texture);
-		}
-		
 		return material;
 	}
 
@@ -162,56 +188,51 @@ THREE.ALMLoader.prototype.parse = function (json, callback, texturePath) {
 		var geometry = new THREE.Geometry();
 		//var material = null;
 		
+		// MESH NAME
 		geometry.name = jsonMesh.name;
 		
+		// SKINNING TEST
 		var skinning = (jsonMesh.skinIndices && jsonMesh.skinWeights && jsonMesh.skinIndices.length && jsonMesh.skinWeights.length);
-		// There is only 1 material per mesh
-		var materialId = getMatIdFromName(jsonMesh.material);
-		if (materialId === -1)
-		{
-			material = new THREE.MeshNormalMaterial();
-		}
-		else
-		{
-			material = materials[materialId];
-			//geometry.materials.push(material);
-			//materialId = 0;
-			if (skinning)
-			{
-				material.skinning = true;
-			}
-		}
-		
+
 		// VERTICES
-		for (var i=0; i < jsonMesh.vertices.length; i+=3)
+		for (var i=0; i<jsonMesh.vertices.length; i+=3)
 		{
 			geometry.vertices.push(new THREE.Vector3(jsonMesh.vertices[i], jsonMesh.vertices[i+1], jsonMesh.vertices[i+2]));
 		}
 		
 		// NORMALS
-		geometry.normals = [];
-		for (var i=0; i < jsonMesh.normals.length; i+=3)
+		var normals = [];
+		if (jsonMesh.normals)
 		{
-			geometry.normals.push(new THREE.Vector3(jsonMesh.normals[i], jsonMesh.normals[i+1], jsonMesh.normals[i+2]));
+			for (var i=0; i<jsonMesh.normals.length; i+=3)
+			{
+				normals.push(new THREE.Vector3(jsonMesh.normals[i], jsonMesh.normals[i+1], jsonMesh.normals[i+2]));
+			}
 		}
 		
 		// UVS
-		geometry.uvs = [];
-		for (var i=0; i < jsonMesh.texcoord.length; i+=2)
+		var uvs = [];
+		for (var i=0; i<jsonMesh.uvs.length; i+=2)
 		{
-			geometry.uvs.push(new THREE.Vector2(jsonMesh.texcoord[i], jsonMesh.texcoord[i+1]));
+			uvs.push(new THREE.Vector2(jsonMesh.uvs[i], jsonMesh.uvs[i+1]));
 		}
 		
 		// INDICES / FACES
 		var n = 0;
-		for (var i=0; i < jsonMesh.indices.length; i+=3)
+		var materialIndex = 0;
+		for (var i=0; i<jsonMesh.indices.length; i++)
 		{
-			geometry.faces.push(new THREE.Face3(jsonMesh.indices[i], jsonMesh.indices[i+1], jsonMesh.indices[i+2], geometry.normals[n], null, 0));
-			if (geometry.uvs.length)
+			var indices = jsonMesh.indices[i];
+			for (var j=0; j<indices.length; j+=3)
 			{
-				geometry.faceVertexUvs[0].push([geometry.uvs[jsonMesh.indices[i]], geometry.uvs[jsonMesh.indices[i+1]], geometry.uvs[jsonMesh.indices[i+2]]]);
+				geometry.faces.push(new THREE.Face3(indices[j], indices[j+1], indices[j+2], /*normals[n]*/null, null, materialIndex));
+				if (uvs.length)
+				{
+					geometry.faceVertexUvs[0].push([uvs[indices[i]], uvs[indices[i+1]], uvs[indices[i+2]]]);
+				}
+				n++;
 			}
-			n++;
+			materialIndex++;
 		}
 		
 		if (skinning)
@@ -220,7 +241,7 @@ THREE.ALMLoader.prototype.parse = function (json, callback, texturePath) {
 			geometry.bones = jsonMesh.bones;
 			
 			// SKININDEX && SKINWEIGHT
-			for (var i=0; i < jsonMesh.skinIndices.length; i+=4)
+			for (var i=0; i<jsonMesh.skinIndices.length; i+=4)
 			{
 				var bi0 = jsonMesh.skinIndices[i+0];
 				var bi1 = jsonMesh.skinIndices[i+1];
@@ -233,21 +254,36 @@ THREE.ALMLoader.prototype.parse = function (json, callback, texturePath) {
 				var bw2 = jsonMesh.skinWeights[i+2];
 				var bw3 = jsonMesh.skinWeights[i+3];
 				geometry.skinWeights.push(new THREE.Vector4(bw0, bw1, 0, 0));
-				
 			}
 		}
-		
+
 		// Post-processing
-		if (jsonMesh.normals.length === 0)
+		if (jsonMesh.normals == null || jsonMesh.normals.length === 0)
 		{
 			geometry.computeFaceNormals();
 		}
 		geometry.computeCentroids();
 		geometry.computeBoundingBox();
 		
+		// MATERIAL
+		var material = getMaterialFromName(jsonMesh.material);
+		if (material == null)
+		{
+			material = new THREE.MeshNormalMaterial();
+		}
+		
+		// MESH
 		var mesh;
 		if (skinning)
 		{
+			if (material instanceof THREE.MeshFaceMaterial)
+			{
+				material.materials.map(function(mat){mat.skinning = true;})
+			}
+			else
+			{
+				material.skinning = true;
+			}
 			mesh = new THREE.SkinnedMesh(geometry, material);
 		}
 		else

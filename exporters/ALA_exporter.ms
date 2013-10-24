@@ -154,17 +154,19 @@ for k = keyStart to keyEnd do
 		
 		createKey = false
 		
-		if (in_array_time b.position.controller.keys kastime) then
+		if (k == keyStart or k == keyEnd) then
 		(
 			createKey = true
 		)
-		
-		if (in_array_time b.rotation.controller.keys kastime) then
+		else if (in_array_time b.position.controller.keys kastime) then
 		(
 			createKey = true
 		)
-		
-		if (in_array_time b.rotation.controller.keys kastime) then
+		else if (in_array_time b.rotation.controller.keys kastime) then
+		(
+			createKey = true
+		)
+		else if (in_array_time b.rotation.controller.keys kastime) then
 		(
 			createKey = true
 		)
