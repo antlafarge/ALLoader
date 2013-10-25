@@ -216,6 +216,7 @@ THREE.ALMLoader.prototype.parse = function (json, callback, texturePath) {
 		{
 			uvs.push(new THREE.Vector2(jsonMesh.uvs[i], jsonMesh.uvs[i+1]));
 		}
+		geometry.uvs = uvs;
 		
 		// INDICES / FACES
 		var n = 0;
@@ -228,7 +229,7 @@ THREE.ALMLoader.prototype.parse = function (json, callback, texturePath) {
 				geometry.faces.push(new THREE.Face3(indices[j], indices[j+1], indices[j+2], /*normals[n]*/null, null, materialIndex));
 				if (uvs.length)
 				{
-					geometry.faceVertexUvs[0].push([uvs[indices[i]], uvs[indices[i+1]], uvs[indices[i+2]]]);
+					geometry.faceVertexUvs[0].push([uvs[indices[j]], uvs[indices[j+1]], uvs[indices[j+2]]]);
 				}
 				n++;
 			}

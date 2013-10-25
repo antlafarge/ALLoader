@@ -68,7 +68,7 @@ AnimationUtils.createSkeleton = function(skinnedMesh, boneScale)
 	skeletonGeometry.skinIndices = [];
 	skeletonGeometry.skinWeights = [];
 	var materials = [];
-	materials.push(new THREE.MeshLambertMaterial({ambient:AnimationUtils.linkColor, wireframe:true, skinning:true}));
+	materials.push(new THREE.MeshPhongMaterial({ambient:AnimationUtils.linkColor, wireframe:true, skinning:true}));
 
 	// Copy bones
 	for (var i=0 ; i < skinnedMesh.bones.length ; i++)
@@ -97,7 +97,7 @@ AnimationUtils.createSkeleton = function(skinnedMesh, boneScale)
 		var boneMesh;
 		var bonesz = AnimationUtils.boneSize * boneScale;
 		var boneMeshMaterials = [];
-		boneMeshMaterials.push(new THREE.MeshLambertMaterial({ambient:AnimationUtils.boneColor, skinning:true}));
+		boneMeshMaterials.push(new THREE.MeshPhongMaterial({ambient:AnimationUtils.boneColor, skinning:true}));
 		switch (AnimationUtils.boneType)
 		{
 			case AnimationUtils.cube:
@@ -149,7 +149,7 @@ AnimationUtils.createSkeleton = function(skinnedMesh, boneScale)
 		treatChild(root.children[i]);
 	}
 
-	var changes = mergeIndexedArray(materials, compareLambertMaterials);
+	var changes = mergeIndexedArray(materials, comparePhongMaterials);
 	for (var i=0 ; i < skeletonGeometry.faces.length ; i++)
 	{
 		var face = skeletonGeometry.faces[i];
@@ -258,7 +258,7 @@ AnimationUtils.mergeBones = function(geometry1, geometry2)
 	geometry1.skinWeights = geometry1.skinWeights.concat(geometry2.skinWeights);
 }
 
-function compareLambertMaterials(mat0, mat1)
+function comparePhongMaterials(mat0, mat1)
 {
 	for (var name in mat0)
 	{

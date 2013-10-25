@@ -21,7 +21,6 @@
 		<script src="libs/three.js/examples/js/libs/stats.min.js"></script>
 
 		<script src="../src/ALMLoader.js"></script>
-		<!--<script src="../src/ALSLoader.js"></script>-->
 		<script src="../src/ALALoader.js"></script>
 		<script src="../src/AnimationUtils.js"></script>
 		
@@ -52,10 +51,23 @@
 
 			function init()
 			{
-				camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.01, 1000);
-				//camera.position.set(16, 32, 48);
-				camera.position.set(32, -32, 32);
+				renderer = new THREE.WebGLRenderer({antialias:true});
+				renderer.setClearColor(new THREE.Color(0x7f7f7f));
+				renderer.setSize(window.innerWidth, window.innerHeight);
 
+				container = document.getElementById('container');
+				container.appendChild(renderer.domElement);
+				
+				stats = new Stats();
+				stats.domElement.style.position = 'absolute';
+				stats.domElement.style.top = '0px';
+				stats.domElement.style.zIndex = 100;
+				container.appendChild(stats.domElement);
+
+				scene = new THREE.Scene();
+				
+				camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.01, 1000);
+				camera.position.set(32, -32, 32);
 				controls = new THREE.TrackballControls(camera);
 				controls.rotateSpeed = 1.0;
 				controls.zoomSpeed = 1.2;
@@ -64,36 +76,36 @@
 				controls.keys = [ 65, 83, 68 ];
 				controls.target = new THREE.Vector3(0, 0, 0);
 
-				// world
-
-				scene = new THREE.Scene();
-				
-				// axis
-				
 				axis = new THREE.AxisHelper(10);
 				scene.add(axis);
-
-				// lights
 
 				light = new THREE.AmbientLight(0xffffff);
 				scene.add(light);
 
-				// renderer
+				function processALM(myObject3d)
+				{
+					gordon = myObject3d.children[0];
+					gordon.material.materials.map(function(mat){mat.opacity=0.5; mat.transparent=true;});
+					scene.add(gordon);
 
-				renderer = new THREE.WebGLRenderer();
-				renderer.setClearColor(new THREE.Color(0x7f7f7f));
-				renderer.setSize(window.innerWidth, window.innerHeight);
+					wiremat = new THREE.MeshBasicMaterial();
+					wiremat.color = new THREE.Color(0xbfbfbf);
+					wiremat.wireframe = true;
+					wiremat.skinning = true;
+					gordon_wire = gordon.clone();
+					gordon_wire.material = wiremat;
+					scene.add(gordon_wire);
 
-				container = document.getElementById('container');
-				container.appendChild(renderer.domElement);
+					skeleton = AnimationUtils.createSkeleton(gordon, 4);
+					scene.add(skeleton);
 
-				stats = new Stats();
-				stats.domElement.style.position = 'absolute';
-				stats.domElement.style.top = '0px';
-				stats.domElement.style.zIndex = 100;
-				container.appendChild(stats.domElement);
-
-				// meshes
+					modelLoaded = true;
+					if (animLoaded)
+					{
+						processAll();
+					}
+				}
+				(new THREE.ALMLoader).load("data/gordon.alm.json", processALM, "textures");
 
 				function processAnim(anim)
 				{
@@ -107,65 +119,20 @@
 						processAll();
 					}
 				}
-				(new THREE.ALALoader).load("data/gordon_idle.ala", processAnim);
-
-				function processALM(myObject3d)
-				{
-					object3d = myObject3d;
-
-					combi = object3d.children[0];
-					head = object3d.children[1];
-
-					combi.material.opacity = 0.5;
-					combi.material.transparent = true;
-					head.material.opacity = 0.5;
-					head.material.transparent = true;
-
-					wiremat = new THREE.MeshBasicMaterial();
-					wiremat.color = new THREE.Color(0xbfbfbf);
-					wiremat.wireframe = true;
-					wiremat.skinning = true;
-					combi_wire = combi.clone();
-					head_wire = head.clone();
-					combi_wire.material = wiremat;
-					head_wire.material = wiremat;
-
-					modelLoaded = true;
-					if (animLoaded)
-					{
-						processAll();
-					}
-				}
-				(new THREE.ALMLoader).load("data/gordon.alm", processALM, "textures");
+				(new THREE.ALALoader).load("data/gordon_idle.ala.json", processAnim);
 
 				function processAll()
 				{
-					scene.add(object3d);
+					gordon_anim_idle = new THREE.Animation(gordon, "gordon_idle");
+					gordon_anim_idle.play();
 
-					combi_anim_idle = new THREE.Animation(combi, "gordon.idle");
-					combi_anim_idle.play();
+					gordon_anim_idle2 = new THREE.Animation(gordon_wire, "gordon_idle");
+					gordon_anim_idle2.play();
 
-					head_anim_idle = new THREE.Animation(head, "gordon.idle");
-					head_anim_idle.play();
-
-					scene.add(combi_wire)
-					scene.add(head_wire)
-
-					combi_anim_idle2 = new THREE.Animation(combi_wire, "gordon.idle");
-					combi_anim_idle2.play();
-
-					head_anim_idle2 = new THREE.Animation(head_wire, "gordon.idle");
-					head_anim_idle2.play();
-
-					skeleton = AnimationUtils.createSkeleton(combi, 4);
-					scene.add(skeleton);
-
-					skeleton_anim_idle = new THREE.Animation(skeleton, "gordon.idle");
+					skeleton_anim_idle = new THREE.Animation(skeleton, "gordon_idle");
 					skeleton_anim_idle.play();
 				}
 				
-				// end init
-
 				window.addEventListener('resize', onWindowResize, false);
 
 				render();
@@ -175,9 +142,7 @@
 			{
 				camera.aspect = window.innerWidth / window.innerHeight;
 				camera.updateProjectionMatrix();
-
 				renderer.setSize(window.innerWidth, window.innerHeight);
-
 				controls.handleResize();
 			}
 

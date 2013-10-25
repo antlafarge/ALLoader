@@ -70,6 +70,29 @@ max modify mode
 struct bonejs (bone=undefined, parent=-1, keys=#())
 struct keyjs (time=0, pos=undefined, rot=undefined, scl=undefined)
 
+global timeFactor = 1
+
+if (timeConfiguration.playbackSpeed == 1) then
+(
+	timeFactor = 4
+)
+else if (timeConfiguration.playbackSpeed == 2) then
+(
+	timeFactor = 2
+)
+else if (timeConfiguration.playbackSpeed == 3) then
+(
+	timeFactor = 1
+)
+else if (timeConfiguration.playbackSpeed == 4) then
+(
+	timeFactor = 0.5
+)
+else if (timeConfiguration.playbackSpeed == 5) then
+(
+	timeFactor = 0.25
+)
+
 -- START FILE
 format "{\n" to:file
 
@@ -78,7 +101,7 @@ animName = "animation"
 animName = getKBLine prompt:"Enter animation name"
 format "\t\"name\":\"%\",\n" animName to:file
 format "\t\"fps\":%,\n" frameRate to:file
-format "\t\"length\":%,\n" (((animationRange.end - animationRange.start) as float) / 4800) to:file
+format "\t\"length\":%,\n" ((((animationRange.end - animationRange.start) as float) / 4800) * timeFactor) to:file
 format "\t\"JIT\":0,\n" to:file
 format "\t\"loop\":%,\n" timeConfiguration.playbackLoop to:file
 
@@ -176,7 +199,7 @@ for k = keyStart to keyEnd do
 			bpos = (in coordsys parent(b.position))
 			brot = (in coordsys parent(b.rotation))
 			bscl = (in coordsys parent(b.scale))
-			btime = (kastime as float) / 4800
+			btime = (((kastime as float) / 4800) * timeFactor)
 			append bjs.keys (keyjs time:btime pos:bpos rot:brot scl:bscl)
 		)
 	)

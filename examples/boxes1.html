@@ -21,7 +21,6 @@
 		<script src="libs/three.js/examples/js/libs/stats.min.js"></script>
 
 		<script src="../src/ALMLoader.js"></script>
-		<!--<script src="../src/ALSLoader.js"></script>-->
 		<script src="../src/ALALoader.js"></script>
 		<script src="../src/AnimationUtils.js"></script>
 		
@@ -52,33 +51,6 @@
 
 			function init()
 			{
-				camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.01, 1000);
-				camera.position.set(150, -150, 150);
-
-				controls = new THREE.TrackballControls(camera);
-				controls.rotateSpeed = 1.0;
-				controls.zoomSpeed = 1.2;
-				controls.panSpeed = 0.8;
-				controls.dynamicDampingFactor = 0.3;
-				controls.keys = [ 65, 83, 68 ];
-				controls.target = new THREE.Vector3(0, 0, 0);
-
-				// world
-
-				scene = new THREE.Scene();
-				
-				// axis
-				
-				axis = new THREE.AxisHelper(10);
-				scene.add(axis);
-
-				// lights
-
-				light = new THREE.AmbientLight(0xffffff);
-				scene.add(light);
-
-				// renderer
-
 				renderer = new THREE.WebGLRenderer();
 				renderer.setClearColor(new THREE.Color(0x7f7f7f));
 				renderer.setSize(window.innerWidth, window.innerHeight);
@@ -92,7 +64,48 @@
 				stats.domElement.style.zIndex = 100;
 				container.appendChild(stats.domElement);
 
-				// meshes
+				camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.01, 1000);
+				camera.position.set(150, -150, 150);
+				controls = new THREE.TrackballControls(camera);
+				controls.rotateSpeed = 1.0;
+				controls.zoomSpeed = 1.2;
+				controls.panSpeed = 0.8;
+				controls.dynamicDampingFactor = 0.3;
+				controls.keys = [ 65, 83, 68 ];
+				controls.target = new THREE.Vector3(0, 0, 0);
+
+				scene = new THREE.Scene();
+				
+				axis = new THREE.AxisHelper(10);
+				scene.add(axis);
+
+				light = new THREE.AmbientLight(0xffffff);
+				scene.add(light);
+
+				function processALM(myObject3d)
+				{
+					boxes1 = myObject3d.children[0];
+					boxes1.material.materials.map(function(mat){mat.opacity = 0.5; mat.transparent = true;});
+					scene.add(boxes1);
+
+					wiremat = new THREE.MeshBasicMaterial();
+					wiremat.color = new THREE.Color(0xbfbfbf);
+					wiremat.wireframe = true;
+					wiremat.skinning = true;
+					boxes1_wire = boxes1.clone();
+					boxes1_wire.material = wiremat;
+					scene.add(boxes1_wire);
+
+					skeleton = AnimationUtils.createSkeleton(boxes1, 50);
+					scene.add(skeleton);
+
+					modelLoaded = true;
+					if (animLoaded)
+					{
+						processAll();
+					}
+				}
+				(new THREE.ALMLoader).load("data/boxes1.alm.json", processALM, "textures");
 
 				function processAnim(anim)
 				{
@@ -106,53 +119,20 @@
 						processAll();
 					}
 				}
-				(new THREE.ALALoader).load("data/boxes2_anim.ala", processAnim);
-
-				function processALM(myObject3d)
-				{
-					object3d = myObject3d;
-
-					boxes = object3d.children[0];
-
-					boxes.material.materials.map(function(mat){mat.opacity = 0.5; mat.transparent = true;});
-
-					wiremat = new THREE.MeshBasicMaterial();
-					wiremat.color = new THREE.Color(0xbfbfbf);
-					wiremat.wireframe = true;
-					wiremat.skinning = true;
-					boxes_wire = boxes.clone();
-					boxes_wire.material = wiremat;
-
-					skeleton = AnimationUtils.createSkeleton(boxes, 50);
-
-					modelLoaded = true;
-					if (animLoaded)
-					{
-						processAll();
-					}
-				}
-				(new THREE.ALMLoader).load("data/boxes2.alm", processALM, "textures");
+				(new THREE.ALALoader).load("data/boxes1_anim.ala.json", processAnim);
 
 				function processAll()
 				{
-					scene.add(object3d);
+					boxes1_anim = new THREE.Animation(boxes1, "anim");
+					boxes1_anim.play();
 
-					ventilo_anim = new THREE.Animation(boxes, "anim");
-					ventilo_anim.play();
-
-					scene.add(boxes_wire);
-
-					ventilo_anim2 = new THREE.Animation(boxes_wire, "anim");
-					ventilo_anim2.play();
-
-					scene.add(skeleton);
+					boxes1_wire_anim2 = new THREE.Animation(boxes1_wire, "anim");
+					boxes1_wire_anim2.play();
 
 					skeleton_anim = new THREE.Animation(skeleton, "anim");
 					skeleton_anim.play();
 				}
 				
-				// end init
-
 				window.addEventListener('resize', onWindowResize, false);
 
 				render();

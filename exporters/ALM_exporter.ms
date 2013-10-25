@@ -101,7 +101,7 @@ function formatMaterial mat str =
 			textureFilePath = mat.diffuseMap.bitmap.filename
 			tokens = (filterString textureFilePath "\\")
 			textureFileName = tokens[tokens.count]
-			format "\t\t\t\"texture\":\"%\", " textureFileName to:str
+			format "\"texture\":\"%\", " textureFileName to:str
 		)
 		format "\"ambient\":[%,%,%], " mat.ambient.r mat.ambient.g mat.ambient.b to:str
 		format "\"diffuse\":[%,%,%], " mat.diffuse.r mat.diffuse.g mat.diffuse.b to:str
