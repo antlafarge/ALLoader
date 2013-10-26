@@ -136,9 +136,6 @@ THREE.ALMLoader.prototype.parse = function (json, callback, texturePath) {
 		{
 			material = new THREE.MeshPhongMaterial();
 
-			//material.wireframe = true;
-			material.side = THREE.DoubleSide;
-
 			if (jsonMat.ambient)
 			{
 				material.ambient.r = jsonMat.ambient[0] / 255;
@@ -172,6 +169,15 @@ THREE.ALMLoader.prototype.parse = function (json, callback, texturePath) {
 			if (jsonMat.texture)
 			{
 				material.map = THREE.ImageUtils.loadTexture(texturePath + '/' + jsonMat.texture);
+			}
+			
+			if (jsonMat.side === "double")
+			{
+				material.side = THREE.DoubleSide;
+			}
+			else if (jsonMat.side === "reverse" || jsonMat.side === "back")
+			{
+				material.side = THREE.BackSide;
 			}
 		}
 

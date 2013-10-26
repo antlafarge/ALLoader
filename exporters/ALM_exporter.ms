@@ -103,6 +103,10 @@ function formatMaterial mat str =
 			textureFileName = tokens[tokens.count]
 			format "\"texture\":\"%\", " textureFileName to:str
 		)
+		if (mat.twoSided == true) then
+		(
+			format "\"side\":\"double\", " to:str
+		)
 		format "\"ambient\":[%,%,%], " mat.ambient.r mat.ambient.g mat.ambient.b to:str
 		format "\"diffuse\":[%,%,%], " mat.diffuse.r mat.diffuse.g mat.diffuse.b to:str
 		format "\"specular\":[%,%,%], " mat.specular.r mat.specular.g mat.specular.b to:str
@@ -351,11 +355,12 @@ function formatSubMesh mySubMesh =
 		)
 		format "]" to:str
 	)
-	format "\n\t\t\t],\n" to:str
+	format "\n\t\t\t]" to:str
 
 	-- Write normals
 	if (mySubMesh.normals.count > 0) then
 	(
+		format ",\n" to:str
 		format "\t\t\t\"normals\":[" to:str
 		for n = 1 to mySubMesh.normals.count do
 		(
@@ -366,12 +371,13 @@ function formatSubMesh mySubMesh =
 			)
 			format "%,%,%" normal.x normal.y normal.z to:str
 		)
-		format "],\n" to:str
+		format "]" to:str
 	)
 
 	-- Write colors
 	if (mySubMesh.colors.count > 0) then
 	(
+		format ",\n" to:str
 		format "\t\t\t\"colors\":[" to:str
 		for c = 1 to mySubMesh.colors.count do
 		(
@@ -382,12 +388,13 @@ function formatSubMesh mySubMesh =
 			)
 			format "%,%,%,%" colo.r colo.v colo.b colo.a to:str
 		)
-		format "],\n" to:str
+		format "]" to:str
 	)
 
 	-- Write texture coords
 	if (mySubMesh.uvs.count > 0) then
 	(
+		format ",\n" to:str
 		format "\t\t\t\"uvs\":[" to:str
 		for t = 1 to mySubMesh.uvs.count do
 		(
@@ -398,12 +405,13 @@ function formatSubMesh mySubMesh =
 			)
 			format "%,%" uv.x uv.y to:str
 		)
-		format "],\n" to:str
+		format "]" to:str
 	)
 	
 	if ((mySubMesh.skinIndices.count != 0) and (mySubMesh.skinWeights.count != 0) and (mySubMesh.bones.count != 0)) then
 	(
 		-- Write skinIndices
+		format ",\n" to:str
 		format "\t\t\t\"skinIndices\":[" to:str
 		for bii = 1 to mySubMesh.skinIndices.count do
 		(
@@ -414,7 +422,7 @@ function formatSubMesh mySubMesh =
 			)
 			format "%,%,%,%" bi[1] bi[2] bi[3] bi[4] to:str
 		)
-		format "],\n" to:str
+		format "]" to:str
 		
 		-- Write skinNames
 		/*format "\t\t\t\"skinNames\":[" to:str
@@ -443,6 +451,7 @@ function formatSubMesh mySubMesh =
 		format "],\n" to:str*/
 		
 		-- Write skinWeights
+		format ",\n" to:str
 		format "\t\t\t\"skinWeights\":[" to:str
 		for bwi = 1 to mySubMesh.skinWeights.count do
 		(
@@ -453,9 +462,10 @@ function formatSubMesh mySubMesh =
 			)
 			format "%,%,%,%" bw[1] bw[2] bw[3] bw[4] to:str
 		)
-		format "],\n" to:str
+		format "]" to:str
 		
 		-- Write bones hierarchy
+		format ",\n" to:str
 		format "\t\t\t\"bones\":[\n" to:str
 		for bi = 1 to mySubMesh.bones.count do
 		(
@@ -494,6 +504,7 @@ function formatSubMesh mySubMesh =
 		format "\t\t\t]\n" to:str
 	)
 	
+	format "\n" to:str
 	format "\t\t}" to:str
 	
 	return (str as string)
@@ -520,9 +531,9 @@ format "{\n" to:file
 -- MATERIALS
 format "\t\"materials\":[\n" to:file
 matCount = 0
-for i = 1 to objects.count do
+for i = 1 to mySelection.count do
 (
-	myObj = objects[i]
+	myObj = mySelection[i]
 	
 	mat = myObj.material
 	if mat != undefined then
@@ -541,9 +552,9 @@ format "\n\t],\n" to:file
 -- MESHES
 format "\t\"meshes\":[\n" to:file
 meshCount = 0
-for i = 1 to objects.count do
+for i = 1 to mySelection.count do
 (
-	myObj = objects[i]
+	myObj = mySelection[i]
 	
 	ib = (isBone myObj) 
 	if (ib == false) then
