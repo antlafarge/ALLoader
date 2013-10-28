@@ -2,7 +2,7 @@
 
 clearListener()
 
-struct subMesh (name = "", matID = undefined, matIDs = #(), material = undefined, indexCount = 0, materialName = "", vertices = #(), indices = #(), normals = #(), colors = #(), uvs = #(), skinIndices = #(), skinWeights = #(), skinNames = #(), skinIndices2 = #(), bones = #())
+struct subMesh (name = "", material = undefined, vertices = #(), indices = #(), normals = #(), colors = #(), uvs = #(), skinIndices = #(), skinWeights = #(), bones = #())
 
 global MAT_TRANSFORM = matrix3 [1,0,0] [0,0,-1] [0,1,0] [0,0,0]
 
@@ -16,50 +16,18 @@ function isBone o =
 	return ((classof o) == BoneGeometry)
 )
 
-function pf3 f =
-(
-	--return ((ceil (f * 10000)) / 10000) 
-	return f
-)
-
 function formatVector3 v =
 (
-	x = pf3 v.x
-	y = pf3 v.y
-	z = pf3 v.z
 	v3str = stringStream ""
-	format "[%,%,%]" x y z to:v3str
+	format "[%,%,%]" v.x v.y v.z to:v3str
 	return (v3str as string)
 )
 
 function formatQuaternion q =
 (
-	x = pf3 q.x
-	y = pf3 q.y
-	z = pf3 q.z
-	w = pf3 q.w
 	qstr = stringStream ""
-	format "[%,%,%,%]" x y z w to:qstr
+	format "[%,%,%,%]" q.x q.y q.z q.w to:qstr
 	return (qstr as string)
-)
-
-function formatMatrix3 m =
-(
-	m1x = pf3 m.row1.x
-	m1y = pf3 m.row1.y
-	m1z = pf3 m.row1.z
-	m2x = pf3 m.row2.x
-	m2y = pf3 m.row2.y
-	m2z = pf3 m.row2.z
-	m3x = pf3 m.row3.x
-	m3y = pf3 m.row3.y
-	m3z = pf3 m.row3.z
-	m4x = pf3 m.row4.x
-	m4y = pf3 m.row4.y
-	m4z = pf3 m.row4.z
-	m3str = stringStream ""
-	format "[%,%,%,%,%,%,%,%,%,%,%,%]" m1x m1y m1z m2x m2y m2z m3x m3y m3z m4x m4y m4z to:m3str
-	return (m3str as string)
 )
 
 function formatMaterial mat str =
@@ -117,21 +85,6 @@ function formatMaterial mat str =
 	return (str as string)
 )
 
-function getBoneID thebones bonename =
-(
-	for tbi = 1 to thebones.count do
-	(
-		if (thebones[tbi].name == bonename) then
-		(
-			return (tbi - 1)
-		)
-	)
-	
-	return -1
-)
-
-global reindexer = #()
-
 function processBoneForOneVertex mySkin mySubMesh vertID thebones =
 (
 	-- skin informations
@@ -144,11 +97,6 @@ function processBoneForOneVertex mySkin mySubMesh vertID thebones =
 	bn2 = 1
 	mySubMesh.skinIndices[vertID] = #()
 	mySubMesh.skinWeights[vertID] = #()
-	/*if (mySubMesh.skinNames[reindexer[vertID]+1] == undefined) then
-	(
-		mySubMesh.skinNames[reindexer[vertID]+1] = #()
-	)
-	mySubMesh.skinIndices2[reindexer[vertID]+1] = #()*/
 	
 	for bn1 = 1 to vertex_bone_count do
 	(
@@ -160,12 +108,8 @@ function processBoneForOneVertex mySkin mySubMesh vertID thebones =
 		bweight = skinops.getvertexweight mySkin vertID bn1
 		append mySubMesh.skinWeights[vertID] bweight
 		
-		-- bones
-		/*bname = skinops.getbonename mySkin bn1 1
-		b = getnodebyname bname
-		append mySubMesh.skinNames[reindexer[vertID]+1] b.name
-		bindex2 = getBoneID thebones bname
-		append mySubMesh.skinIndices2[reindexer[vertID]+1] bindex2*/
+		--bname = skinops.getbonename mySkin bn1 1
+		--b = getnodebyname bname
 		
 		bn2 = bn1
 	)
@@ -173,16 +117,12 @@ function processBoneForOneVertex mySkin mySubMesh vertID thebones =
 	(
 		append mySubMesh.skinIndices[vertID] 0
 		append mySubMesh.skinWeights[vertID] 0
-		--append mySubMesh.skinNames[reindexer[vertID]+1] ""
-		--append mySubMesh.skinIndices2[reindexer[vertID]+1] 0
 		bn2 = bn2  + 1
 	)
 )
 
 function processMesh myObj =
 (
-	--reindexer = #()
-	
 	select myObj
 	
 	max modify mode
@@ -201,26 +141,19 @@ function processMesh myObj =
 		)
 	)
 	
-	--allSubMeshes = #()
-	
 	myMesh = snapshotAsMesh myObj
 	
-	mySubMesh = (subMesh name:myObj.name matID:matID material:myObj.material bones:myBones)
+	mySubMesh = subMesh name:myObj.name material:myObj.material bones:myBones
 	
 	for f = 1 to myMesh.numfaces do
 	(
 		-- Face
 		face = getFace myMesh f
 		
-		-- processing for pmulti material
+		-- processing for multi material
 		matID = getFaceMatID myMesh f
 		
-		-- skin
-		if ((mySkin != undefined) and (mySubMesh.bones == undefined)) then
-		(
-			mySubMesh.bones = bonesArray
-		)
-		
+		-- create indices array of the submesh if not existing
 		if (mySubMesh.indices[matID] == undefined) then
 		(
 			mySubMesh.indices[matID] = #()
@@ -231,24 +164,10 @@ function processMesh myObj =
 		append mySubMesh.indices[matID] (face.y - 1)
 		append mySubMesh.indices[matID] (face.z - 1)
 		
-		/*append mySubMesh.indices (mySubMesh.indexCount  )
-		reindexer[face.x] = mySubMesh.indexCount
-		
-		append mySubMesh.indices (mySubMesh.indexCount+1)
-		reindexer[face.y] = mySubMesh.indexCount + 1
-		
-		append mySubMesh.indices (mySubMesh.indexCount+2)
-		reindexer[face.z] = mySubMesh.indexCount + 2
-		
-		mySubMesh.indexCount += 3;*/
-		
 		-- Vertices
-		v1 = getVert myMesh face.x
-		v2 = getVert myMesh face.y
-		v3 = getVert myMesh face.z
-		/*v1 = v1 * MAT_TRANSFORM
-		v2 = v2 * MAT_TRANSFORM
-		v3 = v3 * MAT_TRANSFORM*/
+		v1 = (getVert myMesh face.x) --* MAT_TRANSFORM
+		v2 = (getVert myMesh face.y) --* MAT_TRANSFORM
+		v3 = (getVert myMesh face.z) --* MAT_TRANSFORM
 		mySubMesh.vertices[face.x] = v1
 		mySubMesh.vertices[face.y] = v2
 		mySubMesh.vertices[face.z] = v3
@@ -275,9 +194,9 @@ function processMesh myObj =
 		mySubMesh.normals[face.z] = normals[3]
 		
 		-- Colors
-		/*mySubMesh.colors[face.x] = color 1 1 1 1
-		mySubMesh.colors[face.y] =color 1 1 1 1
-		mySubMesh.colors[face.z] = color 1 1 1 1*/
+		--mySubMesh.colors[face.x] = color 1 1 1 1
+		--mySubMesh.colors[face.y] = color 1 1 1 1
+		--mySubMesh.colors[face.z] = color 1 1 1 1
 		
 		-- UVs
 		t1 = getTVert myMesh face.x
@@ -295,17 +214,8 @@ function processMesh myObj =
 		)
 	)
 	
-	/*if (allSubMeshes.count > 1) then
-	(
-		for sm = 1 to allSubMeshes.count do
-		(
-			allSubMeshes[sm].name = (allSubMeshes[sm].name + "_" + (sm as string))
-		)
-	)*/
-	
 	deselect myObj
 	
-	--return allSubMeshes
 	return mySubMesh
 )
 
@@ -424,32 +334,6 @@ function formatSubMesh mySubMesh =
 		)
 		format "]" to:str
 		
-		-- Write skinNames
-		/*format "\t\t\t\"skinNames\":[" to:str
-		for bni = 1 to mySubMesh.skinNames.count do
-		(
-			bn = mySubMesh.skinNames[bni]
-			if (bni != 1) then
-			(
-				format "," to:str
-			)
-			format "\"%\",\"%\",\"%\",\"%\"" bn[1] bn[2] bn[3] bn[4] to:str
-		)
-		format "],\n" to:str*/
-		
-		-- Write skinIndices
-		/*format "\t\t\t\"skinIndices\":[" to:str
-		for bii = 1 to mySubMesh.skinIndices2.count do
-		(
-			bi = mySubMesh.skinIndices2[bii]
-			if (bii != 1) then
-			(
-				format "," to:str
-			)
-			format "%,%,%,%" bi[1] bi[2] bi[3] bi[4] to:str
-		)
-		format "],\n" to:str*/
-		
 		-- Write skinWeights
 		format ",\n" to:str
 		format "\t\t\t\"skinWeights\":[" to:str
@@ -475,9 +359,8 @@ function formatSubMesh mySubMesh =
 				format ",\n" to:str
 			)
 			
-			parentBoneID = -1
-			
 			-- retrive parent boneID
+			parentBoneID = -1
 			if (b.parent != undefined) then
 			(
 				for bi2 = 1 to mySubMesh.bones.count do
@@ -501,7 +384,7 @@ function formatSubMesh mySubMesh =
 			format "\"scl\":% }" (in coordsys parent(formatVector3 b.scale)) to:str
 		)
 		format "\n" to:str
-		format "\t\t\t]\n" to:str
+		format "\t\t\t]" to:str
 	)
 	
 	format "\n" to:str
@@ -567,19 +450,6 @@ for i = 1 to mySelection.count do
 		mySubMesh = processMesh myObj
 		
 		format "%" (formatSubMesh mySubMesh) to:file
-		
-		/*for i = 1 to subMeshes.count do
-		(
-			mySubMesh = subMeshes[i]
-			
-			if (i != 1) then
-			(
-				format ",\n" to:file
-			)
-			format "%" (formatSubMesh mySubMesh mySubMesh.material) to:file
-		)*/
-		
-		--meshCount = meshCount + subMeshes.count
 	)
 )
 format "\n" to:file

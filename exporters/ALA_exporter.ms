@@ -2,30 +2,17 @@
 
 clearListener()
 
-function pf3 f =
-(
-	--return ((ceil (f * 10000)) / 10000)
-	return f
-)
-
 function formatVector3 v =
 (
-	x = pf3 v.x
-	y = pf3 v.y
-	z = pf3 v.z
 	v3str = stringStream ""
-	format "[%,%,%]" x y z to:v3str
+	format "[%,%,%]" v.x v.y v.z to:v3str
 	return (v3str as string)
 )
 
 function formatQuaternion q =
 (
-	x = pf3 q.x
-	y = pf3 q.y
-	z = pf3 q.z
-	w = pf3 q.w
 	qstr = stringStream ""
-	format "[%,%,%,%]" x y z w to:qstr
+	format "[%,%,%,%]" q.x q.y q.z q.w to:qstr
 	return (qstr as string)
 )
 
@@ -63,8 +50,8 @@ if (selection.count == 0) then
 	exit
 )
 
-myMesh = selection[1]
-mySkin = myMesh.modifiers[#skin]
+myObj = selection[1]
+mySkin = myObj.modifiers[#skin]
 max modify mode
 
 struct bonejs (bone=undefined, parent=-1, keys=#())
