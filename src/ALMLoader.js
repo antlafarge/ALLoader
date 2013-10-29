@@ -206,14 +206,18 @@ THREE.ALMLoader.prototype.parse = function (json, callback, texturePath) {
 			geometry.vertices.push(new THREE.Vector3(jsonMesh.vertices[i], jsonMesh.vertices[i+1], jsonMesh.vertices[i+2]));
 		}
 		
-		// NORMALS
-		var normals = [];
-		if (jsonMesh.normals)
+		// VERTEX INDICES (FACES)
+		var n = 0;
+		var materialIndex = 0;
+		for (var i=0; i<jsonMesh.vertex_indices.length; i++)
 		{
-			for (var i=0; i<jsonMesh.normals.length; i+=3)
+			var indices = jsonMesh.vertex_indices[i];
+			for (var j=0; j<indices.length; j+=3)
 			{
-				normals.push(new THREE.Vector3(jsonMesh.normals[i], jsonMesh.normals[i+1], jsonMesh.normals[i+2]));
+				geometry.faces.push(new THREE.Face3(indices[j], indices[j+1], indices[j+2], /*normals[n]*/null, null, materialIndex));
+				n++;
 			}
+			materialIndex++;
 		}
 		
 		// UVS
@@ -222,24 +226,21 @@ THREE.ALMLoader.prototype.parse = function (json, callback, texturePath) {
 		{
 			uvs.push(new THREE.Vector2(jsonMesh.uvs[i], jsonMesh.uvs[i+1]));
 		}
-		geometry.uvs = uvs;
 		
-		// INDICES / FACES
-		var n = 0;
-		var materialIndex = 0;
-		for (var i=0; i<jsonMesh.indices.length; i++)
+		// UV INDICES
+		for (var i=0; i<jsonMesh.uv_indices.length; i+=3)
 		{
-			var indices = jsonMesh.indices[i];
-			for (var j=0; j<indices.length; j+=3)
+			geometry.faceVertexUvs[0].push([uvs[jsonMesh.uv_indices[i]], uvs[jsonMesh.uv_indices[i+1]], uvs[jsonMesh.uv_indices[i+2]]]);
+		}
+		
+		// NORMALS
+		var normals = [];
+		if (jsonMesh.normals)
+		{
+			for (var i=0; i<jsonMesh.normals.length; i+=3)
 			{
-				geometry.faces.push(new THREE.Face3(indices[j], indices[j+1], indices[j+2], /*normals[n]*/null, null, materialIndex));
-				if (uvs.length)
-				{
-					geometry.faceVertexUvs[0].push([uvs[indices[j]], uvs[indices[j+1]], uvs[indices[j+2]]]);
-				}
-				n++;
+				normals.push(new THREE.Vector3(jsonMesh.normals[i], jsonMesh.normals[i+1], jsonMesh.normals[i+2]));
 			}
-			materialIndex++;
 		}
 		
 		if (skinning)

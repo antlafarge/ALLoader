@@ -2,7 +2,7 @@
 
 clearListener()
 
-struct subMesh (name = "", material = undefined, vertices = #(), indices = #(), normals = #(), colors = #(), uvs = #(), skinIndices = #(), skinWeights = #(), bones = #())
+struct subMesh (name = "", material = undefined, vertices = #(), vertex_indices = #(), normals = #(), colors = #(), uvs = #(), uv_indices = #(), skinIndices = #(), skinWeights = #(), bones = #())
 
 global MAT_TRANSFORM = matrix3 [1,0,0] [0,0,-1] [0,1,0] [0,0,0]
 
@@ -145,34 +145,47 @@ function processMesh myObj =
 	
 	mySubMesh = subMesh name:myObj.name material:myObj.material bones:myBones
 	
+	-- vertices
+	for v = 1 to myMesh.numverts do
+	(
+		local vert = (getVert myMesh v) --* MAT_TRANSFORM
+		append mySubMesh.vertices (vert)
+		
+		-- skin indices / skin weights
+		if (mySkin != undefined) then
+		(
+			processBoneForOneVertex mySkin mySubMesh v myBones
+		)
+	)
+	
+	-- texture vertices
+	for v = 1 to myMesh.numTVerts do
+	(
+		local tvert = getTVert myMesh v
+		append mySubMesh.uvs tvert
+	)
+	
+	-- parse faces
 	for f = 1 to myMesh.numfaces do
 	(
-		-- Face
+		-- get face
 		face = getFace myMesh f
 		
 		-- processing for multi material
 		matID = getFaceMatID myMesh f
 		
 		-- create indices array of the submesh if not existing
-		if (mySubMesh.indices[matID] == undefined) then
+		if (mySubMesh.vertex_indices[matID] == undefined) then
 		(
-			mySubMesh.indices[matID] = #()
+			mySubMesh.vertex_indices[matID] = #()
 		)
 		
-		-- Indices
-		append mySubMesh.indices[matID] (face.x - 1)
-		append mySubMesh.indices[matID] (face.y - 1)
-		append mySubMesh.indices[matID] (face.z - 1)
+		-- vertex indices
+		append mySubMesh.vertex_indices[matID] (face.x - 1)
+		append mySubMesh.vertex_indices[matID] (face.y - 1)
+		append mySubMesh.vertex_indices[matID] (face.z - 1)
 		
-		-- Vertices
-		v1 = (getVert myMesh face.x) --* MAT_TRANSFORM
-		v2 = (getVert myMesh face.y) --* MAT_TRANSFORM
-		v3 = (getVert myMesh face.z) --* MAT_TRANSFORM
-		mySubMesh.vertices[face.x] = v1
-		mySubMesh.vertices[face.y] = v2
-		mySubMesh.vertices[face.z] = v3
-		
-		-- Normals
+		-- normals
 		normals = #()
 		if (getfacesmoothgroup myMesh f) == 0 then
 		(
@@ -193,25 +206,11 @@ function processMesh myObj =
 		mySubMesh.normals[face.y] = normals[2]
 		mySubMesh.normals[face.z] = normals[3]
 		
-		-- Colors
-		--mySubMesh.colors[face.x] = color 1 1 1 1
-		--mySubMesh.colors[face.y] = color 1 1 1 1
-		--mySubMesh.colors[face.z] = color 1 1 1 1
-		
-		-- UVs
-		t1 = getTVert myMesh face.x
-		t2 = getTVert myMesh face.y
-		t3 = getTVert myMesh face.z
-		mySubMesh.uvs[face.x] = t1
-		mySubMesh.uvs[face.y] = t2
-		mySubMesh.uvs[face.z] = t3
-		
-		if (mySkin != undefined) then
-		(
-			processBoneForOneVertex mySkin mySubMesh face.x myBones
-			processBoneForOneVertex mySkin mySubMesh face.y myBones
-			processBoneForOneVertex mySkin mySubMesh face.z myBones
-		)
+		-- uv indices
+		local tvface = GetTVFace myMesh f
+		append mySubMesh.uv_indices (tvface.x - 1)
+		append mySubMesh.uv_indices (tvface.y - 1)
+		append mySubMesh.uv_indices (tvface.z - 1)
 	)
 	
 	deselect myObj
@@ -246,21 +245,21 @@ function formatSubMesh mySubMesh =
 	format "],\n" to:str
 
 	-- Write indices
-	format "\t\t\t\"indices\":[\n" to:str
-	for i = 1 to mySubMesh.indices.count do
+	format "\t\t\t\"vertex_indices\":[\n" to:str
+	for i = 1 to mySubMesh.vertex_indices.count do
 	(
 		if (i != 1) then
 		(
 			format ",\n" to:str
 		)
 		format "\t\t\t\t[" to:str
-		for j = 1 to mySubMesh.indices[i].count do
+		for j = 1 to mySubMesh.vertex_indices[i].count do
 		(
 			if (j != 1) then
 			(
 				format "," to:str
 			)
-			index = mySubMesh.indices[i][j]
+			local index = mySubMesh.vertex_indices[i][j]
 			format "%" (index as integer) to:str
 		)
 		format "]" to:str
@@ -318,6 +317,23 @@ function formatSubMesh mySubMesh =
 		format "]" to:str
 	)
 	
+	-- Write texture indices
+	if (mySubMesh.uv_indices.count > 0) then
+	(
+		format ",\n" to:str
+		format "\t\t\t\"uv_indices\":[" to:str
+		for i = 1 to mySubMesh.uv_indices.count do
+		(
+			if (i != 1) then
+			(
+				format "," to:str
+			)
+			local index = mySubMesh.uv_indices[i]
+			format "%" (index as integer) to:str
+		)
+		format "]" to:str
+	)
+
 	if ((mySubMesh.skinIndices.count != 0) and (mySubMesh.skinWeights.count != 0) and (mySubMesh.bones.count != 0)) then
 	(
 		-- Write skinIndices
