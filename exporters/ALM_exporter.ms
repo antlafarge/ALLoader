@@ -4,7 +4,9 @@ clearListener()
 
 struct subMesh (name = "", material = undefined, vertices = #(), vertex_indices = #(), normals = #(), colors = #(), uvs = #(), uv_indices = #(), skinIndices = #(), skinWeights = #(), bones = #())
 
+-- Mat transform for converting z top to y top
 global MAT_TRANSFORM = matrix3 [1,0,0] [0,0,-1] [0,1,0] [0,0,0]
+global separateSkeleton = false
 
 function isGeometry o =
 (
@@ -130,7 +132,7 @@ function processMesh myObj =
 	mySkin = myObj.modifiers[#skin]
 	
 	myBones = #()
-	if (mySkin != undefined) then
+	if (separateSkeleton == true AND mySkin != undefined) then
 	(
 		bonesCount = skinops.getnumberbones mySkin
 		for i = 1 to bonesCount do
@@ -148,7 +150,7 @@ function processMesh myObj =
 	-- vertices
 	for v = 1 to myMesh.numverts do
 	(
-		local vert = (getVert myMesh v) --* MAT_TRANSFORM
+		local vert = (getVert myMesh v) * MAT_TRANSFORM
 		append mySubMesh.vertices (vert)
 		
 		-- skin indices / skin weights
@@ -410,71 +412,92 @@ function formatSubMesh mySubMesh =
 )
 
 -- MAIN
---clearListener()
-
-filepath = GetSaveFileName()
-if (filepath == undefined) then
-(
-	exit
-)
-
--- DELETE AND CREATE FILE
-deleteFile filepath
-global file = createFile filepath
 
 mySelection = getCurrentSelection()
 
--- START FILE
-format "{\n" to:file
-
--- MATERIALS
-format "\t\"materials\":[\n" to:file
-matCount = 0
-for i = 1 to mySelection.count do
+if (mySelection.count > 0) then
 (
-	myObj = mySelection[i]
+	sepSke = yesNoCancelBox "Export the skeleton in a separate File?"
 	
-	mat = myObj.material
-	if mat != undefined then
+	if (sepSke == #cancel) then
 	(
-		if matCount > 1 then
-		(
-			format "\t\t,\n" to:file
-		)
-		
-		format "\t\t%" (formatMaterial mat undefined) to:file
-		matCount = matCount + 1
+		exit
 	)
-)
-format "\n\t],\n" to:file
+	else if (sepSke == #false) then
+	(
+		separateSkeleton = false
+	)
+	else if (sepSke == #true) then
+	(
+		separateSkeleton = true
+	)
+	
+	filepath = GetSaveFileName()
+	if (filepath == undefined) then
+	(
+		exit
+	)
 
--- MESHES
-format "\t\"meshes\":[\n" to:file
-meshCount = 0
-for i = 1 to mySelection.count do
+	-- DELETE AND CREATE FILE
+	deleteFile filepath
+	global file = createFile filepath
+
+	-- START FILE
+	format "{\n" to:file
+
+	-- MATERIALS
+	format "\t\"materials\":[\n" to:file
+	matCount = 0
+	for i = 1 to mySelection.count do
+	(
+		myObj = mySelection[i]
+		
+		mat = myObj.material
+		if mat != undefined then
+		(
+			if matCount > 1 then
+			(
+				format "\t\t,\n" to:file
+			)
+			
+			format "\t\t%" (formatMaterial mat undefined) to:file
+			matCount = matCount + 1
+		)
+	)
+	format "\n\t],\n" to:file
+
+	-- MESHES
+	format "\t\"meshes\":[\n" to:file
+	meshCount = 0
+	for i = 1 to mySelection.count do
+	(
+		myObj = mySelection[i]
+		
+		ib = (isBone myObj) 
+		if (ib == false) then
+		(
+			if meshCount > 1 then
+			(
+				format "\t\t,\n" to:file
+			)
+		
+			mySubMesh = processMesh myObj
+			
+			format "%" (formatSubMesh mySubMesh) to:file
+		)
+	)
+	format "\n" to:file
+	format "\t]\n" to:file
+
+	-- END FILE
+	format "}\n" to:file
+
+	-- CLOSE FILE
+	close file
+
+	select mySelection
+)
+else
 (
-	myObj = mySelection[i]
-	
-	ib = (isBone myObj) 
-	if (ib == false) then
-	(
-		if meshCount > 1 then
-		(
-			format "\t\t,\n" to:file
-		)
-	
-		mySubMesh = processMesh myObj
-		
-		format "%" (formatSubMesh mySubMesh) to:file
-	)
+	messageBox "No objects selected. Select the objects you want to export before launching the exporter"
 )
-format "\n" to:file
-format "\t]\n" to:file
-
--- END FILE
-format "}\n" to:file
-
--- CLOSE FILE
-close file
-
-select mySelection
