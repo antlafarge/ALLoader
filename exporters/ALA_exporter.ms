@@ -35,22 +35,26 @@ function isBone o =
 	classof o == BoneGeometry
 )
 
-filepath = GetSaveFileName()
-if (filepath == undefined) then
+mySelection = getCurrentSelection()
+
+if (mySelection.count == 0) then
+(
+	messageBox "No objects selected."
+	exit
+)
+
+anim_filepath = getSaveFileName caption:"Location for saving the Animation file" types:"JSON (*.json)|*.json|Plain Text (*.txt)|*.txt|All Files (*.*)|*.*|"
+	
+if (anim_filepath == undefined) then
 (
 	exit
 )
 
 -- FILE START
-deleteFile filepath
-global file = createFile filepath
+deleteFile anim_filepath
+global file = createFile anim_filepath
 
-if (selection.count == 0) then
-(
-	exit
-)
-
-myObj = selection[1]
+myObj = mySelection[1]
 mySkin = myObj.modifiers[#skin]
 max modify mode
 
@@ -84,8 +88,13 @@ else if (timeConfiguration.playbackSpeed == 5) then
 format "{\n" to:file
 
 -- SKELETON NAME
-animName = "animation"
-animName = getKBLine prompt:"Enter animation name"
+animName = "anim"
+res = queryBox "Do you want to specify an animation name?"
+if (res == #yes) then
+(
+	messageBox "The maxscript listener is waiting for the animation name.\nOpen the maxscript listener and enter the animation name."
+	animName = getKBLine prompt:"Enter the animation name"
+)
 format "\t\"name\":\"%\",\n" animName to:file
 format "\t\"fps\":%,\n" frameRate to:file
 format "\t\"length\":%,\n" ((((animationRange.end - animationRange.start) as float) / 4800) * timeFactor) to:file
@@ -252,3 +261,5 @@ format "}\n" to:file
 
 -- CLOSE FILE
 close file
+
+select mySelection

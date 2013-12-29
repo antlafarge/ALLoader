@@ -90,7 +90,7 @@ AnimationUtils.createSkeleton = function(skinnedMesh, boneScale)
 		// Retrieve the bone position
 		obj.updateMatrix();
 		obj.updateMatrixWorld();
-		var position = (new THREE.Vector3()).getPositionFromMatrix(obj.matrixWorld).clone();
+		var position = (new THREE.Vector3()).setFromMatrixPosition(obj.matrixWorld).clone();
 
 		// BONE
 		// Create and merge the bone as a shpere in the skeleton
@@ -130,7 +130,7 @@ AnimationUtils.createSkeleton = function(skinnedMesh, boneScale)
 		{
 			// LINK
 			var child = obj.children[i];
-			var childPosition = (new THREE.Vector3()).getPositionFromMatrix(child.matrixWorld).clone();
+			var childPosition = (new THREE.Vector3()).setFromMatrixPosition(child.matrixWorld).clone();
 
 			var vl = skeletonGeometry.vertices.length;
 			skeletonGeometry.vertices.push(position.clone(), childPosition.clone());

@@ -5,6 +5,7 @@ clearListener()
 struct subMesh (name = "", material = undefined, vertices = #(), vertex_indices = #(), normals = #(), colors = #(), uvs = #(), uv_indices = #(), skinIndices = #(), skinWeights = #(), bones = #())
 
 -- Mat transform for converting z top to y top
+--global MAT_TRANSFORM = matrix3 [1,0,0] [0,1,0] [0,0,1] [0,0,0]
 global MAT_TRANSFORM = matrix3 [1,0,0] [0,0,-1] [0,1,0] [0,0,0]
 global separateSkeleton = false
 
@@ -132,7 +133,7 @@ function processMesh myObj =
 	mySkin = myObj.modifiers[#skin]
 	
 	myBones = #()
-	if (separateSkeleton == true AND mySkin != undefined) then
+	if (mySkin != undefined) then
 	(
 		bonesCount = skinops.getnumberbones mySkin
 		for i = 1 to bonesCount do
@@ -335,8 +336,8 @@ function formatSubMesh mySubMesh =
 		)
 		format "]" to:str
 	)
-
-	if ((mySubMesh.skinIndices.count != 0) and (mySubMesh.skinWeights.count != 0) and (mySubMesh.bones.count != 0)) then
+	
+	if ((separateSkeleton == false) and (mySubMesh.skinIndices.count != 0) and (mySubMesh.skinWeights.count != 0) and (mySubMesh.bones.count != 0)) then
 	(
 		-- Write skinIndices
 		format ",\n" to:str
@@ -371,16 +372,21 @@ function formatSubMesh mySubMesh =
 		format "\t\t\t\"bones\":[\n" to:str
 		for bi = 1 to mySubMesh.bones.count do
 		(
-			b = mySubMesh.bones[bi]
+			local b = mySubMesh.bones[bi]
 			if (bi != 1) then
 			(
 				format ",\n" to:str
 			)
 			
 			-- retrive parent boneID
-			parentBoneID = -1
+			local parentBoneID = -1
+			--local Mbone = (in coordsys parent b.transform)
+			local Mbone = b.transform * MAT_TRANSFORM
+			local Mparent = undefined
 			if (b.parent != undefined) then
 			(
+				Mparent = b.parent.transform * MAT_TRANSFORM
+				Mbone = (inverse Mparent) * Mbone
 				for bi2 = 1 to mySubMesh.bones.count do
 				(
 					if (mySubMesh.bones[bi2].name == b.parent.name) then
@@ -396,10 +402,10 @@ function formatSubMesh mySubMesh =
 			format "\"parent\":%, " parentBoneID to:str
 			
 			-- data
-			format "\"pos\":%, " (in coordsys parent(formatVector3 b.position)) to:str
+			format "\"pos\":%, " (formatVector3 Mbone.position) to:str
 			format "\"rot\":[0,0,0], " to:str
-			format "\"rotq\":%, " (in coordsys parent(formatQuaternion b.rotation)) to:str
-			format "\"scl\":% }" (in coordsys parent(formatVector3 b.scale)) to:str
+			format "\"rotq\":%, " (formatQuaternion Mbone.rotation) to:str
+			format "\"scl\":% }" (formatVector3 Mbone.scale) to:str
 		)
 		format "\n" to:str
 		format "\t\t\t]" to:str
@@ -417,36 +423,42 @@ mySelection = getCurrentSelection()
 
 if (mySelection.count > 0) then
 (
+	mesh_filepath = getSaveFileName caption:"Location for saving the Mesh file" types:"JSON (*.json)|*.json|Plain Text (*.txt)|*.txt|All Files (*.*)|*.*|"
+	
+	if (mesh_filepath == undefined) then
+	(
+		exit
+	)
+
+	-- SKELETON IN A SEPARATE FILE
+	skeleton_filepath = undefined
 	sepSke = yesNoCancelBox "Export the skeleton in a separate File?"
 	
 	if (sepSke == #cancel) then
 	(
 		exit
 	)
-	else if (sepSke == #false) then
+	else if (sepSke == #no) then
 	(
 		separateSkeleton = false
 	)
-	else if (sepSke == #true) then
+	else if (sepSke == #yes) then
 	(
+		skeleton_filepath = getSaveFileName caption:"Location for saving the Skeleton file" types:"JSON (*.json)|*.json|Plain Text (*.txt)|*.txt|All Files (*.*)|*.*|"
+		deleteFile skeleton_filepath
+		global mesh_file = createFile skeleton_filepath
 		separateSkeleton = true
 	)
 	
-	filepath = GetSaveFileName()
-	if (filepath == undefined) then
-	(
-		exit
-	)
-
 	-- DELETE AND CREATE FILE
-	deleteFile filepath
-	global file = createFile filepath
+	deleteFile mesh_filepath
+	global mesh_file = createFile mesh_filepath
 
 	-- START FILE
-	format "{\n" to:file
+	format "{\n" to:mesh_file
 
 	-- MATERIALS
-	format "\t\"materials\":[\n" to:file
+	format "\t\"materials\":[\n" to:mesh_file
 	matCount = 0
 	for i = 1 to mySelection.count do
 	(
@@ -457,17 +469,17 @@ if (mySelection.count > 0) then
 		(
 			if matCount > 1 then
 			(
-				format "\t\t,\n" to:file
+				format "\t\t,\n" to:mesh_file
 			)
 			
-			format "\t\t%" (formatMaterial mat undefined) to:file
+			format "\t\t%" (formatMaterial mat undefined) to:mesh_file
 			matCount = matCount + 1
 		)
 	)
-	format "\n\t],\n" to:file
+	format "\n\t],\n" to:mesh_file
 
 	-- MESHES
-	format "\t\"meshes\":[\n" to:file
+	format "\t\"meshes\":[\n" to:mesh_file
 	meshCount = 0
 	for i = 1 to mySelection.count do
 	(
@@ -478,26 +490,30 @@ if (mySelection.count > 0) then
 		(
 			if meshCount > 1 then
 			(
-				format "\t\t,\n" to:file
+				format "\t\t,\n" to:mesh_file
 			)
 		
 			mySubMesh = processMesh myObj
 			
-			format "%" (formatSubMesh mySubMesh) to:file
+			format "%" (formatSubMesh mySubMesh) to:mesh_file
 		)
 	)
-	format "\n" to:file
-	format "\t]\n" to:file
+	format "\n" to:mesh_file
+	format "\t]\n" to:mesh_file
 
 	-- END FILE
-	format "}\n" to:file
+	format "}\n" to:mesh_file
 
 	-- CLOSE FILE
-	close file
+	close mesh_file
+	if (separateSkeleton == true) then
+	(
+		close skeleton_file
+	)
 
 	select mySelection
 )
 else
 (
-	messageBox "No objects selected. Select the objects you want to export before launching the exporter"
+	messageBox "No objects selected."
 )

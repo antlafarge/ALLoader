@@ -20,9 +20,9 @@
 		<script src="libs/three.js/examples/js/Detector.js"></script>
 		<script src="libs/three.js/examples/js/libs/stats.min.js"></script>
 
-		<script src="../src/ALMLoader.js"></script>
-		<script src="../src/ALALoader.js"></script>
-		<script src="../src/AnimationUtils.js"></script>
+		<script src="../loaders/ALMLoader.js"></script>
+		<script src="../loaders/ALALoader.js"></script>
+		<script src="../loaders/AnimationUtils.js"></script>
 		
 		<script>
 			if (! Detector.webgl)
@@ -65,7 +65,7 @@
 				container.appendChild(stats.domElement);
 
 				camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.01, 1000);
-				camera.position.set(150, -150, 150);
+				camera.position.set(150, 150, 150);
 				controls = new THREE.TrackballControls(camera);
 				controls.rotateSpeed = 1.0;
 				controls.zoomSpeed = 1.2;
@@ -82,7 +82,7 @@
 				light = new THREE.AmbientLight(0xffffff);
 				scene.add(light);
 
-				function processALM(myObject3d)
+				function processMesh(myObject3d)
 				{
 					boxes1 = myObject3d.children[0];
 					boxes1.material.materials.map(function(mat){mat.opacity = 0.5; mat.transparent = true;});
@@ -105,7 +105,7 @@
 						processAll();
 					}
 				}
-				(new THREE.ALMLoader).load("data/boxes1.alm.json", processALM, "textures");
+				(new THREE.ALMLoader).load("data/boxes.alm.json", processMesh, "textures");
 
 				function processAnim(anim)
 				{
@@ -119,18 +119,18 @@
 						processAll();
 					}
 				}
-				(new THREE.ALALoader).load("data/boxes1_anim.ala.json", processAnim);
+				(new THREE.ALALoader).load("data/boxes.ala.json", processAnim);
 
 				function processAll()
 				{
 					boxes1_anim = new THREE.Animation(boxes1, "anim");
-					boxes1_anim.play();
+					//boxes1_anim.play();
 
 					boxes1_wire_anim2 = new THREE.Animation(boxes1_wire, "anim");
-					boxes1_wire_anim2.play();
+					//boxes1_wire_anim2.play();
 
 					skeleton_anim = new THREE.Animation(skeleton, "anim");
-					skeleton_anim.play();
+					//skeleton_anim.play();
 				}
 				
 				window.addEventListener('resize', onWindowResize, false);
