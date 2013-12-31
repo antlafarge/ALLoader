@@ -11,7 +11,7 @@
 		</style>
 	</head>
 	<body>
-		<div id="info">Gordon example for <a href="http://github.com/ant-lafarge/ALLoader">ALLoader</a></div>
+		<div id="info">Boxes example for <a href="http://github.com/ant-lafarge/ALLoader">ALLoader</a></div>
 
 		<div id="container"></div>
 
@@ -84,19 +84,19 @@
 
 				function processMesh(myObject3d)
 				{
-					boxes1 = myObject3d.children[0];
-					boxes1.material.materials.map(function(mat){mat.opacity = 0.5; mat.transparent = true;});
-					scene.add(boxes1);
+					boxes = myObject3d.children[0];
+					boxes.material.materials.map(function(mat){mat.opacity = 0.5; mat.transparent = true;});
+					scene.add(boxes);
 
 					wiremat = new THREE.MeshBasicMaterial();
 					wiremat.color = new THREE.Color(0xbfbfbf);
 					wiremat.wireframe = true;
 					wiremat.skinning = true;
-					boxes1_wire = boxes1.clone();
-					boxes1_wire.material = wiremat;
-					scene.add(boxes1_wire);
+					boxes_wire = boxes.clone();
+					boxes_wire.material = wiremat;
+					scene.add(boxes_wire);
 
-					skeleton = AnimationUtils.createSkeleton(boxes1, 50);
+					skeleton = AnimationUtils.createSkeleton(boxes, 50);
 					scene.add(skeleton);
 
 					modelLoaded = true;
@@ -123,14 +123,14 @@
 
 				function processAll()
 				{
-					boxes1_anim = new THREE.Animation(boxes1, "anim");
-					//boxes1_anim.play();
+					boxes_anim = new THREE.Animation(boxes, "anim");
+					boxes_anim.play();
 
-					boxes1_wire_anim2 = new THREE.Animation(boxes1_wire, "anim");
-					//boxes1_wire_anim2.play();
+					boxes_wire_anim2 = new THREE.Animation(boxes_wire, "anim");
+					boxes_wire_anim2.play();
 
 					skeleton_anim = new THREE.Animation(skeleton, "anim");
-					//skeleton_anim.play();
+					skeleton_anim.play();
 				}
 				
 				window.addEventListener('resize', onWindowResize, false);
