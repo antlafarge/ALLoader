@@ -1,7 +1,7 @@
 -- GLOBAL TOOLS
 
 -- GLOBAL VARIABLES
---global AXIS_TRANSFORM = matrix3 [1,0,0] [0,1,0] [0,0,1] [0,0,0] -- no change
+--global AXIS_TRANSFORM = matrix3 [1,0,0] [0,1,0] [0,0,1] [0,0,0] -- 3dsmax axis (no change)
 global AXIS_TRANSFORM = matrix3 [1,0,0] [0,0,-1] [0,1,0] [0,0,0] -- openGL axis
 
 -- FUNCTIONS
@@ -41,4 +41,34 @@ function isBone o =
 function isGeometry o =
 (
 	return (((Superclassof o) == GeometryClass) and ((classof o) != BoneGeometry))
+)
+
+-- function that compute the relative (from parent) transform matrix and convert it to openGL axis
+function getRelativeTransformForOpenGL myObject =
+(
+	-- transform of the object converted to OpenGL axis
+	local myTransform = myObject.transform * AXIS_TRANSFORM
+	
+	-- if parent exists
+	if (myObject.parent != undefined) then
+	(
+		-- transform og the parent converted to OpenGL axis
+		local parentTransform = myObject.parent.transform * AXIS_TRANSFORM
+		-- compute the "relative to parent" transform
+		myTransform = myTransform * (inverse parentTransform)
+	)
+	-- if no parent
+	else
+	(
+		myTransform = (inverse myTransform)
+	)
+	
+	-- return converted transform
+	return myTransform
+)
+
+-- convert a simple 3D point to openGL axis
+function point3ForOpenGL myPoint3 =
+(
+	return (myPoint3 * AXIS_TRANSFORM)
 )

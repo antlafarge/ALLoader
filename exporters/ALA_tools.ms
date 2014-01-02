@@ -123,28 +123,9 @@ function processAnimatedObject myObj =
 				
 				if (createKey == true) then
 				(
-					
 					local bpos = (in coordsys parent b.position)
 					local brot = (in coordsys parent b.rotation)
 					local bscl = (in coordsys parent b.scale)
-					
-					/*
-					local bpos = (in coordsys parent b.transform.position)
-					local brot = (in coordsys parent b.transform.rotation)
-					local bscl = (in coordsys parent b.transform.scale)
-					*/
-					/*
-					local Mbone = (in coordsys parent b.transform)
-					local bpos = (in coordsys parent Mbone.position)
-					local brot = (in coordsys parent Mbone.rotation)
-					local bscl = (in coordsys parent Mbone.scale)
-					*/
-					/*
-					local Mbone = (in coordsys parent b.transform)
-					local bpos = Mbone.position
-					local brot = Mbone.rotation
-					local bscl = Mbone.scale
-					*/
 					
 					local btime = (((ktime as float) / 4800) * timeFactor)
 					append bjs.keys (keyjs time:btime pos:bpos rot:brot scl:bscl)
