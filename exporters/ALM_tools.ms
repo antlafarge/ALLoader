@@ -70,7 +70,7 @@ function processMesh myObj =
 	-- vertices
 	for v = 1 to myMesh.numverts do
 	(
-		local vert = (getVert myMesh v) --* AXIS_TRANSFORM
+		local vert = (getVert myMesh v) * AXIS_TRANSFORM
 		append mySubMesh.vertices (vert)
 		
 		-- skin indices / skin weights
@@ -377,13 +377,15 @@ function formatSubMesh mySubMesh file =
 			
 			-- retrive parent boneID
 			local parentBoneID = -1
-			--local Mbone = (in coordsys parent b.transform)
+			-- transform the bone world matrix
 			local Mbone = b.transform * AXIS_TRANSFORM
 			local Mparent = undefined
 			if (b.parent != undefined) then
 			(
+				-- transform the parent bone world matrix
 				Mparent = b.parent.transform * AXIS_TRANSFORM
-				Mbone = (inverse Mparent) * Mbone
+				-- compute the "from parent relative" matrix
+				Mbone = Mbone * (inverse Mparent)
 				for bi2 = 1 to mySubMesh.bones.count do
 				(
 					if (mySubMesh.bones[bi2].name == b.parent.name) then
@@ -393,19 +395,28 @@ function formatSubMesh mySubMesh file =
 					)
 				)
 			)
+			else
+			(
+				-- if no parent, just invert the matrix
+				Mbone = (inverse Mbone)
+			)
 			
 			format "\t\t\t\t{ \"name\":\"%\", " b.name to:skeleton_file
 			-- parent
 			format "\"parent\":%, " parentBoneID to:skeleton_file
 			-- data
-			/*format "\"pos\":%, " (formatVector3 Mbone.position) to:skeleton_file
+			
+			format "\"pos\":%, " (formatVector3 Mbone.position) to:skeleton_file
 			format "\"rot\":[0,0,0], " to:skeleton_file
 			format "\"rotq\":%, " (formatQuaternion Mbone.rotation) to:skeleton_file
-			format "\"scl\":% }" (formatVector3 Mbone.scale) to:skeleton_file*/
+			format "\"scl\":% }" (formatVector3 Mbone.scale) to:skeleton_file
+			
+			/*
 			format "\"pos\":%, " (in coordsys parent(formatVector3 b.position)) to:skeleton_file
 			format "\"rot\":[0,0,0], " to:skeleton_file
 			format "\"rotq\":%, " (in coordsys parent(formatQuaternion b.rotation)) to:skeleton_file
 			format "\"scl\":% }" (in coordsys parent(formatVector3 b.scale)) to:skeleton_file
+			*/
 		)
 		format "\n" to:skeleton_file
 		format "\t\t\t]" to:skeleton_file

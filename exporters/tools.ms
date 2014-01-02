@@ -1,8 +1,8 @@
 -- GLOBAL TOOLS
 
 -- GLOBAL VARIABLES
-global AXIS_TRANSFORM = matrix3 [1,0,0] [0,1,0] [0,0,1] [0,0,0] -- no change
---global AXIS_TRANSFORM = matrix3 [1,0,0] [0,0,-1] [0,1,0] [0,0,0] -- openGL axis
+--global AXIS_TRANSFORM = matrix3 [1,0,0] [0,1,0] [0,0,1] [0,0,0] -- no change
+global AXIS_TRANSFORM = matrix3 [1,0,0] [0,0,-1] [0,1,0] [0,0,0] -- openGL axis
 
 -- FUNCTIONS
 function formatVector3 v =
