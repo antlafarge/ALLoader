@@ -355,14 +355,15 @@ function formatSubMesh mySubMesh file =
 		-- SKELETON IN A SEPARATE FILE?
 		local skeleton_filepath = undefined
 		local skeleton_file = file
-		local separateSkeleton = queryBox ("Export the skeleton in a separate File?\n" + mySubMesh.name)
+		-- NOT YET IMPLEMENTED IN LOADER
+		/*local separateSkeleton = queryBox ("Export the skeleton in a separate File?\n" + mySubMesh.name)
 		if (separateSkeleton == true) then
 		(
 			skeleton_filepath = getSaveFileName caption:"Location for saving the Skeleton file" types:"JSON (*.json)|*.json|Plain Text (*.txt)|*.txt|All Files (*.*)|*.*|"
 			skeleton_file = createFile skeleton_filepath
 			format "{\n" to:skeleton_file
 			format "\t\t\t\"name\":\"%\"" mySubMesh.name to:skeleton_file
-		)
+		)*/
 		
 		-- Write bones hierarchy
 		format ",\n" to:skeleton_file
@@ -401,13 +402,6 @@ function formatSubMesh mySubMesh file =
 			format "\"rot\":[0,0,0], " to:skeleton_file
 			format "\"rotq\":%, " (formatQuaternion newTransform.rotation) to:skeleton_file
 			format "\"scl\":% }" (formatVector3 newTransform.scale) to:skeleton_file
-			
-			/*
-			format "\"pos\":%, " (in coordsys parent(formatVector3 b.position)) to:skeleton_file
-			format "\"rot\":[0,0,0], " to:skeleton_file
-			format "\"rotq\":%, " (in coordsys parent(formatQuaternion b.rotation)) to:skeleton_file
-			format "\"scl\":% }" (in coordsys parent(formatVector3 b.scale)) to:skeleton_file
-			*/
 		)
 		format "\n" to:skeleton_file
 		format "\t\t\t]" to:skeleton_file

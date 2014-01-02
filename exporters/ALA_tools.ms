@@ -123,9 +123,16 @@ function processAnimatedObject myObj =
 				
 				if (createKey == true) then
 				(
-					local bpos = (in coordsys parent b.position)
+					-- get the transform converted to OpenGL axis
+					local newTransform = (getRelativeTransformForOpenGL b)
+					
+					/*local bpos = (in coordsys parent b.position)
 					local brot = (in coordsys parent b.rotation)
-					local bscl = (in coordsys parent b.scale)
+					local bscl = (in coordsys parent b.scale)*/
+					
+					local bpos = newTransform.position
+					local brot = newTransform.rotation
+					local bscl = newTransform.scale
 					
 					local btime = (((ktime as float) / 4800) * timeFactor)
 					append bjs.keys (keyjs time:btime pos:bpos rot:brot scl:bscl)
