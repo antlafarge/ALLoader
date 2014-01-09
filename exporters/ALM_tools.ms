@@ -391,6 +391,7 @@ function formatSubMesh mySubMesh file =
 			)
 			
 			-- get the transform converted to OpenGL axis
+			--local newTransform = (in coordsys parent b.transform)
 			local newTransform = (getRelativeTransformForOpenGL b)
 			
 			format "\t\t\t\t{ \"name\":\"%\", " b.name to:skeleton_file

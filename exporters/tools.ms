@@ -47,24 +47,17 @@ function isGeometry o =
 function getRelativeTransformForOpenGL myObject =
 (
 	-- transform of the object converted to OpenGL axis
-	local myTransform = myObject.transform * AXIS_TRANSFORM
+	local objectTransform = (AXIS_TRANSFORM * myObject.transform)
 	
-	-- if parent exists
+	-- if a parent exists
 	if (myObject.parent != undefined) then
 	(
-		-- transform og the parent converted to OpenGL axis
-		local parentTransform = myObject.parent.transform * AXIS_TRANSFORM
-		-- compute the "relative to parent" transform
-		myTransform = myTransform * (inverse parentTransform)
-	)
-	-- if no parent
-	else
-	(
-		myTransform = (inverse myTransform)
+		local parentTransform = (AXIS_TRANSFORM * myObject.parent.transform)
+		objectTransform = (objectTransform * (inverse parentTransform))
 	)
 	
 	-- return converted transform
-	return myTransform
+	return objectTransform
 )
 
 -- convert a simple 3D point to openGL axis

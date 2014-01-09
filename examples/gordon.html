@@ -109,7 +109,7 @@
 
 				function processAnim(anim)
 				{
-					animation = anim;
+					/*animation = anim;
 
 					THREE.AnimationHandler.add(animation);
 
@@ -117,20 +117,20 @@
 					if (modelLoaded)
 					{
 						processAll();
-					}
+					}*/
 				}
 				(new THREE.ALALoader).load("data/gordon_idle.ala.json", processAnim);
 
 				function processAll()
 				{
-					gordon_anim_idle = new THREE.Animation(gordon, "gordon_idle");
+					/*gordon_anim_idle = new THREE.Animation(gordon, "gordon_idle");
 					gordon_anim_idle.play();
 
 					gordon_anim_idle2 = new THREE.Animation(gordon_wire, "gordon_idle");
 					gordon_anim_idle2.play();
 
 					skeleton_anim_idle = new THREE.Animation(skeleton, "gordon_idle");
-					skeleton_anim_idle.play();
+					skeleton_anim_idle.play();*/
 				}
 				
 				window.addEventListener('resize', onWindowResize, false);
