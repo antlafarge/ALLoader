@@ -20,7 +20,7 @@ function in_array_time arr needle_time =
 	return false
 )
 
--- process the object to extract the animation of bones of his skin
+-- process the object to extract the animation of bones of the skin
 function processAnimatedObject myObj =
 (
 	local anim = animjs()
@@ -57,11 +57,11 @@ function processAnimatedObject myObj =
 		local myBones = #()
 		
 		-- get bones
-		local bonesCount = skinops.getnumberbones mySkin
+		local bonesCount = skinOps.GetNumberBones mySkin
 		for bi = 1 to bonesCount do
 		(
-			local bname = skinops.getbonename mySkin bi 0
-			local b = getnodebyname bname
+			local bname = skinOps.GetBoneNameByListID mySkin bi 1
+			local b = getNodeByName bname
 			append myBones b
 		)
 		
@@ -123,15 +123,12 @@ function processAnimatedObject myObj =
 				
 				if (createKey == true) then
 				(
-					-- get the transform converted to OpenGL axis
 					local newTransform = (getRelativeTransformForOpenGL b)
 					
-					/*local bpos = (in coordsys parent b.position)
-					local brot = (in coordsys parent b.rotation)
-					local bscl = (in coordsys parent b.scale)*/
-					
 					local bpos = newTransform.position
-					local brot = newTransform.rotation
+					-- quaternion is inversed because of rotations are inversed in maxscript
+					-- cf. http://docs.autodesk.com/3DSMAX/15/ENU/MAXScript-Help/index.html?url=files/GUID-3B001F21-8FE9-4663-A972-E648682A0ACD.htm,topicNumber=d30e272529
+					local brot = inverse newTransform.rotation
 					local bscl = newTransform.scale
 					
 					local btime = (((ktime as float) / 4800) * timeFactor)

@@ -1,10 +1,10 @@
 --  MESH TOOLS
 
 -- STRUCTURES
-struct subMesh (name="", material=undefined, vertices=#(), vertex_indices=#(), normals=#(), colors=#(), uvs=#(), uv_indices=#(), skinIndices=#(), skinWeights=#(), bones=#())
+struct subMesh (name="", material=undefined, vertices=#(), vertex_indices=#(), normals=#(), colors=#(), uvs=#(), uv_indices=#(), skinIndices=#(), skinWeights=#(), skinNames=#(), bones=#())
 
 -- FUNCTIONS
-function processBoneForOneVertex mySkin mySubMesh vertID thebones =
+function processBoneForOneVertex mySkin mySubMesh vertID =
 (
 	-- skin informations
 	local vertex_bone_count = skinOps.GetVertexWeightCount mySkin vertID
@@ -13,33 +13,28 @@ function processBoneForOneVertex mySkin mySubMesh vertID thebones =
 		vertex_bone_count = 4
 	)
 	
-	local bn2 = 1
+	local bi = 1
 	mySubMesh.skinIndices[vertID] = #()
 	mySubMesh.skinWeights[vertID] = #()
 	
 	-- extract bone weight and index
-	for bn1 = 1 to vertex_bone_count do
+	for bi = 1 to vertex_bone_count do
 	(
 		-- boneIndexes
-		local bindex = skinops.getvertexweightboneid mySkin vertID bn1
-		append mySubMesh.skinIndices[vertID] (bindex - 1)
+		local bindex = skinOps.GetVertexWeightBoneID mySkin vertID bi
+		append mySubMesh.skinIndices[vertID] (bindex-1)
 		
 		-- skinWeights
-		local bweight = skinops.getvertexweight mySkin vertID bn1
+		local bweight = skinOps.GetVertexWeight mySkin vertID bi
 		append mySubMesh.skinWeights[vertID] bweight
-		
-		--local bname = skinops.getbonename mySkin bn1 1
-		--local b = getnodebyname bname
-		
-		bn2 = bn1
 	)
 	
 	-- padding empty unused bone slots
-	while bn2 < 4 do
+	while bi < 4 do
 	(
 		append mySubMesh.skinIndices[vertID] 0
 		append mySubMesh.skinWeights[vertID] 0
-		bn2 = bn2  + 1
+		bi += 1
 	)
 )
 
@@ -54,11 +49,11 @@ function processMesh myObj =
 	local myBones = #()
 	if (mySkin != undefined) then
 	(
-		local bonesCount = skinops.getnumberbones mySkin
+		local bonesCount = skinOps.GetNumberBones mySkin
 		for i = 1 to bonesCount do
 		(
-			local bname = skinops.getbonename mySkin i 1
-			local b = getnodebyname bname
+			local bname = skinOps.GetBoneNameByListID mySkin i 1
+			local b = getNodeByName bname
 			append myBones b
 		)
 	)
@@ -76,7 +71,7 @@ function processMesh myObj =
 		-- skin indices / skin weights
 		if (mySkin != undefined) then
 		(
-			processBoneForOneVertex mySkin mySubMesh v myBones
+			processBoneForOneVertex mySkin mySubMesh v
 		)
 	)
 	
@@ -321,18 +316,18 @@ function formatSubMesh mySubMesh file =
 	(
 		format ",\n" to:file
 		format "\t\t\t\"skinIndices\":[" to:file
-		for bii = 1 to mySubMesh.skinIndices.count do
+		for si = 1 to mySubMesh.skinIndices.count do
 		(
-			local bi = mySubMesh.skinIndices[bii]
-			if (bii != 1) then
+			local s = mySubMesh.skinIndices[si]
+			if (si != 1) then
 			(
 				format "," to:file
 			)
-			format "%,%,%,%" bi[1] bi[2] bi[3] bi[4] to:file
+			format "%,%,%,%" s[1] s[2] s[3] s[4] to:file
 		)
 		format "]" to:file
 	)
-		
+	
 	-- Write skinWeights
 	if (mySubMesh.skinWeights.count != 0) then
 	(
@@ -391,17 +386,17 @@ function formatSubMesh mySubMesh file =
 			)
 			
 			-- get the transform converted to OpenGL axis
-			--local newTransform = (in coordsys parent b.transform)
 			local newTransform = (getRelativeTransformForOpenGL b)
 			
 			format "\t\t\t\t{ \"name\":\"%\", " b.name to:skeleton_file
 			-- parent
 			format "\"parent\":%, " parentBoneID to:skeleton_file
 			-- data
-			
 			format "\"pos\":%, " (formatVector3 newTransform.position) to:skeleton_file
 			format "\"rot\":[0,0,0], " to:skeleton_file
-			format "\"rotq\":%, " (formatQuaternion newTransform.rotation) to:skeleton_file
+			-- quaternion is inversed because of rotations are inversed in maxscript
+			-- cf. http://docs.autodesk.com/3DSMAX/15/ENU/MAXScript-Help/index.html?url=files/GUID-3B001F21-8FE9-4663-A972-E648682A0ACD.htm,topicNumber=d30e272529
+			format "\"rotq\":%, " (formatQuaternion (inverse newTransform.rotation)) to:skeleton_file
 			format "\"scl\":% }" (formatVector3 newTransform.scale) to:skeleton_file
 		)
 		format "\n" to:skeleton_file

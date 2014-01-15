@@ -10,7 +10,6 @@ mySelection = getCurrentSelection()
 if (mySelection.count > 0) then
 (
 	mesh_filepath = getSaveFileName caption:"Location for saving the Mesh file" types:"JSON (*.json)|*.json|Plain Text (*.txt)|*.txt|All Files (*.*)|*.*|"
-	skeleton_filepath = undefined
 	
 	mySubMeshes = processObjects mySelection
 	
