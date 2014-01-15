@@ -5,6 +5,19 @@ Support animated meshes, materials
 
 ## Informations  
 
+**How to export meshes and animations**  
+- Open 3ds Max  
+- Select the meshes you want to export  
+- Open the Utilities tab in the right lateral tool bar  
+- Clic on Maxscript button  
+- Clic on Run script button  
+- Go to the exporters folder of ALLoader  
+- For exporting a mesh, run the ALM_exporter.ms script  
+- For exporting an animation, run the ALA_exporter.ms script  
+- Follow the instructions  
+
+_Note: For exporting an animation, select only one rigged mesh (that owns the skin modifier)_  
+
 **Exported data**  
 - Mesh name  
 - Vertices with indices  
