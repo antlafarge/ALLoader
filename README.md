@@ -1,7 +1,10 @@
 # ALLoader  
 
-An Autodesk 3ds Max mesh exporter for three.js webGL engine  
-Support animated meshes, materials  
+A Autodesk 3ds Max mesh exporter for three.js webGL engine which supports animated meshes and multiple materials.  
+
+## Live demos
+
+http://ant.lafarge.free.fr/alloader/
 
 ## Informations  
 

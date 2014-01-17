@@ -447,13 +447,13 @@ function formatObjects mySubMeshes file =
 		local mySubMesh = mySubMeshes[i]
 		if ((isBone mySubMesh) == false) then
 		(
-			if (meshCount > 1) then
+			if (meshCount > 0) then
 			(
-				format "\t\t,\n" to:file
+				format ",\n" to:file
 			)
 			
 			formatSubMesh mySubMesh file
-			meshCount = meshCount + 1
+			meshCount += 1
 		)
 	)
 	format "\n" to:file
