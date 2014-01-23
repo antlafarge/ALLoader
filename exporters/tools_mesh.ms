@@ -43,10 +43,6 @@ function processBoneForOneVertex mySkin mySubMesh vertID =
 
 function processMesh myObj =
 (
-	select myObj
-	
-	max modify mode
-	
 	local mySkin = myObj.modifiers[#skin]
 	
 	local myBones = #()
@@ -133,8 +129,6 @@ function processMesh myObj =
 		append mySubMesh.uv_indices (tvface.z - 1)
 	)
 	
-	deselect myObj
-	
 	return mySubMesh
 )
 
@@ -146,6 +140,9 @@ function processObjects myObjects =
 	for i = 1 to myObjects.count do
 	(
 		local myObj = myObjects[i]
+		select myObj
+		max modify mode
+		
 		local mySubMesh = processMesh myObj
 		
 		if (myObj.modifiers[#skin] != undefined) then
@@ -385,7 +382,7 @@ function formatSubMesh mySubMesh file =
 		
 		-- Write bones hierarchy
 		format ",\n" to:skeleton_file
-		format "\t\t\t\"bones\":[\n" to:skeleton_file
+		format "\t\t\t\"skin\":[\n" to:skeleton_file
 		for bi = 1 to mySubMesh.bones.count do
 		(
 			local b = mySubMesh.bones[bi]
@@ -434,7 +431,7 @@ function formatSubMesh mySubMesh file =
 	)
 	
 	format "\n" to:file
-	format "\t\t}" to:file
+	format "\t\t}\n" to:file
 )
 
 function formatObjects mySubMeshes file =
@@ -479,7 +476,25 @@ function formatObjects mySubMeshes file =
 			meshCount += 1
 		)
 	)
-	format "\n" to:file
+	format "\t],\n" to:file
+	
+	-- meshes
+	format "\t\"animations\":[\n" to:file
+	local animCount = 0
+	for i = 1 to mySubMeshes.count do
+	(
+		local mySubMesh = mySubMeshes[i]
+		if (((isBone mySubMesh) == false) and (mySubMesh.animData != undefined)) then
+		(
+			if (animCount > 0) then
+			(
+				format ",\n" to:file
+			)
+			
+			formatAnimatedObject mySubMesh.animData file
+			animCount += 1
+		)
+	)
 	format "\t]\n" to:file
 	
 	format "}\n" to:file

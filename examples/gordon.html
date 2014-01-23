@@ -20,8 +20,7 @@
 		<script src="libs/three.js/examples/js/Detector.js"></script>
 		<script src="libs/three.js/examples/js/libs/stats.min.js"></script>
 
-		<script src="../loaders/ALMLoader.js"></script>
-		<script src="../loaders/ALALoader.js"></script>
+		<script src="../loaders/ALLoader.js"></script>
 		<script src="../loaders/AnimationUtils.js"></script>
 		
 		<script>
@@ -40,10 +39,6 @@
 
 			var skeleton;
 			var combi, head;
-			
-			var modelLoaded = false;
-			var animLoaded = false;
-			var skeletonLoaded = false;
 			
 			var clock = new THREE.Clock();
 
@@ -82,9 +77,9 @@
 				light = new THREE.AmbientLight(0xffffff);
 				scene.add(light);
 
-				function processMesh(myObject3d)
+				function processMesh(myObject)
 				{
-					gordon = myObject3d.children[0];
+					gordon = myObject.meshes[0];
 					gordon.material.materials.map(function(mat){mat.opacity=0.5; mat.transparent=true;});
 					scene.add(gordon);
 
@@ -99,40 +94,21 @@
 					skeleton = AnimationUtils.createSkeleton(gordon, 4);
 					scene.add(skeleton);
 
-					modelLoaded = true;
-					if (animLoaded)
-					{
-						processAll();
-					}
-				}
-				(new THREE.ALMLoader).load("data/gordon.alm.json", processMesh, "textures");
-
-				function processAnim(anim)
-				{
-					animation = anim;
+					animation = myObject.animations[0];
 
 					THREE.AnimationHandler.add(animation);
 
-					animLoaded = true;
-					if (modelLoaded)
-					{
-						processAll();
-					}
-				}
-				(new THREE.ALALoader).load("data/gordon_idle.ala.json", processAnim);
-
-				function processAll()
-				{
-					gordon_anim_idle = new THREE.Animation(gordon, "anim");
+					gordon_anim_idle = new THREE.Animation(gordon, "anim_1");
 					gordon_anim_idle.play();
 
-					gordon_anim_idle2 = new THREE.Animation(gordon_wire, "anim");
+					gordon_anim_idle2 = new THREE.Animation(gordon_wire, "anim_1");
 					gordon_anim_idle2.play();
 
-					skeleton_anim_idle = new THREE.Animation(skeleton, "anim");
+					skeleton_anim_idle = new THREE.Animation(skeleton, "anim_1");
 					skeleton_anim_idle.play();
 				}
-				
+				(new THREE.ALLoader).load("data/gordon.json", processMesh, "textures");
+
 				window.addEventListener('resize', onWindowResize, false);
 
 				render();

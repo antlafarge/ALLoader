@@ -20,9 +20,7 @@
 		<script src="libs/three.js/examples/js/Detector.js"></script>
 		<script src="libs/three.js/examples/js/libs/stats.min.js"></script>
 
-		<script src="../loaders/ALMLoader.js"></script>
-		<script src="../loaders/ALALoader.js"></script>
-		<script src="../loaders/AnimationUtils.js"></script>
+		<script src="../loaders/ALLoader.js"></script>
 		
 		<script>
 			if (! Detector.webgl)
@@ -76,10 +74,10 @@
 
 				function processMesh(myObject3d)
 				{
-					crate = myObject3d.children[0];
+					crate = myObject3d.meshes[0];
 					scene.add(crate);
 				}
-				(new THREE.ALMLoader).load("data/crate.json", processMesh, "textures");
+				(new THREE.ALLoader).load("data/crate.json", processMesh, "textures");
 
 				window.addEventListener('resize', onWindowResize, false);
 

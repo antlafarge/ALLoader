@@ -2,15 +2,15 @@
  * @author ant-lafarge / http://ant.lafarge.free.fr/
  */
 
-THREE.ALMLoader = function (showStatus) {
+THREE.ALLoader = function (showStatus) {
 
 	THREE.Loader.call(this, showStatus);
 
 };
 
-THREE.ALMLoader.prototype = Object.create(THREE.Loader.prototype);
+THREE.ALLoader.prototype = Object.create(THREE.Loader.prototype);
 
-THREE.ALMLoader.prototype.load = function (url, callback, texturePath) {
+THREE.ALLoader.prototype.load = function (url, callback, texturePath) {
 
 	var scope = this;
 
@@ -21,7 +21,7 @@ THREE.ALMLoader.prototype.load = function (url, callback, texturePath) {
 
 };
 
-THREE.ALMLoader.prototype.loadAjaxJSON = function (context, url, callback, texturePath, callbackProgress) {
+THREE.ALLoader.prototype.loadAjaxJSON = function (context, url, callback, texturePath, callbackProgress) {
 
 	var xhr = new XMLHttpRequest();
 
@@ -40,7 +40,7 @@ THREE.ALMLoader.prototype.loadAjaxJSON = function (context, url, callback, textu
 
 				} else {
 
-					console.warn("THREE.ALMLoader: [" + url + "] seems to be unreachable or file there is empty");
+					console.warn("THREE.ALLoader: [" + url + "] seems to be unreachable or file there is empty");
 
 				}
 
@@ -52,7 +52,7 @@ THREE.ALMLoader.prototype.loadAjaxJSON = function (context, url, callback, textu
 
 			} else {
 
-				console.error("THREE.ALMLoader: Couldn't load [" + url + "] [" + xhr.status + "]");
+				console.error("THREE.ALLoader: Couldn't load [" + url + "] [" + xhr.status + "]");
 
 			}
 
@@ -83,14 +83,18 @@ THREE.ALMLoader.prototype.loadAjaxJSON = function (context, url, callback, textu
 
 };
 
-THREE.ALMLoader.prototype.parse = function (json, callback, texturePath) {
+THREE.ALLoader.prototype.parse = function (json, callback, texturePath) {
+
+	var myObject = {};
 
 	// Parse materials
-	var materials = {};
+	var materials = [];
 	for (var i in json.materials)
 	{
 		var jsonMat = json.materials[i];
-		materials[jsonMat.name] = parseMaterial(jsonMat);
+		var threeMat = parseMaterial(jsonMat);
+		materials.push(threeMat);
+		materials[jsonMat.name] = threeMat;
 	}
 
 	// Process multi-materials
@@ -112,7 +116,9 @@ THREE.ALMLoader.prototype.parse = function (json, callback, texturePath) {
 	for (var i in json.meshes)
 	{
 		var jsonMesh = json.meshes[i];
-		meshes.push(parseMesh(jsonMesh));
+		var threeMesh = parseMesh(jsonMesh);
+		meshes.push(threeMesh);
+		meshes[jsonMesh.name] = threeMesh;
 	}
 
 	function parseMaterial(jsonMat)
@@ -192,7 +198,7 @@ THREE.ALMLoader.prototype.parse = function (json, callback, texturePath) {
 		geometry.name = jsonMesh.name;
 		
 		// SKINNING TEST
-		var skinning = (jsonMesh.bones && jsonMesh.skin_indices && jsonMesh.skin_weights);
+		var skinning = (jsonMesh.skin && jsonMesh.skin_indices && jsonMesh.skin_weights);
 
 		// NORMALS
 		var normals = [];
@@ -244,7 +250,7 @@ THREE.ALMLoader.prototype.parse = function (json, callback, texturePath) {
 		if (skinning)
 		{
 			// BONES
-			geometry.bones = jsonMesh.bones;
+			geometry.bones = jsonMesh.skin;
 			
 			// SKIN INDICES && SKIN WEIGHTS
 			for (var i=0; i<jsonMesh.skin_indices.length; i+=4)
@@ -307,5 +313,15 @@ THREE.ALMLoader.prototype.parse = function (json, callback, texturePath) {
 		object3d.add(meshes[i]);
 	}
 
-	callback(object3d);
+	var animations = json.animations.concat();
+	for (var i in json.animations)
+	{
+		animations[json.animations[i].name] = json.animations[i];
+	}
+
+	myObject.materials = materials;
+	myObject.meshes = meshes;
+	myObject.animations = animations;
+
+	callback(myObject);
 };

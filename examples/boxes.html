@@ -20,8 +20,7 @@
 		<script src="libs/three.js/examples/js/Detector.js"></script>
 		<script src="libs/three.js/examples/js/libs/stats.min.js"></script>
 
-		<script src="../loaders/ALMLoader.js"></script>
-		<script src="../loaders/ALALoader.js"></script>
+		<script src="../loaders/ALLoader.js"></script>
 		<script src="../loaders/AnimationUtils.js"></script>
 		
 		<script>
@@ -40,10 +39,6 @@
 
 			var skeleton;
 			var combi, head;
-			
-			var modelLoaded = false;
-			var animLoaded = false;
-			var skeletonLoaded = false;
 			
 			var clock = new THREE.Clock();
 
@@ -82,11 +77,15 @@
 				light = new THREE.AmbientLight(0xffffff);
 				scene.add(light);
 
-				function processMesh(myObject3d)
+				function processMesh(myObject)
 				{
-					boxes = myObject3d.children[0];
+					boxes = myObject.meshes[0];
 					boxes.material.materials.map(function(mat){mat.opacity = 0.5; mat.transparent = true;});
 					scene.add(boxes);
+
+					animation = myObject.animations[0];
+
+					THREE.AnimationHandler.add(animation);
 
 					wiremat = new THREE.MeshBasicMaterial();
 					wiremat.color = new THREE.Color(0xbfbfbf);
@@ -99,40 +98,17 @@
 					skeleton = AnimationUtils.createSkeleton(boxes, 50);
 					scene.add(skeleton);
 
-					modelLoaded = true;
-					if (animLoaded)
-					{
-						processAll();
-					}
-				}
-				(new THREE.ALMLoader).load("data/boxes.alm.json", processMesh, "textures");
-
-				function processAnim(anim)
-				{
-					animation = anim;
-
-					THREE.AnimationHandler.add(animation);
-
-					animLoaded = true;
-					if (modelLoaded)
-					{
-						processAll();
-					}
-				}
-				(new THREE.ALALoader).load("data/boxes.ala.json", processAnim);
-
-				function processAll()
-				{
-					boxes_anim = new THREE.Animation(boxes, "anim");
+					boxes_anim = new THREE.Animation(boxes, "anim_1");
 					boxes_anim.play();
 
-					boxes_wire_anim2 = new THREE.Animation(boxes_wire, "anim");
+					boxes_wire_anim2 = new THREE.Animation(boxes_wire, "anim_1");
 					boxes_wire_anim2.play();
 
-					skeleton_anim = new THREE.Animation(skeleton, "anim");
+					skeleton_anim = new THREE.Animation(skeleton, "anim_1");
 					skeleton_anim.play();
 				}
-				
+				(new THREE.ALLoader).load("data/boxes.json", processMesh, "textures");
+
 				window.addEventListener('resize', onWindowResize, false);
 
 				render();
