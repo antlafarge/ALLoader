@@ -64,7 +64,7 @@ function processMesh myObj =
 	-- vertices
 	for v = 1 to myMesh.numverts do
 	(
-		local vert = (point3ForOpenGL (getVert myMesh v))
+		local vert = (point3ForOpenGL (in coordsys local getVert myMesh v))
 		append mySubMesh.vertices (vert)
 		
 		-- skin indices / skin weights
@@ -218,7 +218,8 @@ function formatMaterial mat file =
 )
 
 function formatSubMesh mySubMesh file =
-(	
+(
+	print "write " + mySubMesh.name
 	format "\t\t{\n" to:file
 	
 	format "\t\t\t\"name\":\"%\",\n" mySubMesh.name to:file
@@ -436,66 +437,95 @@ function formatSubMesh mySubMesh file =
 
 function formatObjects mySubMeshes file =
 (
+	local someDataInserted = false
+	
 	format "{\n" to:file
 	
 	-- materials
-	format "\t\"materials\":[\n" to:file
-	local matCount = 0
+	local materials = #()
 	for i = 1 to mySubMeshes.count do
 	(
 		local mySubMesh = mySubMeshes[i]
 		local mat = mySubMesh.material
 		if (mat != undefined) then
 		(
-			if (matCount > 1) then
+			append materials mat
+		)
+	)
+	if (materials.count > 0) then
+	(
+		if (someDataInserted == true) then
+		(
+			format ",\n" to:file
+		)
+		format "\t\"materials\":[\n" to:file
+		for i = 1 to materials.count do
+		(
+			local mat = materials[i]
+			if (i > 1) then
 			(
 				format "\t\t,\n" to:file
 			)
-			
 			format "\t\t"
 			formatMaterial mat file
-			matCount = matCount + 1
 		)
+		format "\n\t]" to:file
+		someDataInserted = true
 	)
-	format "\n\t],\n" to:file
 	
 	-- meshes
-	format "\t\"meshes\":[\n" to:file
-	local meshCount = 0
-	for i = 1 to mySubMeshes.count do
+	if (mySubMeshes.count > 0) then
 	(
-		local mySubMesh = mySubMeshes[i]
-		if ((isBone mySubMesh) == false) then
+		if (someDataInserted == true) then
 		(
-			if (meshCount > 0) then
-			(
-				format ",\n" to:file
-			)
-			
-			formatSubMesh mySubMesh file
-			meshCount += 1
+			format ",\n" to:file
 		)
+		format "\t\"meshes\":[\n" to:file
+		local meshCount = 0
+		for i = 1 to mySubMeshes.count do
+		(
+			local mySubMesh = mySubMeshes[i]
+			if ((isBone mySubMesh) == false) then
+			(
+				if (meshCount > 0) then
+				(
+					format ",\n" to:file
+				)
+				formatSubMesh mySubMesh file
+				meshCount += 1
+			)
+		)
+		format "\t]" to:file
 	)
-	format "\t],\n" to:file
 	
-	-- meshes
-	format "\t\"animations\":[\n" to:file
-	local animCount = 0
+	-- animations
+	local animations = #()
 	for i = 1 to mySubMeshes.count do
 	(
 		local mySubMesh = mySubMeshes[i]
 		if (((isBone mySubMesh) == false) and (mySubMesh.animData != undefined)) then
 		(
-			if (animCount > 0) then
+			append animations mySubMesh.animData
+		)
+	)
+	if (animations.count > 0) then
+	(
+		if (someDataInserted == true) then
+		(
+			format ",\n" to:file
+		)
+		format "\t\"animations\":[\n" to:file
+		for i = 1 to animations.count do
+		(
+			local anim = animations[i]
+			if (i > 0) then
 			(
 				format ",\n" to:file
 			)
-			
-			formatAnimatedObject mySubMesh.animData file
-			animCount += 1
+			formatAnimatedObject anim file
 		)
+		format "\t]" to:file
 	)
-	format "\t]\n" to:file
 	
-	format "}\n" to:file
+	format "\n}\n" to:file
 )

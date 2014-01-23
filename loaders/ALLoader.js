@@ -313,7 +313,7 @@ THREE.ALLoader.prototype.parse = function (json, callback, texturePath) {
 		object3d.add(meshes[i]);
 	}
 
-	var animations = json.animations.concat();
+	var animations = (json.animations ? json.animations.concat() : []);
 	for (var i in json.animations)
 	{
 		animations[json.animations[i].name] = json.animations[i];
