@@ -192,7 +192,7 @@ THREE.ALMLoader.prototype.parse = function (json, callback, texturePath) {
 		geometry.name = jsonMesh.name;
 		
 		// SKINNING TEST
-		var skinning = (jsonMesh.bones && jsonMesh.skinIndices && jsonMesh.skinWeights);
+		var skinning = (jsonMesh.bones && jsonMesh.skin_indices && jsonMesh.skin_weights);
 
 		// NORMALS
 		var normals = [];
@@ -204,10 +204,10 @@ THREE.ALMLoader.prototype.parse = function (json, callback, texturePath) {
 			}
 		}
 		
-		// VERTICES
-		for (var i=0; i<jsonMesh.vertices.length; i+=3)
+		// VERTEX POSITIONS
+		for (var i=0; i<jsonMesh.vertex_positions.length; i+=3)
 		{
-			geometry.vertices.push(new THREE.Vector3(jsonMesh.vertices[i], jsonMesh.vertices[i+1], jsonMesh.vertices[i+2]));
+			geometry.vertices.push(new THREE.Vector3(jsonMesh.vertex_positions[i], jsonMesh.vertex_positions[i+1], jsonMesh.vertex_positions[i+2]));
 		}
 		
 		// VERTEX INDICES (FACES)
@@ -218,19 +218,20 @@ THREE.ALMLoader.prototype.parse = function (json, callback, texturePath) {
 			var indices = jsonMesh.vertex_indices[i];
 			for (var j=0; j<indices.length; j+=3)
 			{
-				geometry.faces.push(new THREE.Face3(indices[j], indices[j+1], indices[j+2], normals[n], null, materialIndex));
+				geometry.faces.push(new THREE.Face3(indices[j], indices[j+1], indices[j+2], (normals.length ? normals[n] : null), null, materialIndex));
 				n++;
 			}
 			materialIndex++;
 		}
 		
-		if (jsonMesh.uvs && jsonMesh.uv_indices)
+		// TEXTURE COORDINATES
+		if (jsonMesh.uv && jsonMesh.uv_indices)
 		{
 			// UVS
 			var uvs = [];
-			for (var i=0; i<jsonMesh.uvs.length; i+=2)
+			for (var i=0; i<jsonMesh.uv.length; i+=2)
 			{
-				uvs.push(new THREE.Vector2(jsonMesh.uvs[i], jsonMesh.uvs[i+1]));
+				uvs.push(new THREE.Vector2(jsonMesh.uv[i], jsonMesh.uv[i+1]));
 			}
 		
 			// UV INDICES
@@ -245,19 +246,19 @@ THREE.ALMLoader.prototype.parse = function (json, callback, texturePath) {
 			// BONES
 			geometry.bones = jsonMesh.bones;
 			
-			// SKININDEX && SKINWEIGHT
-			for (var i=0; i<jsonMesh.skinIndices.length; i+=4)
+			// SKIN INDICES && SKIN WEIGHTS
+			for (var i=0; i<jsonMesh.skin_indices.length; i+=4)
 			{
-				var bi0 = jsonMesh.skinIndices[i+0];
-				var bi1 = jsonMesh.skinIndices[i+1];
-				var bi2 = jsonMesh.skinIndices[i+2];
-				var bi3 = jsonMesh.skinIndices[i+3];
+				var bi0 = jsonMesh.skin_indices[i+0];
+				var bi1 = jsonMesh.skin_indices[i+1];
+				var bi2 = jsonMesh.skin_indices[i+2];
+				var bi3 = jsonMesh.skin_indices[i+3];
 				geometry.skinIndices.push(new THREE.Vector4(bi0, bi1, bi2, bi3));
 				
-				var bw0 = jsonMesh.skinWeights[i+0];
-				var bw1 = jsonMesh.skinWeights[i+1];
-				var bw2 = jsonMesh.skinWeights[i+2];
-				var bw3 = jsonMesh.skinWeights[i+3];
+				var bw0 = jsonMesh.skin_weights[i+0];
+				var bw1 = jsonMesh.skin_weights[i+1];
+				var bw2 = jsonMesh.skin_weights[i+2];
+				var bw3 = jsonMesh.skin_weights[i+3];
 				geometry.skinWeights.push(new THREE.Vector4(bw0, bw1, bw2, bw3));
 			}
 		}

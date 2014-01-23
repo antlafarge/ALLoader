@@ -1,5 +1,7 @@
 --  ANIMATION TOOLS
 
+include "tools.ms"
+
 -- STRUCTURES
 struct animjs (name="anim", fps=frameRate, length=0, JIT=0, loop=true, hierarchy=#())
 struct bonejs (bone=undefined, parent=-1, keys=#())

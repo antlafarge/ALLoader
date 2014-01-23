@@ -1,6 +1,6 @@
 # ALLoader  
 
-A Autodesk 3ds Max mesh exporter for three.js webGL engine which supports animated meshes and multiple materials.  
+ALLoader is a 3dsmax mesh exporter and loader for three.js (webgl) in a JSON custom format, which supports rigged / skinned and animated meshes.  
 
 ## Live demos
 

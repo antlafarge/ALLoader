@@ -4,6 +4,8 @@
 --global AXIS_TRANSFORM = matrix3 [1,0,0] [0,1,0] [0,0,1] [0,0,0] -- 3dsmax axis (no change)
 global AXIS_TRANSFORM = matrix3 [1,0,0] [0,0,-1] [0,1,0] [0,0,0] -- openGL axis
 
+global TABS = 0
+
 -- FUNCTIONS
 function formatVector3 v =
 (

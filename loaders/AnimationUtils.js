@@ -285,7 +285,7 @@ function comparePhongMaterials(mat0, mat1)
 }
 
 // Function that merge the values of an array by using the compare function
-// An array containing the trace of the the reindexed values is returned back for another processing
+// An array containing the trace of the reindexed values is returned back for another processing
 function mergeIndexedArray(array, compareFunction)
 {
 	var indicesToRemove = [];

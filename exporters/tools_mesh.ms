@@ -1,7 +1,10 @@
 --  MESH TOOLS
 
+include "tools.ms"
+include "tools_anim.ms"
+
 -- STRUCTURES
-struct subMesh (name="", material=undefined, vertices=#(), vertex_indices=#(), normals=#(), colors=#(), uvs=#(), uv_indices=#(), skinIndices=#(), skinWeights=#(), skinNames=#(), bones=#())
+struct subMesh (name="", material=undefined, vertices=#(), vertex_indices=#(), normals=#(), colors=#(), uvs=#(), uv_indices=#(), skinIndices=#(), skinWeights=#(), skinNames=#(), bones=#(), animData=undefined)
 
 -- FUNCTIONS
 function processBoneForOneVertex mySkin mySubMesh vertID =
@@ -138,11 +141,31 @@ function processMesh myObj =
 function processObjects myObjects =
 (
 	local mySubMeshes = #()
+	local animCount = 1
 	
 	for i = 1 to myObjects.count do
 	(
 		local myObj = myObjects[i]
-		append mySubMeshes (processMesh myObj)
+		local mySubMesh = processMesh myObj
+		
+		if (myObj.modifiers[#skin] != undefined) then
+		(
+			local animName = "anim_" + (animCount as String)
+			queryBoxRes = queryBox "Do you want to specify an animation name?"
+			if (queryBoxRes == true) then
+			(
+				messageBox "The maxscript listener is waiting for the animation name.\nOpen the maxscript listener and enter the animation name."
+				animName = getKBLine prompt:"Enter the animation name"
+			)
+			else
+			(
+				animCount += 1
+			)
+			mySubMesh.animData = processAnimatedObject myObj
+			mySubMesh.animData.name = animName
+		)
+		
+		append mySubMeshes mySubMesh
 	)
 	
 	return mySubMeshes
@@ -209,7 +232,7 @@ function formatSubMesh mySubMesh file =
 	)
 	
 	-- Write vertices
-	format "\t\t\t\"vertices\":[" to:file
+	format "\t\t\t\"vertex_positions\":[" to:file
 	for v = 1 to mySubMesh.vertices.count do
 	(
 		local vert = mySubMesh.vertices[v]
@@ -281,7 +304,7 @@ function formatSubMesh mySubMesh file =
 	if (mySubMesh.uvs.count > 0) then
 	(
 		format ",\n" to:file
-		format "\t\t\t\"uvs\":[" to:file
+		format "\t\t\t\"uv\":[" to:file
 		for t = 1 to mySubMesh.uvs.count do
 		(
 			local uv = mySubMesh.uvs[t]
@@ -315,7 +338,7 @@ function formatSubMesh mySubMesh file =
 	if (mySubMesh.skinIndices.count != 0) then
 	(
 		format ",\n" to:file
-		format "\t\t\t\"skinIndices\":[" to:file
+		format "\t\t\t\"skin_indices\":[" to:file
 		for si = 1 to mySubMesh.skinIndices.count do
 		(
 			local s = mySubMesh.skinIndices[si]
@@ -332,7 +355,7 @@ function formatSubMesh mySubMesh file =
 	if (mySubMesh.skinWeights.count != 0) then
 	(
 		format ",\n" to:file
-		format "\t\t\t\"skinWeights\":[" to:file
+		format "\t\t\t\"skin_weights\":[" to:file
 		for bwi = 1 to mySubMesh.skinWeights.count do
 		(
 			local bw = mySubMesh.skinWeights[bwi]
