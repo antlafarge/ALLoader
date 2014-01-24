@@ -4,10 +4,10 @@ include "tools.ms"
 include "tools_anim.ms"
 
 -- STRUCTURES
-struct subMesh (name="", material=undefined, vertices=#(), vertex_indices=#(), normals=#(), colors=#(), uvs=#(), uv_indices=#(), skinIndices=#(), skinWeights=#(), skinNames=#(), bones=#(), animData=undefined)
+struct meshjs (name="", material=undefined, vertices=#(), vertex_indices=#(), face_normals=#(), colors=#(), uvs=#(), uv_indices=#(), skinIndices=#(), skinWeights=#(), skinNames=#(), bones=#(), animData=undefined, position=point3, orientation=quat, scale=point3)
 
 -- FUNCTIONS
-function processBoneForOneVertex mySkin mySubMesh vertID =
+function processBoneForOneVertex mySkin myMeshjs vertID =
 (
 	-- skin informations
 	local vertex_bone_count = skinOps.GetVertexWeightCount mySkin vertID
@@ -17,26 +17,26 @@ function processBoneForOneVertex mySkin mySubMesh vertID =
 	)
 	
 	local bi = 1
-	mySubMesh.skinIndices[vertID] = #()
-	mySubMesh.skinWeights[vertID] = #()
+	myMeshjs.skinIndices[vertID] = #()
+	myMeshjs.skinWeights[vertID] = #()
 	
 	-- extract bone weight and index
 	for bi = 1 to vertex_bone_count do
 	(
 		-- boneIndexes
 		local bindex = skinOps.GetVertexWeightBoneID mySkin vertID bi
-		append mySubMesh.skinIndices[vertID] (bindex-1)
+		append myMeshjs.skinIndices[vertID] (bindex-1)
 		
 		-- skinWeights
 		local bweight = skinOps.GetVertexWeight mySkin vertID bi
-		append mySubMesh.skinWeights[vertID] bweight
+		append myMeshjs.skinWeights[vertID] bweight
 	)
 	
 	-- padding empty unused bone slots
 	while bi < 4 do
 	(
-		append mySubMesh.skinIndices[vertID] 0
-		append mySubMesh.skinWeights[vertID] 0
+		append myMeshjs.skinIndices[vertID] 0
+		append myMeshjs.skinWeights[vertID] 0
 		bi += 1
 	)
 )
@@ -57,20 +57,26 @@ function processMesh myObj =
 		)
 	)
 	
-	local myMesh = snapshotAsMesh myObj
+	local myMesh = myObj.mesh
 	
-	local mySubMesh = (subMesh name:myObj.name material:myObj.material bones:myBones)
+	local myMeshjs = (meshjs name:myObj.name material:myObj.material bones:myBones)
+	
+	myMeshjs.position = (point3ForOpenGL myObj.position)
+	myMeshjs.orientation = (quatForOpenGL myObj.rotation)
+	myMeshjs.scale = (point3 myObj.scale.x myObj.scale.z myObj.scale.y)
+	
+	global a = myMeshjs
 	
 	-- vertices
 	for v = 1 to myMesh.numverts do
 	(
 		local vert = (point3ForOpenGL (in coordsys local getVert myMesh v))
-		append mySubMesh.vertices (vert)
+		append myMeshjs.vertices (vert)
 		
 		-- skin indices / skin weights
 		if (mySkin != undefined) then
 		(
-			processBoneForOneVertex mySkin mySubMesh v
+			processBoneForOneVertex mySkin myMeshjs v
 		)
 	)
 	
@@ -78,7 +84,7 @@ function processMesh myObj =
 	for v = 1 to myMesh.numTVerts do
 	(
 		local tvert = getTVert myMesh v
-		append mySubMesh.uvs tvert
+		append myMeshjs.uvs tvert
 	)
 	
 	-- parse faces
@@ -90,51 +96,34 @@ function processMesh myObj =
 		-- processing for multi material
 		local matID = getFaceMatID myMesh f
 		
-		-- create indices array of the submesh if not existing
-		if (mySubMesh.vertex_indices[matID] == undefined) then
+		-- create indices array of the meshjs if not existing
+		if (myMeshjs.vertex_indices[matID] == undefined) then
 		(
-			mySubMesh.vertex_indices[matID] = #()
+			myMeshjs.vertex_indices[matID] = #()
+			myMeshjs.face_normals[matID] = #()
 		)
 		
 		-- vertex indices
-		append mySubMesh.vertex_indices[matID] (face.x - 1)
-		append mySubMesh.vertex_indices[matID] (face.y - 1)
-		append mySubMesh.vertex_indices[matID] (face.z - 1)
+		append myMeshjs.vertex_indices[matID] (face.x - 1)
+		append myMeshjs.vertex_indices[matID] (face.y - 1)
+		append myMeshjs.vertex_indices[matID] (face.z - 1)
 		
 		-- normals
-		local normals = #()
-		if (getfacesmoothgroup myMesh f) == 0 then
-		(
-			n = (in coordsys local getfacenormal myMesh f)
-			normals = #(n, n, n)
-		)
-		else
-		(
-			normals = (in coordsys local meshop.getfacernormals myMesh f)
-			
-			if normals.count != 3 do
-			(
-				in coordsys local n = getfacenormal myMesh f
-				normals = #(n, n, n)
-			)
-		)
-		mySubMesh.normals[face.x] = normals[1]
-		mySubMesh.normals[face.y] = normals[2]
-		mySubMesh.normals[face.z] = normals[3]
+		append myMeshjs.face_normals[matID] (getfacenormal myMesh f)
 		
 		-- uv indices
 		local tvface = GetTVFace myMesh f
-		append mySubMesh.uv_indices (tvface.x - 1)
-		append mySubMesh.uv_indices (tvface.y - 1)
-		append mySubMesh.uv_indices (tvface.z - 1)
+		append myMeshjs.uv_indices (tvface.x - 1)
+		append myMeshjs.uv_indices (tvface.y - 1)
+		append myMeshjs.uv_indices (tvface.z - 1)
 	)
 	
-	return mySubMesh
+	return myMeshjs
 )
 
 function processObjects myObjects =
 (
-	local mySubMeshes = #()
+	local myMeshes = #()
 	local animCount = 1
 	
 	for i = 1 to myObjects.count do
@@ -143,7 +132,7 @@ function processObjects myObjects =
 		select myObj
 		max modify mode
 		
-		local mySubMesh = processMesh myObj
+		local myMeshjs = processMesh myObj
 		
 		if (myObj.modifiers[#skin] != undefined) then
 		(
@@ -158,14 +147,14 @@ function processObjects myObjects =
 			(
 				animCount += 1
 			)
-			mySubMesh.animData = processAnimatedObject myObj
-			mySubMesh.animData.name = animName
+			myMeshjs.animData = processAnimatedObject myObj
+			myMeshjs.animData.name = animName
 		)
 		
-		append mySubMeshes mySubMesh
+		append myMeshes myMeshjs
 	)
 	
-	return mySubMeshes
+	return myMeshes
 )
 
 function formatMaterial mat file =
@@ -217,78 +206,67 @@ function formatMaterial mat file =
 	)
 )
 
-function formatSubMesh mySubMesh file =
+function formatMeshjs myMeshjs file =
 (
-	print "write " + mySubMesh.name
+	print ("write " + myMeshjs.name) 
 	format "\t\t{\n" to:file
 	
-	format "\t\t\t\"name\":\"%\",\n" mySubMesh.name to:file
+	format "\t\t\t\"name\":\"%\",\n" myMeshjs.name to:file
 
-	if (mySubMesh.material != undefined) then
+	if (myMeshjs.material != undefined) then
 	(
-		format "\t\t\t\"material\":\"%\",\n" mySubMesh.material.name to:file
+		format "\t\t\t\"material\":\"%\",\n" myMeshjs.material.name to:file
 	)
 	
+	format "\t\t\t\"position\":%,\n" myMeshjs.position to:file
+	format "\t\t\t\"orientation\":%,\n" (formatQuaternion myMeshjs.orientation) to:file
+	format "\t\t\t\"scale\":%,\n" myMeshjs.scale to:file
+	
 	-- Write vertices
-	format "\t\t\t\"vertex_positions\":[" to:file
-	for v = 1 to mySubMesh.vertices.count do
-	(
-		local vert = mySubMesh.vertices[v]
-		if (v != 1) then
-		(
-			format "," to:file
-		)
-		format "%,%,%" vert.x vert.y vert.z to:file
-	)
-	format "],\n" to:file
+	format "\t\t\t\"vertex_positions\":[%],\n" (implodePoint3 "," myMeshjs.vertices) to:file
 
 	-- Write indices
 	format "\t\t\t\"vertex_indices\":[\n" to:file
-	for i = 1 to mySubMesh.vertex_indices.count do
+	local arrCount = 0
+	for i = 1 to myMeshjs.vertex_indices.count do
 	(
-		if (i != 1) then
+		if (myMeshjs.vertex_indices[i] != undefined) then
 		(
-			format ",\n" to:file
-		)
-		format "\t\t\t\t[" to:file
-		for j = 1 to mySubMesh.vertex_indices[i].count do
-		(
-			if (j != 1) then
+			if (arrCount != 0) then
 			(
-				format "," to:file
+				format ",\n" to:file
 			)
-			local index = mySubMesh.vertex_indices[i][j]
-			format "%" (index as integer) to:file
+			format "\t\t\t\t[%]" (implodeInteger "," myMeshjs.vertex_indices[i]) to:file
+			arrCount += 1
 		)
-		format "]" to:file
+	)
+	format "\n\t\t\t],\n" to:file
+
+	-- Write normals
+	format "\t\t\t\"face_normals\":[\n" to:file
+	local arrCount = 0
+	for i = 1 to myMeshjs.face_normals.count do
+	(
+		if (myMeshjs.face_normals[i] != undefined) then
+		(
+			if (arrCount != 0) then
+			(
+				format ",\n" to:file
+			)
+			format "\t\t\t\t[%]" (implodePoint3 "," myMeshjs.face_normals[i]) to:file
+			arrCount += 1
+		)
 	)
 	format "\n\t\t\t]" to:file
 
-	-- Write normals
-	if (mySubMesh.normals.count > 0) then
-	(
-		format ",\n" to:file
-		format "\t\t\t\"normals\":[" to:file
-		for n = 1 to mySubMesh.normals.count do
-		(
-			local normal = mySubMesh.normals[n]
-			if (n != 1) then
-			(
-				format "," to:file
-			)
-			format "%,%,%" normal.x normal.y normal.z to:file
-		)
-		format "]" to:file
-	)
-
 	-- Write colors
-	if (mySubMesh.colors.count > 0) then
+	if (myMeshjs.colors.count > 0) then
 	(
 		format ",\n" to:file
 		format "\t\t\t\"colors\":[" to:file
-		for c = 1 to mySubMesh.colors.count do
+		for c = 1 to myMeshjs.colors.count do
 		(
-			local colo = mySubMesh.colors[c]
+			local colo = myMeshjs.colors[c]
 			if (c != 1) then
 			(
 				format "," to:file
@@ -299,13 +277,13 @@ function formatSubMesh mySubMesh file =
 	)
 
 	-- Write texture coords
-	if (mySubMesh.uvs.count > 0) then
+	if (myMeshjs.uvs.count > 0) then
 	(
 		format ",\n" to:file
 		format "\t\t\t\"uv\":[" to:file
-		for t = 1 to mySubMesh.uvs.count do
+		for t = 1 to myMeshjs.uvs.count do
 		(
-			local uv = mySubMesh.uvs[t]
+			local uv = myMeshjs.uvs[t]
 			if ( t != 1 ) then
 			(
 				format "," to:file
@@ -316,30 +294,30 @@ function formatSubMesh mySubMesh file =
 	)
 	
 	-- Write texture indices
-	if (mySubMesh.uv_indices.count > 0) then
+	if (myMeshjs.uv_indices.count > 0) then
 	(
 		format ",\n" to:file
 		format "\t\t\t\"uv_indices\":[" to:file
-		for i = 1 to mySubMesh.uv_indices.count do
+		for i = 1 to myMeshjs.uv_indices.count do
 		(
 			if (i != 1) then
 			(
 				format "," to:file
 			)
-			local index = mySubMesh.uv_indices[i]
+			local index = myMeshjs.uv_indices[i]
 			format "%" (index as integer) to:file
 		)
 		format "]" to:file
 	)
 	
 	-- Write skinIndices
-	if (mySubMesh.skinIndices.count != 0) then
+	if (myMeshjs.skinIndices.count != 0) then
 	(
 		format ",\n" to:file
 		format "\t\t\t\"skin_indices\":[" to:file
-		for si = 1 to mySubMesh.skinIndices.count do
+		for si = 1 to myMeshjs.skinIndices.count do
 		(
-			local s = mySubMesh.skinIndices[si]
+			local s = myMeshjs.skinIndices[si]
 			if (si != 1) then
 			(
 				format "," to:file
@@ -350,13 +328,13 @@ function formatSubMesh mySubMesh file =
 	)
 	
 	-- Write skinWeights
-	if (mySubMesh.skinWeights.count != 0) then
+	if (myMeshjs.skinWeights.count != 0) then
 	(
 		format ",\n" to:file
 		format "\t\t\t\"skin_weights\":[" to:file
-		for bwi = 1 to mySubMesh.skinWeights.count do
+		for bwi = 1 to myMeshjs.skinWeights.count do
 		(
-			local bw = mySubMesh.skinWeights[bwi]
+			local bw = myMeshjs.skinWeights[bwi]
 			if (bwi != 1) then
 			(
 				format "," to:file
@@ -366,27 +344,27 @@ function formatSubMesh mySubMesh file =
 		format "]" to:file
 	)
 	
-	if (mySubMesh.bones.count != 0) then
+	if (myMeshjs.bones.count != 0) then
 	(
 		-- SKELETON IN A SEPARATE FILE?
 		local skeleton_filepath = undefined
 		local skeleton_file = file
 		-- NOT YET IMPLEMENTED IN LOADER
-		/*local separateSkeleton = queryBox ("Export the skeleton in a separate File?\n" + mySubMesh.name)
+		/*local separateSkeleton = queryBox ("Export the skeleton in a separate File?\n" + myMeshjs.name)
 		if (separateSkeleton == true) then
 		(
 			skeleton_filepath = getSaveFileName caption:"Location for saving the Skeleton file" types:"JSON (*.json)|*.json|Plain Text (*.txt)|*.txt|All Files (*.*)|*.*|"
 			skeleton_file = createFile skeleton_filepath
 			format "{\n" to:skeleton_file
-			format "\t\t\t\"name\":\"%\"" mySubMesh.name to:skeleton_file
+			format "\t\t\t\"name\":\"%\"" myMeshjs.name to:skeleton_file
 		)*/
 		
 		-- Write bones hierarchy
 		format ",\n" to:skeleton_file
 		format "\t\t\t\"skin\":[\n" to:skeleton_file
-		for bi = 1 to mySubMesh.bones.count do
+		for bi = 1 to myMeshjs.bones.count do
 		(
-			local b = mySubMesh.bones[bi]
+			local b = myMeshjs.bones[bi]
 			if (bi != 1) then
 			(
 				format ",\n" to:skeleton_file
@@ -396,9 +374,9 @@ function formatSubMesh mySubMesh file =
 			local parentBoneID = -1
 			if (b.parent != undefined) then
 			(
-				for bi2 = 1 to mySubMesh.bones.count do
+				for bi2 = 1 to myMeshjs.bones.count do
 				(
-					if (mySubMesh.bones[bi2].name == b.parent.name) then
+					if (myMeshjs.bones[bi2].name == b.parent.name) then
 					(
 						parentBoneID = bi2 - 1
 						break
@@ -435,7 +413,7 @@ function formatSubMesh mySubMesh file =
 	format "\t\t}\n" to:file
 )
 
-function formatObjects mySubMeshes file =
+function formatObjects myMeshes file =
 (
 	local someDataInserted = false
 	
@@ -443,10 +421,10 @@ function formatObjects mySubMeshes file =
 	
 	-- materials
 	local materials = #()
-	for i = 1 to mySubMeshes.count do
+	for i = 1 to myMeshes.count do
 	(
-		local mySubMesh = mySubMeshes[i]
-		local mat = mySubMesh.material
+		local myMeshjs = myMeshes[i]
+		local mat = myMeshjs.material
 		if (mat != undefined) then
 		(
 			append materials mat
@@ -474,7 +452,7 @@ function formatObjects mySubMeshes file =
 	)
 	
 	-- meshes
-	if (mySubMeshes.count > 0) then
+	if (myMeshes.count > 0) then
 	(
 		if (someDataInserted == true) then
 		(
@@ -482,16 +460,16 @@ function formatObjects mySubMeshes file =
 		)
 		format "\t\"meshes\":[\n" to:file
 		local meshCount = 0
-		for i = 1 to mySubMeshes.count do
+		for i = 1 to myMeshes.count do
 		(
-			local mySubMesh = mySubMeshes[i]
-			if ((isBone mySubMesh) == false) then
+			local myMeshjs = myMeshes[i]
+			if ((isBone myMeshjs) == false) then
 			(
 				if (meshCount > 0) then
 				(
 					format ",\n" to:file
 				)
-				formatSubMesh mySubMesh file
+				formatMeshjs myMeshjs file
 				meshCount += 1
 			)
 		)
@@ -500,12 +478,12 @@ function formatObjects mySubMeshes file =
 	
 	-- animations
 	local animations = #()
-	for i = 1 to mySubMeshes.count do
+	for i = 1 to myMeshes.count do
 	(
-		local mySubMesh = mySubMeshes[i]
-		if (((isBone mySubMesh) == false) and (mySubMesh.animData != undefined)) then
+		local myMeshjs = myMeshes[i]
+		if (((isBone myMeshjs) == false) and (myMeshjs.animData != undefined)) then
 		(
-			append animations mySubMesh.animData
+			append animations myMeshjs.animData
 		)
 	)
 	if (animations.count > 0) then
@@ -518,7 +496,7 @@ function formatObjects mySubMeshes file =
 		for i = 1 to animations.count do
 		(
 			local anim = animations[i]
-			if (i > 0) then
+			if (i > 1) then
 			(
 				format ",\n" to:file
 			)

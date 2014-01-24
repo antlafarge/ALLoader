@@ -1,17 +1,20 @@
 -- GLOBAL TOOLS
 
 -- GLOBAL VARIABLES
---global AXIS_TRANSFORM = matrix3 [1,0,0] [0,1,0] [0,0,1] [0,0,0] -- 3dsmax axis (no change)
-global AXIS_TRANSFORM = matrix3 [1,0,0] [0,0,-1] [0,1,0] [0,0,0] -- openGL axis
+global FlipYZ_transform_nochange = matrix3 [1,0,0] [0,1,0] [0,0,1] [0,0,0] -- 3dsmax axis (no change)
+global FlipYZ_transform_opengl = matrix3 [1,0,0] [0,0,-1] [0,1,0] [0,0,0] -- openGL axis
+global FlipYZ_transform = FlipYZ_transform_opengl
+
+global exportMeshes = true
+global exportMaterials = true
+global exportSkins = true
 
 global TABS = 0
 
 -- FUNCTIONS
 function formatVector3 v =
 (
-	local v3str = stringStream ""
-	format "[%,%,%]" v.x v.y v.z to:v3str
-	return (v3str as string)
+	("[" + (v.x as string) + "," + (v.y as string) + "," + (v.z as string) + "]")
 )
 
 function formatQuaternion q =
@@ -21,18 +24,66 @@ function formatQuaternion q =
 	return (qstr as string)
 )
 
-function arrayToString arr separator =
+function implode glue pieces =
 (
-	local dzastr = string
-	for c = 1 to arr.count do
+	local glueStr = (glue as string)
+	local str = ""
+	for i = 1 to pieces.count do
 	(
-		if (c > 1) then
+		if (i > 1) then
 		(
-			dzastr += separator
+			str += glueStr
 		)
-		dzastr += arr[c]
+		str += (pieces[i] as string)
 	)
-	return dzastr
+	return str
+)
+
+function implodeInteger glue pieces =
+(
+	local glueStr = (glue as string)
+	local str = ""
+	for i = 1 to pieces.count do
+	(
+		if (i > 1) then
+		(
+			str += glueStr
+		)
+		str += ((pieces[i] as integer) as string)
+	)
+	return str
+)
+
+function implodePoint3 glue pieces =
+(
+	local glueStr = (glue as string)
+	local str = ""
+	for i = 1 to pieces.count do
+	(
+		if (i > 1) then
+		(
+			str += glueStr
+		)
+		local p3 = pieces[i]
+		str += ((p3.x as string) + glueStr + (p3.y as string) + glueStr + (p3.z as string))
+	)
+	return str
+)
+
+function implodeQuat glue pieces =
+(
+	local glueStr = (glue as string)
+	local str = ""
+	for i = 1 to pieces.count do
+	(
+		if (i > 1) then
+		(
+			str += glueStr
+		)
+		local p3 = pieces[i]
+		str += ((p3.x as string) + glueStr + (p3.y as string) + glueStr + (p3.z as string) + glueStr + (p3.w as string))
+	)
+	return str
 )
 
 function isBone o =
@@ -49,20 +100,26 @@ function isGeometry o =
 function getRelativeTransformForOpenGL myObject =
 (
 	-- transform of the object converted to OpenGL axis
-	local myTransform = myObject.transform * AXIS_TRANSFORM
+	local myTransform = myObject.transform * FlipYZ_transform
 	
 	-- if a parent exists
 	if (myObject.parent != undefined) then
 	(
-		myTransform *= inverse (myObject.parent.transform * AXIS_TRANSFORM)
+		myTransform *= inverse (myObject.parent.transform * FlipYZ_transform)
 	)
 	
 	-- return converted transform
 	return myTransform
 )
 
--- convert a simple 3D point to openGL axis
+-- convert a 3d point to openGL axis
 function point3ForOpenGL myPoint3 =
 (
-	return (myPoint3 * AXIS_TRANSFORM)
+	return (myPoint3 * FlipYZ_transform)
+)
+
+-- convert a quaternion orientation to openGL axis
+function quatForOpenGL q =
+(
+	return (q * FlipYZ_transform)
 )

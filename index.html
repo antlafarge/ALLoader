@@ -2,25 +2,63 @@
 <html>
 <head>
 <title>OakLoader</title>
+<link href="examples/libs/bootstrap-3.0.3/css/bootstrap.css" rel="stylesheet">
 <style>
-.iblock { display:inline-block; border:1px solid black; }
+/*.iblock { display:inline-block; border:1px solid black; }
 .subtitle { width:100%; text-align:center; }
-img { border-bottom:1px solid black; }
+img { border-bottom:1px solid black; }*/
 </style>
 </head>
 <body>
 
-<h1>Demos</h1>
+<div class="jumbotron">
+	<div class="container">
+		<h1>ALLoader demos</h1>
+		<p class="lead">This is the demos main page of the ALLoader open source project on github.</a></p>
+		<p><a class="btn btn-lg btn-primary" href="https://github.com/antlafarge/ALLoader" role="button">Go to Github project</a></p>
+	</div>
+</div>
 
-<h2>Meshes</h2>
-<p>
-<div class="iblock"><a href="examples/crate.html"><img src="examples/thumbs/crate.jpg"><br /><div class="subtitle">Crate</div></a></div>
-</p>
+<div class="container">
+	<h2>Static meshes</h2>
+	<div class="row">
+		<div class="col-md-6">
+			<a href="examples/primitives.html">
+				<img class="thumbnail" src="examples/thumbs/primitives.jpg">
+				<div class="caption">
+					<h3>Primitives</h3>
+				</div>
+			</a>
+		</div>
+		<div class="col-md-6">
+			<a href="examples/crate.html">
+				<img class="thumbnail" src="examples/thumbs/crate.jpg">
+				<div class="caption">
+					<h3>Crate</h3>
+				</div>
+			</a>
+		</div>
+	</div>
 
-<h2>Animated meshes</h2>
-<p>
-<div class="iblock"><a href="examples/boxes.html"><img src="examples/thumbs/boxes.jpg"><br /><div class="subtitle">Boxes</div></a></div>
-<div class="iblock"><a href="examples/gordon.html"><img src="examples/thumbs/gordon.jpg"><br /><div class="subtitle">Gordon</div></a></div>
-</p>
+	<h2>Skinned / Rigged and animated meshes</h2>
+	<div class="row">
+		<div class="col-md-6">
+			<a href="examples/boxes.html">
+				<img class="thumbnail" src="examples/thumbs/boxes.jpg">
+				<div class="caption">
+					<h3>Boxes</h3>
+				</div>
+			</a>
+		</div>
+		<div class="col-md-6">
+			<a href="examples/gordon.html">
+				<img class="thumbnail" src="examples/thumbs/gordon.jpg">
+				<div class="caption">
+					<h3>Gordon</h3>
+				</div>
+			</a>
+		</div>
+	</div>
+</div>
 
 </body>

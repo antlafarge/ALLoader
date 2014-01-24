@@ -6,13 +6,22 @@ include "tools_anim.ms"
 
 clearListener()
 
-mySelection = getCurrentSelection()
-
-if (mySelection.count > 0) then
+function export =
 (
+	mySelection = getCurrentSelection()
+
 	filepath = getSaveFileName caption:"Location for saving the Mesh file" types:"JSON (*.json)|*.json|Plain Text (*.txt)|*.txt|All Files (*.*)|*.*|"
 	
-	mySubMeshes = processObjects mySelection
+	myObjects = #()
+	for o in objects do
+	(
+		if (isGeometry o) then
+		(
+			append myObjects o
+		)
+	)
+	
+	mySubMeshes = processObjects myObjects
 	
 	if (filepath != undefined) then
 	(
@@ -23,10 +32,35 @@ if (mySelection.count > 0) then
 		
 		close file
 	)
-)
-else
-(
-	messageBox "No objects selected."
+	
+	clearselection
+	select mySelection
 )
 
-select mySelection
+rollout ALExporter "ALExporter"
+(
+	checkbox flipYZCheckBox "Flip YZ-axis (Poser-like)" checked:true
+	--checkbox exportMeshesCheckBox "Export meshes" checked:true
+	--checkbox exportMaterialsCheckBox "Export materials" checked:true
+	--checkbox exportSkinsCheckBox "Export Skins" checked:true
+	button exportButton "Export"
+	
+	on exportButton pressed do
+	(
+		if (flipYZCheckBox.checked == true) then
+		(
+			FlipYZ_transform = FlipYZ_transform_opengl
+		)
+		else
+		(
+			FlipYZ_transform = FlipYZ_transform_nochange
+		)
+		--exportMeshes = exportMeshesCheckBox.checked
+		--exportMaterials = exportMaterialsCheckBox.checked
+		--exportSkins = exportSkinsCheckBox.checked
+		export()
+		destroydialog ALExporter
+	)
+)
+
+createdialog ALExporter

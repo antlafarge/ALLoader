@@ -192,7 +192,6 @@ THREE.ALLoader.prototype.parse = function (json, callback, texturePath) {
 	function parseMesh(jsonMesh)
 	{
 		var geometry = new THREE.Geometry();
-		//var material = null;
 		
 		// MESH NAME
 		geometry.name = jsonMesh.name;
@@ -200,16 +199,6 @@ THREE.ALLoader.prototype.parse = function (json, callback, texturePath) {
 		// SKINNING TEST
 		var skinning = (jsonMesh.skin && jsonMesh.skin_indices && jsonMesh.skin_weights);
 
-		// NORMALS
-		var normals = [];
-		if (jsonMesh.normals)
-		{
-			for (var i=0; i<jsonMesh.normals.length; i+=3)
-			{
-				normals.push(new THREE.Vector3(jsonMesh.normals[i], jsonMesh.normals[i+1], jsonMesh.normals[i+2]));
-			}
-		}
-		
 		// VERTEX POSITIONS
 		for (var i=0; i<jsonMesh.vertex_positions.length; i+=3)
 		{
@@ -217,17 +206,18 @@ THREE.ALLoader.prototype.parse = function (json, callback, texturePath) {
 		}
 		
 		// VERTEX INDICES (FACES)
-		var n = 0;
-		var materialIndex = 0;
 		for (var i=0; i<jsonMesh.vertex_indices.length; i++)
 		{
-			var indices = jsonMesh.vertex_indices[i];
-			for (var j=0; j<indices.length; j+=3)
+			var materialIndex = i;
+			for (var j=0; j<jsonMesh.vertex_indices[i].length; j+=3)
 			{
-				geometry.faces.push(new THREE.Face3(indices[j], indices[j+1], indices[j+2], (normals.length ? normals[n] : null), null, materialIndex));
-				n++;
+				var face_normal = null;
+				if (jsonMesh.face_normals.length)
+				{
+					face_normal = new THREE.Vector3(jsonMesh.face_normals[i][j], jsonMesh.face_normals[i][j+1], jsonMesh.face_normals[i][j+2])
+				}
+				geometry.faces.push(new THREE.Face3(jsonMesh.vertex_indices[i][j], jsonMesh.vertex_indices[i][j+1], jsonMesh.vertex_indices[i][j+2], face_normal, null, materialIndex));
 			}
-			materialIndex++;
 		}
 		
 		// TEXTURE COORDINATES
@@ -270,9 +260,9 @@ THREE.ALLoader.prototype.parse = function (json, callback, texturePath) {
 		}
 
 		// Post-processing
-		if (jsonMesh.normals == null || jsonMesh.normals.length === 0)
+		if (jsonMesh.face_normals == null)
 		{
-			geometry.computeFaceNormals();
+			//geometry.computeFaceNormals();
 		}
 		geometry.computeCentroids();
 		geometry.computeBoundingBox();
@@ -303,6 +293,18 @@ THREE.ALLoader.prototype.parse = function (json, callback, texturePath) {
 			mesh = new THREE.Mesh(geometry, material);
 		}
 		mesh.name = jsonMesh.name;
+		if (jsonMesh.position != null)
+		{
+			mesh.position = new THREE.Vector3(jsonMesh.position[0], jsonMesh.position[1], jsonMesh.position[2]);
+		}
+		if (jsonMesh.rotation != null)
+		{
+			mesh.quaternion = new THREE.Quaternion(jsonMesh.rotation[0], jsonMesh.rotation[1], jsonMesh.rotation[2], jsonMesh.rotation[3]);
+		}
+		if (jsonMesh.scale != null)
+		{
+			mesh.scale = new THREE.Vector3(jsonMesh.scale[0], jsonMesh.scale[1], jsonMesh.scale[2]);
+		}
 
 		return mesh;
 	}

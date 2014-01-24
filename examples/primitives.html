@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 	<head>
-		<title>OakLoader for three.js</title>
+		<title>ALLoader for three.js</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		<style>
@@ -55,14 +55,14 @@
 				container.appendChild(stats.domElement);
 
 				camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.01, 1000);
-				camera.position.set(50, 70, 50);
+				camera.position.set(100, 100, 100);
 				controls = new THREE.TrackballControls(camera);
 				controls.rotateSpeed = 1.0;
 				controls.zoomSpeed = 1.2;
 				controls.panSpeed = 0.8;
 				controls.dynamicDampingFactor = 0.3;
 				controls.keys = [65, 83, 68];
-				controls.target = new THREE.Vector3(0, 20, 0);
+				controls.target = new THREE.Vector3(0, 0, 0);
 
 				scene = new THREE.Scene();
 				
@@ -72,12 +72,11 @@
 				light = new THREE.AmbientLight(0xffffff);
 				scene.add(light);
 
-				function processMesh(myObject3d)
+				function processMeshes(myObject3d)
 				{
-					primitives = myObject3d.meshes[0];
-					scene.add(primitives);
+					myObject3d.meshes.map(function(child){scene.add(child)})
 				}
-				(new THREE.ALLoader).load("data/primitives.json", processMesh);
+				(new THREE.ALLoader).load("data/primitives.json", processMeshes);
 
 				window.addEventListener('resize', onWindowResize, false);
 
