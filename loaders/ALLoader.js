@@ -1,5 +1,5 @@
 /**
- * @author ant-lafarge / http://ant.lafarge.free.fr/
+ * @author antlafarge / http://ant.lafarge.free.fr/
  */
 
 THREE.ALLoader = function (showStatus) {
@@ -324,6 +324,8 @@ THREE.ALLoader.prototype.parse = function (json, callback, texturePath) {
 	myObject.materials = materials;
 	myObject.meshes = meshes;
 	myObject.animations = animations;
+
+	myObject.root = object3d;
 
 	callback(myObject);
 };

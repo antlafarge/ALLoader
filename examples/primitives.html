@@ -72,9 +72,9 @@
 				light = new THREE.AmbientLight(0xffffff);
 				scene.add(light);
 
-				function processMeshes(myObject3d)
+				function processMeshes(data)
 				{
-					myObject3d.meshes.map(function(child){scene.add(child)})
+					scene.add(data.root);
 				}
 				(new THREE.ALLoader).load("data/primitives.json", processMeshes);
 

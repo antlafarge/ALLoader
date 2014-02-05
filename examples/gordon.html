@@ -77,9 +77,9 @@
 				light = new THREE.AmbientLight(0xffffff);
 				scene.add(light);
 
-				function processMesh(myObject)
+				function processMesh(data)
 				{
-					gordon = myObject.meshes[0];
+					gordon = data.meshes[0];
 					gordon.material.materials.map(function(mat){mat.opacity=0.5; mat.transparent=true;});
 					scene.add(gordon);
 
@@ -94,7 +94,7 @@
 					skeleton = AnimationUtils.createSkeleton(gordon, 4);
 					scene.add(skeleton);
 
-					animation = myObject.animations[0];
+					animation = data.animations[0];
 
 					THREE.AnimationHandler.add(animation);
 

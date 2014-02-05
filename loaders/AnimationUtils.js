@@ -1,5 +1,5 @@
 /**
- * @author ant-lafarge / http://ant.lafarge.free.fr/
+ * @author antlafarge / http://ant.lafarge.free.fr/
  */
 
 AnimationUtils = {};

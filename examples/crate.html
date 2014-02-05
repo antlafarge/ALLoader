@@ -72,10 +72,9 @@
 				light = new THREE.AmbientLight(0xffffff);
 				scene.add(light);
 
-				function processMesh(myObject3d)
+				function processMesh(data)
 				{
-					crate = myObject3d.meshes[0];
-					scene.add(crate);
+					scene.add(data.root);
 				}
 				(new THREE.ALLoader).load("data/crate.json", processMesh, "textures");
 

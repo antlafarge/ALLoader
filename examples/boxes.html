@@ -77,13 +77,13 @@
 				light = new THREE.AmbientLight(0xffffff);
 				scene.add(light);
 
-				function processMesh(myObject)
+				function processMesh(data)
 				{
-					boxes = myObject.meshes[0];
+					boxes = data.meshes[0];
 					boxes.material.materials.map(function(mat){mat.opacity = 0.5; mat.transparent = true;});
 					scene.add(boxes);
 
-					animation = myObject.animations[0];
+					animation = data.animations[0];
 
 					THREE.AnimationHandler.add(animation);
 
