@@ -112,10 +112,13 @@ function processMesh myObj =
 		append myMeshjs.face_normals[matID] (getfacenormal myMesh f)
 		
 		-- uv indices
-		local tvface = GetTVFace myMesh f
-		append myMeshjs.uv_indices (tvface.x - 1)
-		append myMeshjs.uv_indices (tvface.y - 1)
-		append myMeshjs.uv_indices (tvface.z - 1)
+		if (getNumTVerts myMesh > 0) then
+		(
+			local tvface = GetTVFace myMesh f
+			append myMeshjs.uv_indices (tvface.x - 1)
+			append myMeshjs.uv_indices (tvface.y - 1)
+			append myMeshjs.uv_indices (tvface.z - 1)
+		)
 	)
 	
 	return myMeshjs
@@ -410,7 +413,7 @@ function formatMeshjs myMeshjs file =
 	)
 	
 	format "\n" to:file
-	format "\t\t}\n" to:file
+	format "\t\t}" to:file
 )
 
 function formatObjects myMeshes file =
@@ -442,9 +445,9 @@ function formatObjects myMeshes file =
 			local mat = materials[i]
 			if (i > 1) then
 			(
-				format "\t\t,\n" to:file
+				format ",\n" to:file
 			)
-			format "\t\t"
+			format "\t\t" to:file
 			formatMaterial mat file
 		)
 		format "\n\t]" to:file
@@ -473,7 +476,7 @@ function formatObjects myMeshes file =
 				meshCount += 1
 			)
 		)
-		format "\t]" to:file
+		format "\n\t]" to:file
 	)
 	
 	-- animations
