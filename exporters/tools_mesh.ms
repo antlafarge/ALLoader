@@ -65,8 +65,6 @@ function processMesh myObj =
 	myMeshjs.orientation = (quatForOpenGL myObj.rotation)
 	myMeshjs.scale = (point3 myObj.scale.x myObj.scale.z myObj.scale.y)
 	
-	global a = myMeshjs
-	
 	-- vertices
 	for v = 1 to myMesh.numverts do
 	(
