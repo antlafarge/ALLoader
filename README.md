@@ -43,6 +43,6 @@ http://ant.lafarge.free.fr/alloader/
 
 ### FAQ
 Q. Some objects in the scene are not well placed?  
-A. Add a reset XForm and export  
+A. Add a reset XForm on these objects and export.  
 
 _Thank you for your interest._  
