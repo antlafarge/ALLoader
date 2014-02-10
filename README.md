@@ -42,7 +42,7 @@ http://ant.lafarge.free.fr/alloader/
 - Python implementation  
 
 ### FAQ
-Q. My object is deformed?  
-A. Add a reset XForm et export  
+Q. Some objects in the scene are not well placed?  
+A. Add a reset XForm and export  
 
 _Thank you for your interest._  
