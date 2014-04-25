@@ -107,7 +107,7 @@ function processMesh myObj =
 		append myMeshjs.vertex_indices[matID] (face.z - 1)
 		
 		-- normals
-		append myMeshjs.face_normals[matID] (getfacenormal myMesh f)
+		append myMeshjs.face_normals[matID] (point3ForOpenGL (getfacenormal myMesh f))
 		
 		-- uv indices
 		if (getNumTVerts myMesh > 0) then
