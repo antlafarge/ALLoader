@@ -264,7 +264,6 @@ THREE.ALLoader.prototype.parse = function (json, callback, texturePath) {
 		{
 			//geometry.computeFaceNormals();
 		}
-		geometry.computeCentroids();
 		geometry.computeBoundingBox();
 		
 		// MATERIAL
