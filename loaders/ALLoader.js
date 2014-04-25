@@ -212,7 +212,7 @@ THREE.ALLoader.prototype.parse = function (json, callback, texturePath) {
 			for (var j=0; j<jsonMesh.vertex_indices[i].length; j+=3)
 			{
 				var face_normal = null;
-				if (jsonMesh.face_normals.length)
+				if (jsonMesh.face_normals && jsonMesh.face_normals.length)
 				{
 					face_normal = new THREE.Vector3(jsonMesh.face_normals[i][j], jsonMesh.face_normals[i][j+1], jsonMesh.face_normals[i][j+2])
 				}
@@ -262,7 +262,7 @@ THREE.ALLoader.prototype.parse = function (json, callback, texturePath) {
 		// Post-processing
 		if (jsonMesh.face_normals == null)
 		{
-			//geometry.computeFaceNormals();
+			geometry.computeFaceNormals();
 		}
 		geometry.computeBoundingBox();
 		
