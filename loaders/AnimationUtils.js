@@ -71,7 +71,8 @@ AnimationUtils.createSkeleton = function(skinnedMesh, boneScale)
 	materials.push(new THREE.MeshPhongMaterial({ambient:AnimationUtils.linkColor, wireframe:true, skinning:true}));
 
 	// Copy bones
-	for (var i=0 ; i < skinnedMesh.bones.length ; i++)
+	console.log(skinnedMesh)
+	for (var i=0 ; i < skinnedMesh.geometry.bones.length ; i++)
 	{
 		var bone = skinnedMesh.geometry.bones[i];
 		var bone2 = {};
@@ -79,7 +80,9 @@ AnimationUtils.createSkeleton = function(skinnedMesh, boneScale)
 		bone2.parent = bone.parent;
 		bone2.pos = [bone.pos[0], bone.pos[1], bone.pos[2]];
 		if (bone.rot)
+		{
 			bone2.rot = [bone.rot[0], bone.rot[1], bone.rot[2]];
+		}
 		bone2.rotq = [bone.rotq[0], bone.rotq[1], bone.rotq[2], bone.rotq[3]];
 		bone2.scl = [bone.scl[0], bone.scl[1], bone.scl[2]];
 		skeletonGeometry.bones.push(bone2);
