@@ -117,7 +117,10 @@ AnimationUtils.createSkeleton = function(skinnedMesh, boneScale)
 			boneMesh.geometry.faces[i].materialIndex = 0;
 		}
 		boneMesh.position.set(position.x, position.y, position.z);
-		THREE.GeometryUtils.merge(skeletonGeometry, boneMesh);
+
+		boneMesh.matrixAutoUpdate && boneMesh.updateMatrix();
+		skeletonGeometry.merge(boneMesh.geometry, boneMesh.matrix);
+
 		// create skinIndices and skinWeights for sphereGeometry
 		for (var i=0 ; i < boneMesh.geometry.vertices.length ; i++)
 		{
@@ -198,7 +201,7 @@ AnimationUtils.merge = function(geometry1, geometry2, materialIndexOffset)
 	{
 		materialIndexOffset = 0;
 	}
-	THREE.GeometryUtils.merge(geometry1, geometry2, materialIndexOffset);
+	geometry1.merge(geometry2, null, materialIndexOffset);
 	AnimationUtils.mergeBones(geometry1, geometry2);
 	if (geometry2.name.length)
 	{
