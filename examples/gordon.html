@@ -15,7 +15,7 @@
 
 		<div id="container"></div>
 
-		<script src="libs/three.js/build/three.min.js"></script>
+		<script src="libs/three.js/build/three.js"></script>
 		<script src="libs/three.js/examples/js/controls/TrackballControls.js"></script>
 		<script src="libs/three.js/examples/js/Detector.js"></script>
 		<script src="libs/three.js/examples/js/libs/stats.min.js"></script>
@@ -33,12 +33,11 @@
 
 			var camera, controls, scene, renderer;
 			
-			var ske;
-			var animPlayer, anim, animation;
-			var object3d, gordon;
+			var mesh, meshWire;
 
-			var skeleton;
-			var combi, head;
+			var anim, anim2, meshAnim, meshWireAnim;
+			
+			var skeletonHelper;
 			
 			var clock = new THREE.Clock();
 
@@ -77,35 +76,33 @@
 				light = new THREE.AmbientLight(0xffffff);
 				scene.add(light);
 
+				function createWireframe(skinnedMesh)
+				{
+					var wireColor = 0xffffff;
+					var wireOpacity = 0.2;
+					var material = new THREE.MeshBasicMaterial({ambient:wireColor, opacity:wireOpacity, skinning:true, wireframe:true, transparent:true});
+					return new THREE.SkinnedMesh(skinnedMesh.geometry, material);
+				}
+
 				function processMesh(data)
 				{
-					gordon = data.meshes[0];
-					gordon.material.materials.map(function(mat){mat.opacity=0.5; mat.transparent=true;});
-					scene.add(gordon);
+					mesh = data.meshes[0];
+					scene.add(mesh);
 
-					wiremat = new THREE.MeshBasicMaterial();
-					wiremat.color = new THREE.Color(0xbfbfbf);
-					wiremat.wireframe = true;
-					wiremat.skinning = true;
-					gordon_wire = gordon.clone();
-					gordon_wire.material = wiremat;
-					scene.add(gordon_wire);
+					var meshWire = createWireframe(mesh);
+					scene.add(meshWire);
 
-					skeleton = AnimationUtils.createSkeleton(gordon, 4);
-					scene.add(skeleton);
+					anim = data.animations[0];
+					meshAnim = new THREE.Animation(mesh, anim);
+					meshAnim.play();
 
-					animation = data.animations[0];
+					anim2 = AnimationUtils.cloneAnimationData(anim, "anim_1");
+					meshWireAnim = new THREE.Animation(meshWire, anim2);
+					meshWireAnim.play();
 
-					THREE.AnimationHandler.add(animation);
-
-					gordon_anim_idle = new THREE.Animation(gordon, "anim_1");
-					gordon_anim_idle.play();
-
-					gordon_anim_idle2 = new THREE.Animation(gordon_wire, "anim_1");
-					gordon_anim_idle2.play();
-
-					skeleton_anim_idle = new THREE.Animation(skeleton, "anim_1");
-					skeleton_anim_idle.play();
+					skeletonHelper = new THREE.SkeletonHelper(mesh);
+					skeletonHelper.material.linewidth = 3;
+					scene.add(skeletonHelper);
 				}
 				(new THREE.ALLoader).load("data/gordon.json", processMesh, "textures");
 
@@ -127,6 +124,7 @@
 				requestAnimationFrame(render);
 				var delta = clock.getDelta();
 				THREE.AnimationHandler.update(delta);
+				skeletonHelper.update();
 				controls.update();
 				renderer.render(scene, camera);
 				stats.update();

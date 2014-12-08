@@ -2,46 +2,42 @@
  * @author antlafarge / http://ant.lafarge.free.fr/
  */
 
-THREE.ALLoader = function (showStatus) {
-
+THREE.ALLoader = function (showStatus)
+{
 	THREE.Loader.call(this, showStatus);
-
 };
 
 THREE.ALLoader.prototype = Object.create(THREE.Loader.prototype);
 
-THREE.ALLoader.prototype.load = function (url, callback, texturePath) {
-
+THREE.ALLoader.prototype.load = function (url, callback, texturePath)
+{
 	var scope = this;
 
 	texturePath = texturePath ? texturePath : this.extractUrlBase(url);
 
 	this.onLoadStart();
 	this.loadAjaxJSON(this, url, callback, texturePath);
-
 };
 
-THREE.ALLoader.prototype.loadAjaxJSON = function (context, url, callback, texturePath, callbackProgress) {
-
+THREE.ALLoader.prototype.loadAjaxJSON = function (context, url, callback, texturePath, callbackProgress)
+{
 	var xhr = new XMLHttpRequest();
-
 	var length = 0;
 
-	xhr.onreadystatechange = function () {
-
-		if (xhr.readyState === xhr.DONE) {
-
-			if (xhr.status === 200 || xhr.status === 0) {
-
-				if (xhr.responseText) {
-				
+	xhr.onreadystatechange = function ()
+	{
+		if (xhr.readyState === xhr.DONE)
+		{
+			if (xhr.status === 200 || xhr.status === 0)
+			{
+				if (xhr.responseText)
+				{
 					var json = JSON.parse(xhr.responseText);
 					context.parse(json, callback, texturePath);
-
-				} else {
-
+				}
+				else
+				{
 					console.warn("THREE.ALLoader: [" + url + "] seems to be unreachable or file there is empty");
-
 				}
 
 				// in context of more complex asset initialization
@@ -49,42 +45,36 @@ THREE.ALLoader.prototype.loadAjaxJSON = function (context, url, callback, textur
 				// maybe should go even one more level up
 
 				context.onLoadComplete();
-
-			} else {
-
+			}
+			else
+			{
 				console.error("THREE.ALLoader: Couldn't load [" + url + "] [" + xhr.status + "]");
-
 			}
-
-		} else if (xhr.readyState === xhr.LOADING) {
-
-			if (callbackProgress) {
-
-				if (length === 0) {
-
+		}
+		else if (xhr.readyState === xhr.LOADING)
+		{
+			if (callbackProgress)
+			{
+				if (length === 0)
+				{
 					length = xhr.getResponseHeader("Content-Length");
-
 				}
-
 				callbackProgress({ total: length, loaded: xhr.responseText.length });
-
 			}
-
-		} else if (xhr.readyState === xhr.HEADERS_RECEIVED) {
-
-			length = xhr.getResponseHeader("Content-Length");
 
 		}
-
+		else if (xhr.readyState === xhr.HEADERS_RECEIVED)
+		{
+			length = xhr.getResponseHeader("Content-Length");
+		}
 	};
 
 	xhr.open("GET", url, true);
 	xhr.send(null);
-
 };
 
-THREE.ALLoader.prototype.parse = function (json, callback, texturePath) {
-
+THREE.ALLoader.prototype.parse = function (json, callback, texturePath)
+{
 	var myObject = {};
 
 	// Parse materials
@@ -294,15 +284,15 @@ THREE.ALLoader.prototype.parse = function (json, callback, texturePath) {
 		mesh.name = jsonMesh.name;
 		if (jsonMesh.position != null)
 		{
-			mesh.position = new THREE.Vector3(jsonMesh.position[0], jsonMesh.position[1], jsonMesh.position[2]);
+			mesh.position.set(jsonMesh.position[0], jsonMesh.position[1], jsonMesh.position[2]);
 		}
 		if (jsonMesh.rotation != null)
 		{
-			mesh.quaternion = new THREE.Quaternion(jsonMesh.rotation[0], jsonMesh.rotation[1], jsonMesh.rotation[2], jsonMesh.rotation[3]);
+			mesh.quaternion.set(jsonMesh.rotation[0], jsonMesh.rotation[1], jsonMesh.rotation[2], jsonMesh.rotation[3]);
 		}
 		if (jsonMesh.scale != null)
 		{
-			mesh.scale = new THREE.Vector3(jsonMesh.scale[0], jsonMesh.scale[1], jsonMesh.scale[2]);
+			mesh.scale.set(jsonMesh.scale[0], jsonMesh.scale[1], jsonMesh.scale[2]);
 		}
 
 		return mesh;

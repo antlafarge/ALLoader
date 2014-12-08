@@ -15,7 +15,7 @@
 
 		<div id="container"></div>
 
-		<script src="libs/three.js/build/three.min.js"></script>
+		<script src="libs/three.js/build/three.js"></script>
 		<script src="libs/three.js/examples/js/controls/TrackballControls.js"></script>
 		<script src="libs/three.js/examples/js/Detector.js"></script>
 		<script src="libs/three.js/examples/js/libs/stats.min.js"></script>
@@ -33,12 +33,11 @@
 
 			var camera, controls, scene, renderer;
 			
-			var ske;
-			var animPlayer, anim, animation;
-			var object3d, gordon;
+			var mesh, meshWire;
 
-			var skeleton;
-			var combi, head;
+			var anim, anim2, meshAnim, meshWireAnim;
+			
+			var skeletonHelper;
 			
 			var clock = new THREE.Clock();
 
@@ -46,7 +45,7 @@
 
 			function init()
 			{
-				renderer = new THREE.WebGLRenderer();
+				renderer = new THREE.WebGLRenderer({antialias:true});
 				renderer.setClearColor(new THREE.Color(0x7f7f7f));
 				renderer.setSize(window.innerWidth, window.innerHeight);
 
@@ -77,35 +76,32 @@
 				light = new THREE.AmbientLight(0xffffff);
 				scene.add(light);
 
+				function createWireframe(skinnedMesh)
+				{
+					var wireColor = 0xffffff;
+					var wireOpacity = 0.2;
+					var material = new THREE.MeshBasicMaterial({ambient:wireColor, opacity:wireOpacity, skinning:true, wireframe:true, transparent:true});
+					return new THREE.SkinnedMesh(skinnedMesh.geometry, material);
+				}
+
 				function processMesh(data)
 				{
-					boxes = data.meshes[0];
-					boxes.material.materials.map(function(mat){mat.opacity = 0.5; mat.transparent = true;});
-					scene.add(boxes);
+					mesh = data.meshes[0];
+					scene.add(mesh);
 
-					animation = data.animations[0];
+					meshWire = createWireframe(mesh);
+					scene.add(meshWire);
 
-					THREE.AnimationHandler.add(animation);
+					anim = data.animations[0];
+					meshAnim = new THREE.Animation(mesh, anim);
+					meshAnim.play();
 
-					wiremat = new THREE.MeshBasicMaterial();
-					wiremat.color = new THREE.Color(0xbfbfbf);
-					wiremat.wireframe = true;
-					wiremat.skinning = true;
-					boxes_wire = boxes.clone();
-					boxes_wire.material = wiremat;
-					scene.add(boxes_wire);
+					anim2 = AnimationUtils.cloneAnimationData(anim, "anim_2");
+					meshWireAnim = new THREE.Animation(meshWire, anim2);
+					meshWireAnim.play();
 
-					skeleton = AnimationUtils.createSkeleton(boxes, 50);
-					scene.add(skeleton);
-
-					boxes_anim = new THREE.Animation(boxes, "anim_1");
-					boxes_anim.play();
-
-					boxes_wire_anim2 = new THREE.Animation(boxes_wire, "anim_1");
-					boxes_wire_anim2.play();
-
-					skeleton_anim = new THREE.Animation(skeleton, "anim_1");
-					skeleton_anim.play();
+					skeletonHelper = new THREE.SkeletonHelper(mesh);
+					scene.add(skeletonHelper);
 				}
 				(new THREE.ALLoader).load("data/boxes.json", processMesh, "textures");
 

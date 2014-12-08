@@ -33,7 +33,6 @@
 			var camera, controls, scene, renderer;
 			
 			var animation;
-			var crate, crate_wire;
 			
 			var clock = new THREE.Clock();
 
@@ -74,6 +73,7 @@
 
 				function processMeshes(data)
 				{
+					console.dir(data);
 					scene.add(data.root);
 				}
 				(new THREE.ALLoader).load("data/primitives.json", processMeshes);
