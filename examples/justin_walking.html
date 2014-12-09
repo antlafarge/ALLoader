@@ -90,7 +90,7 @@
 					scene.add(mesh);
 
 					var meshWire = createWireframe(mesh);
-					//scene.add(meshWire);
+					scene.add(meshWire);
 
 					anim = data.animations[0];
 					meshAnim = new THREE.Animation(mesh, anim);
@@ -102,7 +102,7 @@
 
 					skeletonHelper = new THREE.SkeletonHelper(mesh);
 					skeletonHelper.material.linewidth = 3;
-					//scene.add(skeletonHelper);
+					scene.add(skeletonHelper);
 				}
 				(new THREE.ALLoader).load("data/justin_walking.json", processMesh, "textures");
 
