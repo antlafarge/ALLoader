@@ -51,7 +51,7 @@ function processMesh myObj =
 		local bonesCount = skinOps.GetNumberBones mySkin
 		for i = 1 to bonesCount do
 		(
-			local bname = skinOps.GetBoneNameByListID mySkin i 1
+			local bname = skinOps.GetBoneName mySkin i 1
 			local b = getNodeByName bname
 			append myBones b
 		)

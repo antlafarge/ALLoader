@@ -66,7 +66,7 @@ function processAnimatedObject myObj =
 	local bonesCount = skinOps.GetNumberBones mySkin
 	for bi = 1 to bonesCount do
 	(
-		local bname = skinOps.GetBoneNameByListID mySkin bi 1
+		local bname = skinOps.GetBoneName mySkin bi 1
 		local b = getNodeByName bname
 		append myBones b
 	)
