@@ -254,6 +254,7 @@ THREE.ALLoader.prototype.parse = function (json, callback, texturePath)
 		{
 			geometry.computeFaceNormals();
 		}
+		geometry.computeVertexNormals();
 		geometry.computeBoundingBox();
 		
 		// MATERIAL
