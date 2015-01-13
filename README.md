@@ -1,6 +1,6 @@
 # ALLoader  
 
-ALLoader is a 3dsMax exporter and loader for three.js (webgl) in a simple custom JSON format, which supports rigged, skinned and animated meshes.  
+ALLoader is a 3dsMax 2015 exporter and loader for three.js (webgl) in a simple custom JSON format, which supports rigged, skinned and animated meshes.  
 
 ### Live demos  
 http://ant.lafarge.free.fr/alloader/  
@@ -40,6 +40,19 @@ http://ant.lafarge.free.fr/alloader/
 - Interface  
 - Biped  
 - Python implementation  
+
+### How to use the exporter  
+- Open 3dsmax
+- Open your scene (all meshes will be exported)
+- In right bar, go to Utilities tab
+- Clic Maxscript button
+- Clic Run Script
+- Find and open the expoter.ms file
+- Choose your options
+- Clic Export
+- Choose your target file
+- Clic Save
+- The meshes are exported !
 
 ### FAQ
 Q. Some objects in the scene are not well placed?  
