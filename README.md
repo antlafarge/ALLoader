@@ -6,8 +6,7 @@ ALLoader is a 3dsMax 2015 exporter and loader for three.js (webgl) in a simple c
 http://ant.lafarge.free.fr/alloader/  
 
 ### How to export meshes and animations  
-- Open 3ds Max and your scene  
-- Select the meshes you want to export  
+- Open 3ds Max and your scene *(all meshes will be exported)*  
 - Open the **Utilities** tab in the right lateral tool bar  
 - Clic on **MAXScript** button  
 - Clic on **Run Script** button  
@@ -40,19 +39,6 @@ http://ant.lafarge.free.fr/alloader/
 - Interface  
 - Biped  
 - Python implementation  
-
-### How to use the exporter  
-- Open 3dsmax
-- Open your scene (all meshes will be exported)
-- In right bar, go to Utilities tab
-- Clic Maxscript button
-- Clic Run Script
-- Find and open the expoter.ms file
-- Choose your options
-- Clic Export
-- Choose your target file
-- Clic Save
-- The meshes are exported !
 
 ### FAQ
 Q. Some objects in the scene are not well placed?  
