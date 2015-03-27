@@ -44,7 +44,7 @@ http://ant.lafarge.free.fr/alloader/
 Q. Some objects in the scene are not well placed?  
 A. Add a reset XForm on these objects and export.  
 
-Q. I can't export a biped skeleton from 3DSMax?
+Q. I can't export a biped skeleton from 3DSMax?  
 A. Export your scene using the FBX format, close your scene and open the FBX file. This action will convert the biped to a standart skeleton (tree of bones). You can now export your scene using the exporter.  
 
 _Thank you for your interest._  
