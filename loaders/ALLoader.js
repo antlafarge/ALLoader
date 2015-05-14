@@ -123,13 +123,6 @@ THREE.ALLoader.prototype.parse = function (json, callback, texturePath)
 		{
 			material = new THREE.MeshPhongMaterial();
 
-			if (jsonMat.ambient)
-			{
-				material.ambient.r = jsonMat.ambient[0] / 255;
-				material.ambient.g = jsonMat.ambient[1] / 255;
-				material.ambient.b = jsonMat.ambient[2] / 255;
-			}
-			
 			if (jsonMat.diffuse)
 			{
 				material.color.r = jsonMat.diffuse[0] / 255;
