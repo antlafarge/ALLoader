@@ -475,6 +475,7 @@ function formatObjects myMeshes file =
 			)
 		)
 		format "\n\t]" to:file
+		someDataInserted = true
 	)
 	
 	-- animations
@@ -504,6 +505,7 @@ function formatObjects myMeshes file =
 			formatAnimatedObject anim file
 		)
 		format "\t]" to:file
+		someDataInserted = true
 	)
 	
 	format "\n}\n" to:file
