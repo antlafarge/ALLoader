@@ -3,11 +3,14 @@
 -- GLOBAL VARIABLES
 global FlipYZ_transform_nochange = matrix3 [1,0,0] [0,1,0] [0,0,1] [0,0,0] -- 3dsmax axis (no change)
 global FlipYZ_transform_opengl = matrix3 [1,0,0] [0,0,-1] [0,1,0] [0,0,0] -- openGL axis
-global FlipYZ_transform = FlipYZ_transform_opengl
+
+global FlipYZ_transform = FlipYZ_transform_nochange
 
 global exportMeshes = true
 global exportMaterials = true
 global exportSkins = true
+
+global customAnimName = false
 
 global TABS = 0
 

@@ -8,7 +8,7 @@ clearListener()
 
 function export =
 (
-	filepath = getSaveFileName caption:"Location for saving the Mesh file" types:"JSON (*.json)|*.json|Plain Text (*.txt)|*.txt|All Files (*.*)|*.*|"
+	filepath = getSaveFileName caption:"Location for saving the Mesh file" types:"JSON (json)|*.json|Plain Text (txt)|*.txt|All Files|*.*|"
 	
 	if (filepath == undefined) then
 	(
@@ -51,6 +51,8 @@ rollout ALExporter "ALLoader exporter"
 	
 	--checkbox exportSkinsCheckBox "Export Skins" checked:true
 	
+	checkbox customAnimNameCheckbox "Customize animation name" checked:false
+	
 	button exportButton "Export"
 	
 	on exportButton pressed do
@@ -59,16 +61,17 @@ rollout ALExporter "ALLoader exporter"
 		(
 			FlipYZ_transform = FlipYZ_transform_opengl
 		)
-		else
-		(
-			FlipYZ_transform = FlipYZ_transform_nochange
-		)
 		
 		--exportMeshes = exportMeshesCheckBox.checked
 		
 		--exportMaterials = exportMaterialsCheckBox.checked
 		
 		--exportSkins = exportSkinsCheckBox.checked
+
+		if (customAnimNameCheckbox.checked == true) then
+		(
+			customAnimName = true
+		)
 		
 		result = export()
 		

@@ -2,6 +2,7 @@
 
 include "tools.ms"
 include "tools_anim.ms"
+include "InputStringDialog.ms"
 
 -- STRUCTURES
 struct meshjs (name="", material=undefined, vertices=#(), vertex_indices=#(), face_normals=#(), colors=#(), uvs=#(), uv_indices=#(), skinIndices=#(), skinWeights=#(), skinNames=#(), bones=#(), animData=undefined, position=point3, orientation=quat, scale=point3)
@@ -138,11 +139,10 @@ function processObjects myObjects =
 		if (myObj.modifiers[#skin] != undefined) then
 		(
 			local animName = "anim_" + (animCount as String)
-			queryBoxRes = queryBox "Do you want to specify an animation name?"
-			if (queryBoxRes == true) then
+			if (customAnimName == true) then
 			(
-				messageBox "The maxscript listener is waiting for the animation name.\nOpen the maxscript listener and enter the animation name."
-				animName = getKBLine prompt:"Enter the animation name"
+				InputStringDialog = InputStringDialog()
+				animName = InputStringDialog.stringQuery.launch label:"Enter the animation name"
 			)
 			else
 			(
