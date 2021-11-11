@@ -1,9 +1,13 @@
 # ALLoader  
 
-ALLoader is a 3dsMax [2015](https://github.com/antlafarge/ALLoader/tree/3dsmax2015) & [2022](https://github.com/antlafarge/ALLoader/tree/3dsmax2022) exporter and loader for three.js (webgl) in a simple custom JSON format, which supports rigged, skinned and animated meshes.  
+ALLoader is a 3dsMax exporter and loader for three.js (webgl) in a simple custom JSON format, which supports rigged, skinned and animated meshes.  
 
 ### Live demos  
 http://antlafarge.github.io/ALLoader/  
+
+Supported 3ds Max versions
+- [2015](https://github.com/antlafarge/ALLoader/tree/3dsmax2015)
+- [2022](https://github.com/antlafarge/ALLoader/tree/3dsmax2022)
 
 ### How to export meshes and animations  
 - Open 3ds Max and your scene *(all meshes will be exported)*  

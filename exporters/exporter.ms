@@ -1,8 +1,8 @@
 -- MESH EXPORTER (ALM)
 
-include "tools.ms"
-include "tools_mesh.ms"
-include "tools_anim.ms"
+include "tools/tools.ms"
+include "tools/tools_mesh.ms"
+include "tools/tools_anim.ms"
 
 clearListener()
 
