@@ -8,10 +8,18 @@ clearListener()
 
 function export =
 (
-	mySelection = getCurrentSelection()
-
 	filepath = getSaveFileName caption:"Location for saving the Mesh file" types:"JSON (*.json)|*.json|Plain Text (*.txt)|*.txt|All Files (*.*)|*.*|"
 	
+	if (filepath == undefined) then
+	(
+		return false
+	)
+	
+	deleteFile filepath
+	file = createFile filepath
+
+	mySelection = getCurrentSelection()
+
 	myObjects = #()
 	for o in objects do
 	(
@@ -23,26 +31,26 @@ function export =
 	
 	mySubMeshes = processObjects myObjects
 	
-	if (filepath != undefined) then
-	(
-		deleteFile filepath
-		file = createFile filepath
-		
-		formatObjects mySubMeshes file
-		
-		close file
-	)
+	formatObjects mySubMeshes file
 	
+	close file
+
 	clearselection
 	select mySelection
+	
+	return true
 )
 
-rollout ALExporter "ALExporter"
+rollout ALExporter "ALLoader exporter"
 (
-	checkbox flipYZCheckBox "Flip YZ-axis (Poser-like)" checked:true
+	checkbox flipYZCheckBox "Flip YZ-axis (Poser-like)" checked:false
+	
 	--checkbox exportMeshesCheckBox "Export meshes" checked:true
+	
 	--checkbox exportMaterialsCheckBox "Export materials" checked:true
+	
 	--checkbox exportSkinsCheckBox "Export Skins" checked:true
+	
 	button exportButton "Export"
 	
 	on exportButton pressed do
@@ -55,11 +63,25 @@ rollout ALExporter "ALExporter"
 		(
 			FlipYZ_transform = FlipYZ_transform_nochange
 		)
+		
 		--exportMeshes = exportMeshesCheckBox.checked
+		
 		--exportMaterials = exportMaterialsCheckBox.checked
+		
 		--exportSkins = exportSkinsCheckBox.checked
-		export()
+		
+		result = export()
+		
 		destroydialog ALExporter
+		
+		if (result == true) then
+		(
+			messageBox "Export succeed." title:"ALLoader exporter" beep:false
+		)
+		else
+		(
+			messageBox "Export canceled." title:"ALLoader exporter" beep:false
+		)
 	)
 )
 

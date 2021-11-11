@@ -160,9 +160,9 @@ function processObjects myObjects =
 
 function formatMaterial mat file =
 (
-	if ((classof mat) == MultiMaterial) then -- multi-material
+	if ((classof mat) == MultiMaterial) then
 	(
-		format "\t\t{ " to:file
+		format "{ " to:file
 		format "\"name\":\"%\", " mat.name to:file
 		format "\"multi\":[" to:file
 		-- display sub-material names
@@ -184,7 +184,23 @@ function formatMaterial mat file =
 			formatMaterial mat.materialList[i] file
 		)
 	)
-	else -- standard material
+	else if ((classof mat) == PhysicalMaterial) then
+	(
+		format "{ " to:file
+		format "\"name\":\"%\", " mat.name to:file
+		if (mat.base_color_map != undefined) then
+		(
+			textureFilePath = mat.base_color_map.bitmap.filename
+			tokens = (filterString textureFilePath "\\")
+			textureFileName = tokens[tokens.count]
+			format "\"texture\":\"%\", " textureFileName to:file
+		)
+		format "\"ambient\":[%,%,%], " mat.Base_Color.r mat.Base_Color.g mat.Base_Color.b to:file
+		format "\"diffuse\":[%,%,%], " mat.Base_Color.r mat.Base_Color.g mat.Base_Color.b to:file
+		format "\"opacity\":% " (1 - mat.Transparency) to:file
+		format "}" to:file
+	)
+	else if ((classof mat) == Standardmaterial) then
 	(
 		format "{ " to:file
 		format "\"name\":\"%\", " mat.name to:file
@@ -209,7 +225,7 @@ function formatMaterial mat file =
 
 function formatMeshjs myMeshjs file =
 (
-	print ("write " + myMeshjs.name) 
+	print ("write " + myMeshjs.name)
 	format "\t\t{\n" to:file
 	
 	format "\t\t\t\"name\":\"%\",\n" myMeshjs.name to:file
