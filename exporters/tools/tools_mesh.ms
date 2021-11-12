@@ -195,10 +195,10 @@ function formatMaterial mat file =
 			textureFileName = tokens[tokens.count]
 			format "\"texture\":\"%\", " textureFileName to:file
 		)
-		format "\"ambient\":[%,%,%], " mat.Base_Color.r mat.Base_Color.g mat.Base_Color.b to:file
-		format "\"diffuse\":[%,%,%], " mat.Base_Color.r mat.Base_Color.g mat.Base_Color.b to:file
-		format "\"opacity\":% " (1 - mat.Transparency) to:file
-		format "}" to:file
+		format "\"ambient\":[%,%,%], " (toFixed mat.Base_Color.r) (toFixed mat.Base_Color.g) (toFixed mat.Base_Color.b) to:file
+		format "\"diffuse\":[%,%,%], " (toFixed mat.Base_Color.r) (toFixed mat.Base_Color.g) (toFixed mat.Base_Color.b) to:file
+		format "\"opacity\":%" (toFixed (1 - mat.Transparency)) to:file
+		format " }" to:file
 	)
 	else if ((classof mat) == Standardmaterial) then
 	(
@@ -215,11 +215,11 @@ function formatMaterial mat file =
 		(
 			format "\"side\":\"double\", " to:file
 		)
-		format "\"ambient\":[%,%,%], " mat.ambient.r mat.ambient.g mat.ambient.b to:file
-		format "\"diffuse\":[%,%,%], " mat.diffuse.r mat.diffuse.g mat.diffuse.b to:file
-		format "\"specular\":[%,%,%], " mat.specular.r mat.specular.g mat.specular.b to:file
-		format "\"opacity\":% " (mat.opacity / 100) to:file
-		format "}" to:file
+		format "\"ambient\":[%,%,%], " (toFixed mat.ambient.r) (toFixed mat.ambient.g) (toFixed mat.ambient.b) to:file
+		format "\"diffuse\":[%,%,%], " (toFixed mat.diffuse.r) (toFixed mat.diffuse.g) (toFixed mat.diffuse.b) to:file
+		format "\"specular\":[%,%,%], " (toFixed mat.specular.r) (toFixed mat.specular.g) (toFixed mat.specular.b) to:file
+		format "\"opacity\":%" (toFixed (mat.opacity / 100)) to:file
+		format " }" to:file
 	)
 )
 
@@ -305,7 +305,7 @@ function formatMeshjs myMeshjs file =
 			(
 				format "," to:file
 			)
-			format "%,%" uv.x uv.y to:file
+			format "%,%" (toFixed uv.x) (toFixed uv.y) to:file
 		)
 		format "]" to:file
 	)
@@ -356,7 +356,7 @@ function formatMeshjs myMeshjs file =
 			(
 				format "," to:file
 			)
-			format "%,%,%,%" bw[1] bw[2] bw[3] bw[4] to:file
+			format "%,%,%,%" (toFixed bw[1]) (toFixed bw[2]) (toFixed bw[3]) (toFixed bw[4]) to:file
 		)
 		format "]" to:file
 	)

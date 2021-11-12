@@ -51,15 +51,21 @@ rollout ALExporter "ALLoader exporter"
 	
 	--checkbox exportSkinsCheckBox "Export Skins" checked:true
 	
-	checkbox customAnimNameCheckbox "Customize animation name" checked:false
+	checkbox customAnimNameCheckbox "Custom animation name" checked:customAnimName
+
+	spinner decimalsSpinner "Decimals of floats" range:[0,10,decimalsOfFloats] type:#integer scale:1
 	
 	button exportButton "Export"
 	
 	on exportButton pressed do
 	(
-		if (flipYZCheckBox.checked == true) then
+		if (flipYZCheckBox.checked) then
 		(
 			FlipYZ_transform = FlipYZ_transform_opengl
+		)
+		else
+		(
+			FlipYZ_transform = FlipYZ_transform_nochange
 		)
 		
 		--exportMeshes = exportMeshesCheckBox.checked
@@ -68,16 +74,15 @@ rollout ALExporter "ALLoader exporter"
 		
 		--exportSkins = exportSkinsCheckBox.checked
 
-		if (customAnimNameCheckbox.checked == true) then
-		(
-			customAnimName = true
-		)
+		customAnimName = customAnimNameCheckbox.checked
+
+		decimalsOfFloats = decimalsSpinner.value
 		
 		result = export()
 		
 		destroydialog ALExporter
 		
-		if (result == true) then
+		if (result) then
 		(
 			messageBox "Export succeed." title:"ALLoader exporter" beep:false
 		)

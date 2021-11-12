@@ -151,7 +151,7 @@ function formatKeyjs thekeyjs =
 (
 	local myStringStream = stringStream ""
 	
-	format "{\"time\":%, " thekeyjs.time to:myStringStream
+	format "{\"time\":%, " (toFixed thekeyjs.time) to:myStringStream
 	format "\"pos\":%, " (formatVector3 thekeyjs.pos) to:myStringStream
 	format "\"rot\":%, " (formatQuaternion thekeyjs.rot) to:myStringStream
 	format "\"scl\":%}" (formatVector3 thekeyjs.scl) to:myStringStream

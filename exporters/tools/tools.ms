@@ -12,19 +12,27 @@ global exportSkins = true
 
 global customAnimName = false
 
+global decimalsOfFloats = 4
+
 global TABS = 0
 
 -- FUNCTIONS
+
+function toFixed num digits:decimalsOfFloats =
+(
+	local mult = 10.0 ^ digits
+	res = (floor((num * mult) + 0.5)) / mult
+	return (trimRight (trimRight (res as string) "0") ".")
+)
+
 function formatVector3 v =
 (
-	("[" + (v.x as string) + "," + (v.y as string) + "," + (v.z as string) + "]")
+	("[" + (toFixed v.x) + "," + (toFixed v.y) + "," + (toFixed v.z) + "]")
 )
 
 function formatQuaternion q =
 (
-	local qstr = stringStream ""
-	format "[%,%,%,%]" q.x q.y q.z q.w to:qstr
-	return (qstr as string)
+	("[" + (toFixed q.x) + "," + (toFixed q.y) + "," + (toFixed q.z) + "," + (toFixed q.w) + "]")
 )
 
 function implode glue pieces =
@@ -68,7 +76,7 @@ function implodePoint3 glue pieces =
 			str += glueStr
 		)
 		local p3 = pieces[i]
-		str += ((p3.x as string) + glueStr + (p3.y as string) + glueStr + (p3.z as string))
+		str += ((toFixed p3.x) + glueStr + (toFixed p3.y) + glueStr + (toFixed p3.z))
 	)
 	return str
 )
@@ -83,8 +91,8 @@ function implodeQuat glue pieces =
 		(
 			str += glueStr
 		)
-		local p3 = pieces[i]
-		str += ((p3.x as string) + glueStr + (p3.y as string) + glueStr + (p3.z as string) + glueStr + (p3.w as string))
+		local q4 = pieces[i]
+		str += ((toFixed q4.x) + glueStr + (toFixed q4.y) + glueStr + (toFixed q4.z) + glueStr + (toFixed q4.w))
 	)
 	return str
 )
