@@ -17,14 +17,14 @@ global tabs = 0
 
 -- FUNCTIONS
 
-fn fp v =
+fn fp value =
 (
-	formattedPrint v format:formattedPrintFormat
+	formattedPrint value format:formattedPrintFormat
 )
 
 fn formatPoint3 myPoint3 =
 (
-	formattedPrint myPoint3
+	fp myPoint3
 )
 
 fn formatQuaternion myQuat =
@@ -40,7 +40,7 @@ fn formatArray pieces =
 	local sz = pieces.count
 	for i = 1 to sz do
 	(
-		format "%%" (if i > 1 then "," else "") pieces[i] to:ss
+		format "%%" (if i > 1 then "," else "") (fp pieces[i]) to:ss
 	)
 	ss as string
 )
