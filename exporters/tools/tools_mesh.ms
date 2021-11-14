@@ -195,9 +195,9 @@ function formatMaterial mat file =
 			textureFileName = tokens[tokens.count]
 			format "\"texture\":\"%\", " textureFileName to:file
 		)
-		format "\"ambient\":[%,%,%], " (toFixed mat.Base_Color.r) (toFixed mat.Base_Color.g) (toFixed mat.Base_Color.b) to:file
-		format "\"diffuse\":[%,%,%], " (toFixed mat.Base_Color.r) (toFixed mat.Base_Color.g) (toFixed mat.Base_Color.b) to:file
-		format "\"opacity\":%" (toFixed (1 - mat.Transparency)) to:file
+		format "\"ambient\":[%,%,%], " (fp mat.Base_Color.r) (fp mat.Base_Color.g) (fp mat.Base_Color.b) to:file
+		format "\"diffuse\":[%,%,%], " (fp mat.Base_Color.r) (fp mat.Base_Color.g) (fp mat.Base_Color.b) to:file
+		format "\"opacity\":%" (fp (1 - mat.Transparency)) to:file
 		format " }" to:file
 	)
 	else if ((classof mat) == Standardmaterial) then
@@ -215,10 +215,10 @@ function formatMaterial mat file =
 		(
 			format "\"side\":\"double\", " to:file
 		)
-		format "\"ambient\":[%,%,%], " (toFixed mat.ambient.r) (toFixed mat.ambient.g) (toFixed mat.ambient.b) to:file
-		format "\"diffuse\":[%,%,%], " (toFixed mat.diffuse.r) (toFixed mat.diffuse.g) (toFixed mat.diffuse.b) to:file
-		format "\"specular\":[%,%,%], " (toFixed mat.specular.r) (toFixed mat.specular.g) (toFixed mat.specular.b) to:file
-		format "\"opacity\":%" (toFixed (mat.opacity / 100)) to:file
+		format "\"ambient\":[%,%,%], " (fp mat.ambient.r) (fp mat.ambient.g) (fp mat.ambient.b) to:file
+		format "\"diffuse\":[%,%,%], " (fp mat.diffuse.r) (fp mat.diffuse.g) (fp mat.diffuse.b) to:file
+		format "\"specular\":[%,%,%], " (fp mat.specular.r) (fp mat.specular.g) (fp mat.specular.b) to:file
+		format "\"opacity\":%" (fp (mat.opacity / 100)) to:file
 		format " }" to:file
 	)
 )
@@ -240,7 +240,7 @@ function formatMeshjs myMeshjs file =
 	format "\t\t\t\"scale\":%,\n" myMeshjs.scale to:file
 	
 	-- Write vertices
-	format "\t\t\t\"vertex_positions\":[%],\n" (implodePoint3 "," myMeshjs.vertices) to:file
+	format "\t\t\t\"vertex_positions\":[%],\n" (formatPoint3Array myMeshjs.vertices) to:file
 
 	-- Write indices
 	format "\t\t\t\"vertex_indices\":[\n" to:file
@@ -253,7 +253,7 @@ function formatMeshjs myMeshjs file =
 			(
 				format ",\n" to:file
 			)
-			format "\t\t\t\t[%]" (implodeInteger "," myMeshjs.vertex_indices[i]) to:file
+			format "\t\t\t\t[%]" (formatArray myMeshjs.vertex_indices[i]) to:file
 			arrCount += 1
 		)
 	)
@@ -270,7 +270,7 @@ function formatMeshjs myMeshjs file =
 			(
 				format ",\n" to:file
 			)
-			format "\t\t\t\t[%]" (implodePoint3 "," myMeshjs.face_normals[i]) to:file
+			format "\t\t\t\t[%]" (formatPoint3Array myMeshjs.face_normals[i]) to:file
 			arrCount += 1
 		)
 	)
@@ -305,7 +305,7 @@ function formatMeshjs myMeshjs file =
 			(
 				format "," to:file
 			)
-			format "%,%" (toFixed uv.x) (toFixed uv.y) to:file
+			format "%,%" (fp uv.x) (fp uv.y) to:file
 		)
 		format "]" to:file
 	)
@@ -356,7 +356,7 @@ function formatMeshjs myMeshjs file =
 			(
 				format "," to:file
 			)
-			format "%,%,%,%" (toFixed bw[1]) (toFixed bw[2]) (toFixed bw[3]) (toFixed bw[4]) to:file
+			format "%,%,%,%" (fp bw[1]) (fp bw[2]) (fp bw[3]) (fp bw[4]) to:file
 		)
 		format "]" to:file
 	)
@@ -408,12 +408,12 @@ function formatMeshjs myMeshjs file =
 			-- parent
 			format "\"parent\":%, " parentBoneID to:skeleton_file
 			-- data
-			format "\"pos\":%, " (formatVector3 newTransform.position) to:skeleton_file
+			format "\"pos\":%, " (formatPoint3 newTransform.position) to:skeleton_file
 			format "\"rot\":[0,0,0], " to:skeleton_file
 			-- quaternion is inversed because of rotations are inversed in maxscript
 			-- cf. http://docs.autodesk.com/3DSMAX/15/ENU/MAXScript-Help/index.html?url=files/GUID-3B001F21-8FE9-4663-A972-E648682A0ACD.htm,topicNumber=d30e272529
 			format "\"rotq\":%, " (formatQuaternion (inverse newTransform.rotation)) to:skeleton_file
-			format "\"scl\":% }" (formatVector3 newTransform.scale) to:skeleton_file
+			format "\"scl\":% }" (formatPoint3 newTransform.scale) to:skeleton_file
 		)
 		format "\n" to:skeleton_file
 		format "\t\t\t]" to:skeleton_file

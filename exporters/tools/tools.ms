@@ -1,10 +1,9 @@
 -- GLOBAL TOOLS
 
 -- GLOBAL VARIABLES
-global FlipYZ_transform_nochange = matrix3 [1,0,0] [0,1,0] [0,0,1] [0,0,0] -- 3dsmax axis (no change)
-global FlipYZ_transform_opengl = matrix3 [1,0,0] [0,0,-1] [0,1,0] [0,0,0] -- openGL axis
 
-global FlipYZ_transform = FlipYZ_transform_nochange
+global flipYZ = true
+global flipYZ_transform = matrix3 [1,0,0] [0,0,-1] [0,1,0] [0,0,0] -- matrix to transform to default opengl axis
 
 global exportMeshes = true
 global exportMaterials = true
@@ -12,125 +11,102 @@ global exportSkins = true
 
 global customAnimName = false
 
-global decimalsOfFloats = 4
+global formattedPrintFormat = ".4g"
 
-global TABS = 0
+global tabs = 0
 
 -- FUNCTIONS
 
-function toFixed num digits:decimalsOfFloats =
+fn fp v =
 (
-	local mult = 10.0 ^ digits
-	res = (floor((num * mult) + 0.5)) / mult
-	return (trimRight (trimRight (res as string) "0") ".")
+	formattedPrint v format:formattedPrintFormat
 )
 
-function formatVector3 v =
+fn formatPoint3 myPoint3 =
 (
-	("[" + (toFixed v.x) + "," + (toFixed v.y) + "," + (toFixed v.z) + "]")
+	formattedPrint myPoint3
 )
 
-function formatQuaternion q =
+fn formatQuaternion myQuat =
 (
-	("[" + (toFixed q.x) + "," + (toFixed q.y) + "," + (toFixed q.z) + "," + (toFixed q.w) + "]")
+	local ss = stringstream ""
+	format "[%,%,%,%]" (fp myQuat.x) (fp myQuat.y) (fp myQuat.z) (fp myQuat.w) to:ss
+	ss as string
 )
 
-function implode glue pieces =
+fn formatArray pieces =
 (
-	local glueStr = (glue as string)
-	local str = ""
-	for i = 1 to pieces.count do
+	local ss = stringstream ""
+	local sz = pieces.count
+	for i = 1 to sz do
 	(
-		if (i > 1) then
-		(
-			str += glueStr
-		)
-		str += (pieces[i] as string)
+		format "%%" (if i > 1 then "," else "") pieces[i] to:ss
 	)
-	return str
+	ss as string
 )
 
-function implodeInteger glue pieces =
+fn formatPoint3Array pieces =
 (
-	local glueStr = (glue as string)
-	local str = ""
-	for i = 1 to pieces.count do
+	local ss = stringstream ""
+	local sz = pieces.count
+	local myPoint3
+	for i = 1 to sz do
 	(
-		if (i > 1) then
-		(
-			str += glueStr
-		)
-		str += ((pieces[i] as integer) as string)
+		myPoint3 = pieces[i]
+		format "%%,%,%" (if i > 1 then "," else "") (fp myPoint3.x) (fp myPoint3.y) (fp myPoint3.z) to:ss
 	)
-	return str
+	ss as string
 )
 
-function implodePoint3 glue pieces =
+fn formatQuatArray pieces =
 (
-	local glueStr = (glue as string)
-	local str = ""
-	for i = 1 to pieces.count do
+	local ss = stringstream ""
+	local sz = pieces.count
+	local myQuat
+	for i = 1 to sz do
 	(
-		if (i > 1) then
-		(
-			str += glueStr
-		)
-		local p3 = pieces[i]
-		str += ((toFixed p3.x) + glueStr + (toFixed p3.y) + glueStr + (toFixed p3.z))
+		myQuat = pieces[i]
+		format "%%,%,%,%" (if i > 1 then "," else "") (fp q4.x) (fp q4.y) (fp q4.z) (fp q4.w) to:ss
 	)
-	return str
+	ss as string
 )
 
-function implodeQuat glue pieces =
+fn isBone o =
 (
-	local glueStr = (glue as string)
-	local str = ""
-	for i = 1 to pieces.count do
-	(
-		if (i > 1) then
-		(
-			str += glueStr
-		)
-		local q4 = pieces[i]
-		str += ((toFixed q4.x) + glueStr + (toFixed q4.y) + glueStr + (toFixed q4.z) + glueStr + (toFixed q4.w))
-	)
-	return str
+	(classof o) == BoneGeometry
 )
 
-function isBone o =
+fn isGeometry o =
 (
-	return ((classof o) == BoneGeometry)
-)
-
-function isGeometry o =
-(
-	return (((Superclassof o) == GeometryClass) and ((classof o) != BoneGeometry))
+	((Superclassof o) == GeometryClass) and ((classof o) != BoneGeometry)
 )
 
 -- function that compute the relative (from parent) transform matrix and convert it to openGL axis
-function getRelativeTransformForOpenGL myObject =
+fn getRelativeTransformForOpenGL myObject =
 (
 	-- transform of the object converted to OpenGL axis
-	local myTransform = myObject.transform * FlipYZ_transform
+	local myTransform = (if (flipYZ) then (myObject.transform * flipYZ_transform) else myObject.transform)
+	
+	local parent = myObject.parent
 	
 	-- if a parent exists
-	if (myObject.parent != undefined) then
+	if (parent != undefined) then
 	(
-		myTransform *= inverse (myObject.parent.transform * FlipYZ_transform)
+		myTransform *= inverse (if (flipYZ) then (parent.transform * flipYZ_transform) else parent.transform)
 	)
 	
 	-- return converted transform
-	return myTransform
+	myTransform
 )
 
 -- convert a 3d point to openGL axis
-function point3ForOpenGL myPoint3 =
+fn point3ForOpenGL myPoint3 =
 (
-	return (myPoint3 * FlipYZ_transform)
+	if flipYZ then (myPoint3 * flipYZ_transform) else myPoint3
 )
 
 -- convert a quaternion orientation to openGL axis
-function quatForOpenGL q =
+fn quatForOpenGL myQuat =
 (
-	return (q * FlipYZ_transform)
+	if flipYZ then (myQuat * flipYZ_transform) else myQuat
 )

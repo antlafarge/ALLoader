@@ -6,44 +6,50 @@ include "tools/tools_anim.ms"
 
 clearListener()
 
-function export =
+fn export =
 (
 	filepath = getSaveFileName caption:"Location for saving the Mesh file" types:"JSON (json)|*.json|Plain Text (txt)|*.txt|All Files|*.*|"
 	
-	if (filepath == undefined) then
+	if (filepath != undefined) then
 	(
-		return false
-	)
-	
-	deleteFile filepath
-	file = createFile filepath
-
-	mySelection = getCurrentSelection()
-
-	myObjects = #()
-	for o in objects do
-	(
-		if (isGeometry o) then
+		deleteFile filepath
+		file = createFile filepath
+		
+		mySelection = getCurrentSelection()
+		
+		startTime = timeStamp()
+		
+		myObjects = #()
+		for o in objects do
 		(
-			append myObjects o
+			if (isGeometry o) then
+			(
+				append myObjects o
+			)
 		)
+		
+		mySubMeshes = processObjects myObjects
+		
+		formatObjects mySubMeshes file
+		
+		endTime = timeStamp()
+		
+		close file
+		
+		clearselection
+		select mySelection
+		
+		messageBox ("Export succeed (" + (((endTime - startTime) / 1000.0) as string) + " seconds).") title:"ALLoader exporter" beep:false
 	)
-	
-	mySubMeshes = processObjects myObjects
-	
-	formatObjects mySubMeshes file
-	
-	close file
-
-	clearselection
-	select mySelection
-	
-	return true
+	else
+	(
+		messageBox "Export canceled." title:"ALLoader exporter" beep:false
+	)
 )
 
 rollout ALExporter "ALLoader exporter"
 (
-	checkbox flipYZCheckBox "Flip YZ-axis (Poser-like)" checked:false
+	checkbox flipYZCheckBox "Flip YZ-axis (Poser-like)" checked:true
 	
 	--checkbox exportMeshesCheckBox "Export meshes" checked:true
 	
@@ -53,44 +59,39 @@ rollout ALExporter "ALLoader exporter"
 	
 	checkbox customAnimNameCheckbox "Custom animation name" checked:customAnimName
 
-	spinner decimalsSpinner "Decimals of floats" range:[0,10,decimalsOfFloats] type:#integer scale:1
+	spinner decimalsSpinner "Decimals of floats" range:[0,10,4] type:#integer scale:1
 	
 	button exportButton "Export"
 	
 	on exportButton pressed do
 	(
-		if (flipYZCheckBox.checked) then
-		(
-			FlipYZ_transform = FlipYZ_transform_opengl
-		)
-		else
-		(
-			FlipYZ_transform = FlipYZ_transform_nochange
-		)
+		flipYZ = flipYZCheckBox.checked
 		
 		--exportMeshes = exportMeshesCheckBox.checked
 		
 		--exportMaterials = exportMaterialsCheckBox.checked
 		
 		--exportSkins = exportSkinsCheckBox.checked
-
-		customAnimName = customAnimNameCheckbox.checked
-
-		decimalsOfFloats = decimalsSpinner.value
 		
-		result = export()
+		customAnimName = customAnimNameCheckbox.checked
+		
+		formattedPrintFormat = "." + (decimalsSpinner.value as string) + "g"
+		
+		export()
 		
 		destroydialog ALExporter
-		
-		if (result) then
-		(
-			messageBox "Export succeed." title:"ALLoader exporter" beep:false
-		)
-		else
-		(
-			messageBox "Export canceled." title:"ALLoader exporter" beep:false
-		)
 	)
 )
 
-createdialog ALExporter
+disableSceneRedraw()
+suspendEditing()
+
+undo on
+(
+	createdialog ALExporter
+)
+
+resumeEditing()
+enableSceneRedraw()
+
+print "Script ended"
