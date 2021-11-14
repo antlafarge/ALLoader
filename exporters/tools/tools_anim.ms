@@ -9,7 +9,7 @@ struct keyjs (time=0, pos=undefined, rot=undefined, scl=undefined)
 
 -- FUNCTIONS
 -- check if a key of the array of keys has the specified time
-function in_array_time arr needle_time =
+fn in_array_time arr needle_time =
 (
 	for ai = 1 to arr.count do
 	(
@@ -23,7 +23,7 @@ function in_array_time arr needle_time =
 )
 
 -- process the object to extract the animation of bones of the skin
-function processAnimatedObject myObj =
+fn processAnimatedObject myObj =
 (
 	local anim = animjs()
 	local mySkin = myObj.modifiers[#skin]
@@ -147,7 +147,7 @@ function processAnimatedObject myObj =
 	return anim
 )
 
-function formatKeyjs thekeyjs =
+fn formatKeyjs thekeyjs =
 (
 	local myStringStream = stringStream ""
 	
@@ -159,7 +159,7 @@ function formatKeyjs thekeyjs =
 	return (myStringStream as string)
 )
 
-function formatBonejs thebonejs =
+fn formatBonejs thebonejs =
 (
 	local myStringStream = stringStream ""
 	
@@ -187,7 +187,7 @@ function formatBonejs thebonejs =
 	return (myStringStream as string)
 )
 
-function formatAnimatedObject anim file =
+fn formatAnimatedObject anim file =
 (
 	format "\t\t{\n" to:file
 	
