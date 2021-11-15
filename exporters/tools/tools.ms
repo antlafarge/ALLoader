@@ -11,11 +11,40 @@ global exportSkins = true
 
 global customAnimName = false
 
-global formattedPrintFormat = ".4g"
+global formattedPrintFormat = ".5g"
 
-global tabs = 0
+global compressJson = false
+
+global TAB = 0
+
+global TAB_ARRAY = #( "\t" )
+
+global nl = "\n"
+
+global sp = " "
 
 -- FUNCTIONS
+
+-- Return the cached number of tabulations if output is not compressed
+fn tabs tab =
+(
+	if (compressJson) then
+	(
+		""	
+	)
+	else
+	(
+		local count = TAB_ARRAY.count
+		if (tab > count) then
+		(
+			for tabIndex = count + 1 to tab do
+			(
+				TAB_ARRAY[tabIndex] = TAB_ARRAY[tabIndex - 1] + "\t"
+			)
+		)
+		TAB_ARRAY[tab]
+	)
+)
 
 fn fp value =
 (
@@ -29,46 +58,46 @@ fn formatPoint3 myPoint3 =
 
 fn formatQuaternion myQuat =
 (
-	local ss = stringstream ""
-	format "[%,%,%,%]" (fp myQuat.x) (fp myQuat.y) (fp myQuat.z) (fp myQuat.w) to:ss
-	ss as string
+	local stream = stringstream ""
+	format "[%,%,%,%]" (fp myQuat.x) (fp myQuat.y) (fp myQuat.z) (fp myQuat.w) to:stream
+	stream as string
 )
 
 fn formatArray pieces =
 (
-	local ss = stringstream ""
-	local sz = pieces.count
-	for i = 1 to sz do
+	local stream = stringstream ""
+	local count = pieces.count
+	for index = 1 to count do
 	(
-		format "%%" (if i > 1 then "," else "") (fp pieces[i]) to:ss
+		format "%%" (if index > 1 then "," else "") (fp pieces[index]) to:stream
 	)
-	ss as string
+	stream as string
 )
 
 fn formatPoint3Array pieces =
 (
-	local ss = stringstream ""
-	local sz = pieces.count
+	local stream = stringstream ""
+	local count = pieces.count
 	local myPoint3
-	for i = 1 to sz do
+	for index = 1 to count do
 	(
-		myPoint3 = pieces[i]
-		format "%%,%,%" (if i > 1 then "," else "") (fp myPoint3.x) (fp myPoint3.y) (fp myPoint3.z) to:ss
+		myPoint3 = pieces[index]
+		format "%%,%,%" (if index > 1 then "," else "") (fp myPoint3.x) (fp myPoint3.y) (fp myPoint3.z) to:stream
 	)
-	ss as string
+	stream as string
 )
 
 fn formatQuatArray pieces =
 (
-	local ss = stringstream ""
-	local sz = pieces.count
+	local stream = stringstream ""
+	local count = pieces.count
 	local myQuat
-	for i = 1 to sz do
+	for index = 1 to count do
 	(
-		myQuat = pieces[i]
-		format "%%,%,%,%" (if i > 1 then "," else "") (fp q4.x) (fp q4.y) (fp q4.z) (fp q4.w) to:ss
+		myQuat = pieces[index]
+		format "%%,%,%,%" (if index > 1 then "," else "") (fp q4.x) (fp q4.y) (fp q4.z) (fp q4.w) to:stream
 	)
-	ss as string
+	stream as string
 )
 
 fn isBone o =

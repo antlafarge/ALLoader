@@ -49,33 +49,43 @@ fn export =
 
 rollout ALExporter "ALLoader exporter"
 (
-	checkbox flipYZCheckBox "Flip YZ-axis (Poser-like)" checked:true
+	checkbox flipYZCheckbox "Flip YZ-axis (Poser-like)" checked:true
 	
-	--checkbox exportMeshesCheckBox "Export meshes" checked:true
+	--checkbox exportMeshesCheckbox "Export meshes" checked:true
 	
-	--checkbox exportMaterialsCheckBox "Export materials" checked:true
+	--checkbox exportMaterialsCheckbox "Export materials" checked:true
 	
-	--checkbox exportSkinsCheckBox "Export Skins" checked:true
+	--checkbox exportSkinsCheckbox "Export Skins" checked:true
 	
 	checkbox customAnimNameCheckbox "Custom animation name" checked:customAnimName
 
-	spinner decimalsSpinner "Decimals of floats" range:[0,10,4] type:#integer scale:1
+	spinner decimalsSpinner "Decimals of floats" range:[0,9,4] type:#integer scale:1
 	
+	checkbox compressJsonCheckbox "Compress JSON" checked:false
+
 	button exportButton "Export"
 	
 	on exportButton pressed do
 	(
-		flipYZ = flipYZCheckBox.checked
+		compressJson = compressJsonCheckbox.checked
+
+		if (compressJson) then
+		(
+			nl = ""
+			sp = ""
+		)
+
+		flipYZ = flipYZCheckbox.checked
 		
-		--exportMeshes = exportMeshesCheckBox.checked
+		--exportMeshes = exportMeshesCheckbox.checked
 		
-		--exportMaterials = exportMaterialsCheckBox.checked
+		--exportMaterials = exportMaterialsCheckbox.checked
 		
-		--exportSkins = exportSkinsCheckBox.checked
+		--exportSkins = exportSkinsCheckbox.checked
 		
 		customAnimName = customAnimNameCheckbox.checked
 		
-		formattedPrintFormat = "." + (decimalsSpinner.value as string) + "g"
+		formattedPrintFormat = "." + ((decimalsSpinner.value + 1) as string) + "g"
 		
 		export()
 		
