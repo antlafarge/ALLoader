@@ -6,8 +6,8 @@ ALLoader is a 3dsMax exporter and loader for three.js (webgl) in a simple custom
 http://antlafarge.github.io/ALLoader/  
 
 ### Supported 3ds Max versions
-- [2015](https://github.com/antlafarge/ALLoader/tree/3dsmax2015)
-- [2022](https://github.com/antlafarge/ALLoader/tree/3dsmax2022)
+- [2022](https://github.com/antlafarge/ALLoader/tree/3dsmax2022) (in progress...)
+- [2015](https://github.com/antlafarge/ALLoader/tree/3dsmax2015) ([release](https://github.com/antlafarge/ALLoader/releases/tag/3dsmax2015))
 
 ### How to export meshes and animations  
 - Open 3ds Max and your scene *(all meshes will be exported)*  
