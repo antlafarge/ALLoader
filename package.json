@@ -1,0 +1,28 @@
+{
+  "name": "alloader",
+  "version": "1.0.0",
+  "description": "ALLoader is a 3dsMax exporter and loader for three.js (webgl) in a simple custom JSON format, which supports rigged, skinned and animated meshes.",
+  "keywords": [ "3dsmax", "exporter", "three.js", "loader", "mesh" ],
+  "author": "",
+  "license": "ISC",
+  "homepage": "https://github.com/antlafarge/ALLoader#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/antlafarge/ALLoader.git"
+  },
+  "bugs": {
+    "url": "https://github.com/antlafarge/ALLoader/issues"
+  },
+  "directories": {
+    "example": "examples"
+  },
+  "main": "serve.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "http-server": "^14.1.1"
+  }
+}

@@ -5,8 +5,11 @@ ALLoader is a 3dsMax exporter and loader for three.js (webgl) in a simple custom
 ### Live demos  
 http://antlafarge.github.io/ALLoader/  
 
+### Supported THREE.js version
+- [r146](https://github.com/mrdoob/three.js/releases/tag/r146) (work in progress...)
+
 ### Supported 3ds Max versions
-- [2022](https://github.com/antlafarge/ALLoader/tree/3dsmax2022) (in progress...)
+- [2022](https://github.com/antlafarge/ALLoader/tree/3dsmax2022) (work in progress...)
 - [2015](https://github.com/antlafarge/ALLoader/tree/3dsmax2015) ([release](https://github.com/antlafarge/ALLoader/releases/tag/3dsmax2015))
 
 ### How to export meshes and animations  
@@ -51,4 +54,4 @@ A. Add a reset XForm on these objects and export.
 Q. I can't export a biped skeleton from 3DSMax?  
 A. Export your scene using the FBX format, close your scene and open the FBX file. This action will convert the biped to a standart skeleton (tree of bones). You can now export your scene using the exporter.  
 
-_Thank you for your interest._  
+_You can share feedback or discuss the project in the [discussion tab](https://github.com/antlafarge/ALLoader/discussions)._  

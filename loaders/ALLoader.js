@@ -1,315 +1,512 @@
-/**
- * @author antlafarge / http://ant.lafarge.free.fr/
- */
-
-import * as THREE from '../examples/libs/three.module.js'
+import * as THREE from '../examples/libs/three.js/build/three.module.js'
 
 export class ALLoader extends THREE.Loader
 {
-	constructor(showStatus)
+	constructor(manager)
 	{
-		super(this, showStatus);
+		super(manager);
 	}
 
-	load(url, callback, texturePath)
+	load(url, texturePath, onLoad, onProgress, onError)
 	{
 		texturePath = (texturePath ? texturePath : this.extractUrlBase(url));
 
-		this.onLoadStart();
-		this.loadAjaxJSON(this, url, callback, texturePath);
-	}
+		const loader = new THREE.FileLoader(this.manager);
+		loader.setPath(this.path );
+		loader.setRequestHeader(this.requestHeader);
+		loader.setWithCredentials(this.withCredentials);
+		loader.setResponseType("json");
 
-	loadAjaxJSON(context, url, callback, texturePath, callbackProgress)
-	{
-		var xhr = new XMLHttpRequest();
-		var length = 0;
-
-		xhr.onreadystatechange = function ()
+		loader.load(url, (text) =>
 		{
-			if (xhr.readyState === xhr.DONE)
+			try
 			{
-				if (xhr.status === 200 || xhr.status === 0)
+				onLoad(this.parse(text, texturePath));
+			}
+			catch(ex)
+			{
+				if (onError)
 				{
-					if (xhr.responseText)
-					{
-						var json = JSON.parse(xhr.responseText);
-						context.parse(json, callback, texturePath);
-					}
-					else
-					{
-						console.warn("THREE.ALLoader: [" + url + "] seems to be unreachable or file there is empty");
-					}
-
-					// in context of more complex asset initialization
-					// do not block on single failed file
-					// maybe should go even one more level up
-
-					context.onLoadComplete();
+					onError(ex);
 				}
 				else
 				{
-					console.error("THREE.ALLoader: Couldn't load [" + url + "] [" + xhr.status + "]");
-				}
-			}
-			else if (xhr.readyState === xhr.LOADING)
-			{
-				if (callbackProgress)
-				{
-					if (length === 0)
-					{
-						length = xhr.getResponseHeader("Content-Length");
-					}
-					callbackProgress({ total: length, loaded: xhr.responseText.length });
+					console.error(ex);
 				}
 
+				scope.manager.itemError(url);
 			}
-			else if (xhr.readyState === xhr.HEADERS_RECEIVED)
-			{
-				length = xhr.getResponseHeader("Content-Length");
-			}
-		};
 
-		xhr.open("GET", url, true);
-		xhr.send(null);
+		}, onProgress, onError);
 	}
 
-	parse(json, callback, texturePath)
+	parse(json, texturePath)
 	{
-		var myObject = {};
-
-		// Parse materials
-		var materials = [];
-		for (var i in json.materials)
+		// MATERIALS
+		const materials = [];
+		const materialsByName = {};
+		if (json.materials && json.materials.length)
 		{
-			var jsonMat = json.materials[i];
-			var threeMat = parseMaterial(jsonMat);
-			materials.push(threeMat);
-			materials[jsonMat.name] = threeMat;
-		}
-
-		// Process multi-materials
-		for (var i in json.materials)
-		{
-			var jsonMat = json.materials[i];
-			if (jsonMat.multi)
+			for (const jsonMat of json.materials)
 			{
-				var material = materials[jsonMat.name];
-				for (var j in jsonMat.multi)
+				const material = this.parseMaterial(jsonMat, texturePath);
+				materials.push(material);
+				materialsByName[jsonMat.name] = material;
+			}
+			for (const jsonMat of json.materials)
+			{
+				if (jsonMat.multi && jsonMat.multi.length)
 				{
-					var matName = jsonMat.multi[j];
-					material.materials.push(materials[matName]);
+					const materials2 = materialsByName[jsonMat.name];
+					for (const matName of jsonMat.multi)
+					{
+						materials2.push(materialsByName[matName]);
+					}
 				}
 			}
 		}
 
-		var meshes = [];
-		for (var i in json.meshes)
+		// MESHES
+		const meshes = [];
+		if (json.meshes && json.meshes.length)
 		{
-			var jsonMesh = json.meshes[i];
-			var threeMesh = parseMesh(jsonMesh);
-			meshes.push(threeMesh);
-			meshes[jsonMesh.name] = threeMesh;
-		}
-
-		function parseMaterial(jsonMat)
-		{
-			// MATERIAL
-			var material = null;
-			if (jsonMat.multi)
+			for (const jsonMesh of json.meshes)
 			{
-				material = new THREE.MeshFaceMaterial();
+				const mesh = this.parseMesh(jsonMesh, materialsByName);
+				meshes.push(mesh);
 			}
-			else
-			{
-				material = new THREE.MeshPhongMaterial();
-
-				if (jsonMat.diffuse)
-				{
-					material.color.r = jsonMat.diffuse[0] / 255;
-					material.color.g = jsonMat.diffuse[1] / 255;
-					material.color.b = jsonMat.diffuse[2] / 255;
-				}
-				
-				if (jsonMat.specular)
-				{
-					material.specular.r = jsonMat.specular[0] / 255;
-					material.specular.g = jsonMat.specular[1] / 255;
-					material.specular.b = jsonMat.specular[2] / 255;
-				}
-
-				if (jsonMat.opacity)
-				{
-					material.opacity = jsonMat.opacity;
-					if (jsonMat.opacity != 1)
-					{
-						material.transparent = true;
-					}
-				}
-				
-				if (jsonMat.texture)
-				{
-					material.map = THREE.ImageUtils.loadTexture(texturePath+'/'+jsonMat.texture);
-				}
-				
-				if (jsonMat.side)
-				{
-					if (jsonMat.side === "double")
-					{
-						material.side = THREE.DoubleSide;
-					}
-					else if (jsonMat.side === "back" || jsonMat.side === "reverse")
-					{
-						material.side = THREE.BackSide;
-					}
-				}
-			}
-
-			if (jsonMat.name)
-			{
-				material.name = jsonMat.name;
-			}
-
-			return material;
-		}
-
-		function parseMesh(jsonMesh)
-		{
-			var geometry = new THREE.Geometry();
-			
-			// MESH NAME
-			geometry.name = jsonMesh.name;
-			
-			// SKINNING TEST
-			var skinning = (jsonMesh.skin && jsonMesh.skin_indices && jsonMesh.skin_weights);
-
-			// VERTEX POSITIONS
-			for (var i=0; i<jsonMesh.vertex_positions.length; i+=3)
-			{
-				geometry.vertices.push(new THREE.Vector3(jsonMesh.vertex_positions[i], jsonMesh.vertex_positions[i+1], jsonMesh.vertex_positions[i+2]));
-			}
-			
-			// VERTEX INDICES (FACES)
-			for (var i=0; i<jsonMesh.vertex_indices.length; i++)
-			{
-				var materialIndex = i;
-				for (var j=0; j<jsonMesh.vertex_indices[i].length; j+=3)
-				{
-					var face_normal = null;
-					if (jsonMesh.face_normals && jsonMesh.face_normals.length)
-					{
-						face_normal = new THREE.Vector3(jsonMesh.face_normals[i][j], jsonMesh.face_normals[i][j+1], jsonMesh.face_normals[i][j+2])
-					}
-					geometry.faces.push(new THREE.Face3(jsonMesh.vertex_indices[i][j], jsonMesh.vertex_indices[i][j+1], jsonMesh.vertex_indices[i][j+2], face_normal, null, materialIndex));
-				}
-			}
-			
-			// TEXTURE COORDINATES
-			if (jsonMesh.uv && jsonMesh.uv_indices)
-			{
-				// UVS
-				var uvs = [];
-				for (var i=0; i<jsonMesh.uv.length; i+=2)
-				{
-					uvs.push(new THREE.Vector2(jsonMesh.uv[i], jsonMesh.uv[i+1]));
-				}
-			
-				// UV INDICES
-				for (var i=0; i<jsonMesh.uv_indices.length; i+=3)
-				{
-					geometry.faceVertexUvs[0].push([uvs[jsonMesh.uv_indices[i]], uvs[jsonMesh.uv_indices[i+1]], uvs[jsonMesh.uv_indices[i+2]]]);
-				}
-			}
-			
-			if (skinning)
-			{
-				// BONES
-				geometry.bones = jsonMesh.skin;
-				
-				// SKIN INDICES && SKIN WEIGHTS
-				for (var i=0; i<jsonMesh.skin_indices.length; i+=4)
-				{
-					var bi0 = jsonMesh.skin_indices[i+0];
-					var bi1 = jsonMesh.skin_indices[i+1];
-					var bi2 = jsonMesh.skin_indices[i+2];
-					var bi3 = jsonMesh.skin_indices[i+3];
-					geometry.skinIndices.push(new THREE.Vector4(bi0, bi1, bi2, bi3));
-					
-					var bw0 = jsonMesh.skin_weights[i+0];
-					var bw1 = jsonMesh.skin_weights[i+1];
-					var bw2 = jsonMesh.skin_weights[i+2];
-					var bw3 = jsonMesh.skin_weights[i+3];
-					geometry.skinWeights.push(new THREE.Vector4(bw0, bw1, bw2, bw3));
-				}
-			}
-
-			// Post-processing
-			if (jsonMesh.face_normals == null)
-			{
-				geometry.computeFaceNormals();
-			}
-			geometry.computeVertexNormals();
-			geometry.computeBoundingBox();
-			
-			// MATERIAL
-			var material = materials[jsonMesh.material];
-			if (material == null)
-			{
-				material = new THREE.MeshNormalMaterial();
-			}
-			
-			// MESH
-			var mesh;
-			if (skinning)
-			{
-				if (material instanceof THREE.MeshFaceMaterial)
-				{
-					material.materials.map(function(mat){mat.skinning = true;})
-				}
-				else
-				{
-					material.skinning = true;
-				}
-				mesh = new THREE.SkinnedMesh(geometry, material);
-			}
-			else
-			{
-				mesh = new THREE.Mesh(geometry, material);
-			}
-			mesh.name = jsonMesh.name;
-			if (jsonMesh.position != null)
-			{
-				mesh.position.set(jsonMesh.position[0], jsonMesh.position[1], jsonMesh.position[2]);
-			}
-			if (jsonMesh.rotation != null)
-			{
-				mesh.quaternion.set(jsonMesh.rotation[0], jsonMesh.rotation[1], jsonMesh.rotation[2], jsonMesh.rotation[3]);
-			}
-			if (jsonMesh.scale != null)
-			{
-				mesh.scale.set(jsonMesh.scale[0], jsonMesh.scale[1], jsonMesh.scale[2]);
-			}
-
-			return mesh;
 		}
 		
-		var object3d = new THREE.Object3D();
-		for (var i=0; i<meshes.length; i++)
+		// ANIMATIONS
+		const animations = [];
+		if (json.animations && json.animations.length)
 		{
-			object3d.add(meshes[i]);
+			for (let jsonAnimationIndex = 0; jsonAnimationIndex < json.animations.length; jsonAnimationIndex++)
+			{
+				const jsonAnimation = json.animations[jsonAnimationIndex];
+				const mesh = meshes[jsonAnimationIndex];
+				const bones = mesh.userData.skeleton.bones;
+				const animation = this.parseAnimation(jsonAnimation, bones);
+				mesh.animations.push(animation);
+				animations.push(animation);
+			}
 		}
 
-		var animations = (json.animations ? json.animations.concat() : []);
-		for (var i in json.animations)
+		return { materials, meshes, animations };
+	}
+
+	parseMaterial(jsonMat, texturePath)
+	{
+		let material;
+
+		if (jsonMat.multi)
 		{
-			animations[json.animations[i].name] = json.animations[i];
+			// MULTI-MATERIAL
+			material = [];
+		}
+		else
+		{
+			material = new THREE.MeshPhongMaterial();
+
+			// DIFFUSE
+			if (jsonMat.diffuse)
+			{
+				material.color.r = jsonMat.diffuse[0] / 255;
+				material.color.g = jsonMat.diffuse[1] / 255;
+				material.color.b = jsonMat.diffuse[2] / 255;
+			}
+			
+			// SPECULAR
+			if (jsonMat.specular)
+			{
+				material.specular.r = jsonMat.specular[0] / 255;
+				material.specular.g = jsonMat.specular[1] / 255;
+				material.specular.b = jsonMat.specular[2] / 255;
+			}
+
+			// OPACITY
+			if (jsonMat.opacity)
+			{
+				material.opacity = jsonMat.opacity;
+				if (jsonMat.opacity != 1)
+				{
+					material.transparent = true;
+				}
+			}
+			
+			// TEXTURE
+			if (jsonMat.texture)
+			{
+				const textureUrl = `${texturePath}/${jsonMat.texture}`;
+
+				const onTextureLoaded = (texture) =>
+				{
+					console.log(`Texture "${textureUrl}" loaded`);
+				};
+
+				const onTextureProgress = (xhr) => { console.log(`${textureUrl} (${xhr.loaded / xhr.total * 100}%)`) };
+
+				const onTextureError = (xhr) => { console.log("Texture load failed", xhr) };
+
+				material.map = (new THREE.TextureLoader()).load(textureUrl, onTextureLoaded, onTextureProgress, onTextureError);
+			}
+			
+			if (jsonMat.side)
+			{
+				if (jsonMat.side === "double")
+				{
+					material.side = THREE.DoubleSide;
+				}
+				else if (jsonMat.side === "back" || jsonMat.side === "reverse")
+				{
+					material.side = THREE.BackSide;
+				}
+			}
 		}
 
-		myObject.materials = materials;
-		myObject.meshes = meshes;
-		myObject.animations = animations;
+		if (jsonMat.name)
+		{
+			material.name = jsonMat.name;
+		}
+		material.wireframe = true;
+		return material;
+	}
 
-		myObject.root = object3d;
+	parseMesh(jsonMesh, materialsByName)
+	{
+		console.log("parseMesh", jsonMesh);
 
-		callback(myObject);
+		// MATERIAL
+		var material = materialsByName[jsonMesh.material];
+		if (material == null)
+		{
+			material = new THREE.MeshNormalMaterial();
+		}
+		
+		// GEOMETRY
+		var geometry = new THREE.BufferGeometry();
+
+		if (jsonMesh.name)
+		{
+			geometry.name = jsonMesh.name;
+		}
+		
+		// VERTICES
+		if (jsonMesh.vertex_indices && jsonMesh.vertex_indices.length)
+		{
+			// INDEXED (remove indices)
+			const verticesSize = 3 * jsonMesh.vertex_indices.reduce((acc, value) => (acc + value.length), 0);
+			const vertices = new Float32Array(verticesSize);
+			let index = 0;
+			let materialIndex = 0;
+			for (const groupVertexIndices of jsonMesh.vertex_indices)
+			{
+				geometry.addGroup((index / 3), groupVertexIndices.length, materialIndex++);
+				for (const vertexIndex of groupVertexIndices)
+				{
+					const vertexIndexPosition = vertexIndex * 3;
+					vertices[index++] = jsonMesh.vertex_positions[vertexIndexPosition];
+					vertices[index++] = jsonMesh.vertex_positions[vertexIndexPosition + 1];
+					vertices[index++] = jsonMesh.vertex_positions[vertexIndexPosition + 2];
+				}
+			}
+			geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+		}
+		else
+		{
+			// NOT INDEXED
+			geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(jsonMesh.vertex_positions), 3));
+		}
+
+		// NORMALS
+		if (jsonMesh.face_normals && jsonMesh.face_normals.length && jsonMesh.vertex_indices && jsonMesh.vertex_indices.length)
+		{
+			// INDEXED (remove indices)
+			const normalsSize = 3 * jsonMesh.face_normals.reduce((acc, value) => (acc + value.length), 0);
+			const normals = new Float32Array(normalsSize);
+			let index = 0;
+			for (const groupFaceNormals of jsonMesh.face_normals)
+			{
+				for (let i = 0; i < groupFaceNormals.length; i += 3)
+				{
+					normals[index++] = groupFaceNormals[i];
+					normals[index++] = groupFaceNormals[i + 1];
+					normals[index++] = groupFaceNormals[i + 2];
+					normals[index++] = groupFaceNormals[i];
+					normals[index++] = groupFaceNormals[i + 1];
+					normals[index++] = groupFaceNormals[i + 2];
+					normals[index++] = groupFaceNormals[i];
+					normals[index++] = groupFaceNormals[i + 1];
+					normals[index++] = groupFaceNormals[i + 2];
+				}
+			}
+			geometry.setAttribute('normal', new THREE.BufferAttribute(normals, 3));
+		}
+		else if (jsonMesh.normals)
+		{
+			// NOT INDEXED
+			geometry.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(jsonMesh.normals), 3));
+		}
+		else
+		{
+			// NO NORMALS
+			geometry.computeVertexNormals();
+		}
+
+		// UVS
+		if (jsonMesh.uv_indices && jsonMesh.uv_indices.length)
+		{
+			// INDEXED (remove indices)
+			const uvs = new Float32Array(jsonMesh.uv_indices.length * 2);
+			for (let i = 0, sz = jsonMesh.uv_indices.length; i < sz; i++)
+			{
+				const index = jsonMesh.uv_indices[i];
+				uvs[2 * i] = jsonMesh.uv[2 * index];
+				uvs[2 * i + 1] = jsonMesh.uv[2 * index + 1];
+			}
+			geometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
+		}
+		else if (jsonMesh.uvs)
+		{
+			// NOT INDEXED
+			geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(jsonMesh.uvs), 2));
+		}
+
+		let aaa = false;
+		// MESH
+		let mesh;
+		if (jsonMesh.skin && jsonMesh.skin_indices && jsonMesh.skin_weights)
+		{
+			const skinIndicesSize = 4 * jsonMesh.vertex_indices.reduce((acc, value) => (acc + value.length), 0);
+			const skinIndices = new Uint16Array(skinIndicesSize);
+			const skinWeights = new Float32Array(skinIndicesSize);
+			let index = 0;
+			for (const groupVertexIndices of jsonMesh.vertex_indices)
+			{
+				for (const vertexIndex of groupVertexIndices)
+				{
+					const skinIndexPosition = vertexIndex * 4;
+					const i0 = jsonMesh.skin_indices[skinIndexPosition];
+					const i1 = jsonMesh.skin_indices[skinIndexPosition+1];
+					const i2 = jsonMesh.skin_indices[skinIndexPosition+2];
+					const i3 = jsonMesh.skin_indices[skinIndexPosition+3];
+
+					const w0 = jsonMesh.skin_weights[skinIndexPosition];
+					const w1 = jsonMesh.skin_weights[skinIndexPosition+1];
+					const w2 = jsonMesh.skin_weights[skinIndexPosition+2];
+					const w3 = jsonMesh.skin_weights[skinIndexPosition+3];
+
+					var total = w0 + w1 + w2 + w3;
+					if (total < 0.1)
+					{
+						console.warn(skinIndexPosition, "=>", index);
+						console.log("total=", total);
+						console.log("IDX", i0, i1, i2, i3);
+						console.log("WGT", w0, w1, w2, w3);
+					}
+
+					skinIndices[index] = i0;
+					skinWeights[index] = w0 / total;
+					index++;
+
+					skinIndices[index] = i1;
+					skinWeights[index] = w1 / total;
+					index++;
+
+					skinIndices[index] = i2;
+					skinWeights[index] = w2 / total;
+					index++;
+
+					skinIndices[index] = i3;
+					skinWeights[index] = w3 / total;
+					index++;
+				}
+			}
+			geometry.setAttribute('skinIndex', new THREE.BufferAttribute(skinIndices, 4));
+			geometry.setAttribute('skinWeight', new THREE.BufferAttribute(skinWeights, 4));
+			
+			console.log(geometry)
+			// SKINNED_MATERIALS
+			if (material instanceof Array)
+			{
+				for (var mat of material)
+				{
+					mat.skinning = true;
+				}
+			}
+			else
+			{
+				material.skinning = true;
+			}
+
+			// SKINNED_MESH
+			mesh = new THREE.SkinnedMesh(geometry, material);
+			mesh.userData.animated = true;
+
+			// SKELETON / BONES
+			var bones = [];
+
+			for (const jsonBone of jsonMesh.skin)
+			{
+				const bone = new THREE.Bone();
+				bone.name = jsonBone.name;
+				bone.userData.parent = jsonBone.parent;
+				bone.position.fromArray(jsonBone.pos);
+				bone.quaternion.fromArray(jsonBone.rotq);
+				bone.scale.fromArray(jsonBone.scl);
+				bones.push(bone);
+			}
+
+			for (const bone of bones)
+			{
+				if (bone.userData.parent != -1)
+				{
+					const parent = bones[bone.userData.parent];
+					parent.add(bone);
+				}
+				else
+				{
+					mesh.add(bone);
+				}
+			}
+
+			const skeleton = new THREE.Skeleton(bones);
+			mesh.bind(skeleton);
+			mesh.userData.skeleton = skeleton;
+		}
+		else
+		{
+			mesh = new THREE.Mesh(geometry, material);
+		}
+
+		if (jsonMesh.name)
+		{
+			mesh.name = jsonMesh.name;
+		}
+
+		if (jsonMesh.position)
+		{
+			mesh.position.fromArray(jsonMesh.position);
+		}
+
+		if (jsonMesh.rotation)
+		{
+			mesh.quaternion.fromArray(jsonMesh.rotation);
+		}
+
+		if (jsonMesh.scale)
+		{
+			mesh.scale.fromArray(jsonMesh.scale);
+		}
+
+		return mesh;
+	}
+
+	parseAnimation(jsonAnim, bones)
+	{
+		const tracks = [];
+
+		for (let jsonTrackIndex = 0; jsonTrackIndex < jsonAnim.hierarchy.length; jsonTrackIndex++)
+		{
+			const jsonTrack = jsonAnim.hierarchy[jsonTrackIndex];
+			const boneName = bones[jsonTrackIndex].name;
+			const times = [];
+			const positions = [];
+			const orientations = [];
+			const scales = [];
+			for (const jsonFrame of jsonTrack.keys)
+			{
+				times.push(jsonFrame.time);
+				positions.push(...jsonFrame.pos);
+				orientations.push(...jsonFrame.rot);
+				scales.push(...jsonFrame.scl);
+			}
+			tracks.push(new THREE.VectorKeyframeTrack(`${boneName}.position`, times, positions));
+			tracks.push(new THREE.QuaternionKeyframeTrack(`${boneName}.quaternion`, times, orientations));
+			tracks.push(new THREE.VectorKeyframeTrack(`${boneName}.scale`, times, scales));
+		}
+
+		return new THREE.AnimationClip(jsonAnim.name, jsonAnim.length, tracks);
+	}
+	
+	static cloneAnimationData(data, newName)
+	{
+		var data2 = {};
+		data2.name = newName;
+		data2.JIT = data.JIT;
+		data2.fps = data.fps;
+		data2.hierarchy = data.hierarchy.slice();
+		data2.initialized = false;
+		data2.length = data.length;
+		data2.loop = data.loop;
+		return data2;
+	}
+
+	static merge(geometry1, geometry2, materialIndexOffset)
+	{
+		if (materialIndexOffset === undefined)
+		{
+			materialIndexOffset = 0;
+		}
+		geometry1.merge(geometry2, null, materialIndexOffset);
+		AnimationUtils.mergeBones(geometry1, geometry2);
+		if (geometry2.name.length)
+		{
+			if (geometry1.name.length)
+			{
+				geometry1.name += "_";
+			}
+			geometry1.name += geometry2.name;
+		}
+		return geometry1;
+	}
+
+	static mergeBones(geometry1, geometry2)
+	{
+		if (typeof(geometry1.bones) == "undefined")
+		{
+			geometry1.bones = [];
+			geometry1.skinIndices = [];
+			geometry1.skinWeights = [];
+		}
+	
+		var bl, GB = [];
+	
+		// enumerate bone names in geometry1
+		bl = geometry1.bones.length;
+		for (var i=0 ; i < bl ; i++)
+		{
+			GB.push(geometry1.bones[i].name);
+		}
+	
+		// if bone doesn't exist in geometry1, we push it from geometry2
+		bl = geometry2.bones.length;
+		for (var i=0 ; i < bl ; i++)
+		{
+			if (GB.indexOf(geometry2.bones[i].name) == -1)
+			{
+				geometry1.bones.push(geometry2.bones[i]);
+			}
+		}
+	
+		function treatSkinIndex(skinIndex)
+		{
+			var name = geometry2.bones[skinIndex].name;
+			return getBoneIdFromName(geometry1.bones, name);
+		}
+	
+		for (var i=0 ; i < geometry2.skinIndices.length ; i++)
+		{
+			var v4 = geometry2.skinIndices[i].clone();
+	
+			// skinIndices
+			v4.x = (v4.x != -1 ? treatSkinIndex(v4.x) : 0);
+			v4.y = (v4.y != -1 ? treatSkinIndex(v4.y) : 0);
+			v4.z = (v4.z != -1 ? treatSkinIndex(v4.z) : 0);
+			v4.w = (v4.w != -1 ? treatSkinIndex(v4.w) : 0);
+			geometry1.skinIndices.push(v4);
+		}
+	
+		geometry1.skinWeights = geometry1.skinWeights.concat(geometry2.skinWeights);
 	}
 }

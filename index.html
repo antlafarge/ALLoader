@@ -1,82 +1,342 @@
 <!doctype html>
-<html>
+<html lang="en">
+
 <head>
-<title>ALLoader demos</title>
-<link href="examples/libs/bootstrap-3.0.3/css/bootstrap.css" rel="stylesheet">
-<style>
-/*.iblock { display:inline-block; border:1px solid black; }
-.subtitle { width:100%; text-align:center; }
-img { border-bottom:1px solid black; }*/
-</style>
+	<title>ALLoader demos (three.js)</title>
+	<link rel="icon" type="image/x-icon" href="/examples/favicon.ico">
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet"
+		integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"
+		integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3"
+		crossorigin="anonymous"></script>
+	<script async src="https://unpkg.com/es-module-shims@1.3.6/dist/es-module-shims.js"></script>
+	<script type="importmap">
+			{
+			  "imports": {
+				"three": "./examples/libs/three.js/build/three.module.js",
+				"TrackballControls": "./examples/libs/three.js/examples/jsm/controls/TrackballControls.js",
+				"stats.module":"./examples/libs/three.js/examples/jsm/libs/stats.module.js",
+				"dat.gui.module":"./examples/libs/three.js/examples/jsm/libs/dat.gui.module.js"
+			  }
+			}
+		</script>
+	<style>
+		html,
+		body,
+		.container-fluid,
+		.row {
+			height: 100%;
+			overflow: hidden;
+		}
+
+		.col-md-10 {
+			padding-left: 0;
+			padding-right: 0;
+		}
+
+		.side-menu {
+			height: 100%;
+			overflow-y: scroll;
+		}
+
+		#canvas-container {
+			background-color: black;
+			margin: 0;
+			padding: 0;
+			width: 100%;
+			height: 100%;
+		}
+	</style>
 </head>
+
 <body>
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-md-2 side-menu">
+				<h2>ALLoader demos</h2>
+				<p class="text-center">
+					<a href="https://github.com/antlafarge/ALLoader">Github project</a>
+				</p>
+				<a href="index.html?model=primitives">
+					<figure class="figure">
+						<img src="examples/thumbs/primitives.jpg" class="figure-img img-fluid rounded" alt="...">
+						<figcaption class="figure-caption text-center">Primitives</figcaption>
+					</figure>
+				</a>
+				<a href="index.html?model=crate">
+					<figure class="figure">
+						<img src="examples/thumbs/crate.jpg" class="figure-img img-fluid rounded" alt="...">
+						<figcaption class="figure-caption text-center">Crate</figcaption>
+					</figure>
+				</a>
+				<a href="index.html?model=gordon">
+					<figure class="figure">
+						<img src="examples/thumbs/gordon.jpg" class="figure-img img-fluid rounded" alt="...">
+						<figcaption class="figure-caption text-center">Gordon</figcaption>
+					</figure>
+				</a>
+				<a href="index.html?model=justin_idle">
+					<figure class="figure">
+						<img src="examples/thumbs/justin_idle.jpg" class="figure-img img-fluid rounded" alt="...">
+						<figcaption class="figure-caption text-center">Justin Idle</figcaption>
+					</figure>
+				</a>
+				<a href="index.html?model=justin_walking">
+					<figure class="figure">
+						<img src="examples/thumbs/justin_walking.jpg" class="figure-img img-fluid rounded" alt="...">
+						<figcaption class="figure-caption text-center">Justin Walking</figcaption>
+					</figure>
+				</a>
+			</div>
+			<div class="col-md-10 main-window">
+				<div id="canvas-container"></div>
+			</div>
+		</div>
+	</div>
 
-<div class="jumbotron">
-	<div class="container">
-		<h1>ALLoader demos</h1>
-		<p class="lead">This is the demos main page of the ALLoader open source project on github.</a></p>
-		<p><a class="btn btn-lg btn-primary" href="https://github.com/antlafarge/ALLoader" role="button">Go to Github project</a></p>
-	</div>
-</div>
+	<script type="module">
+		import * as THREE from 'three';
+		import { TrackballControls } from 'TrackballControls';
+		import { ALLoader } from '../loaders/ALLoader.js';
 
-<div class="container">
-	<h2>Static meshes</h2>
-	<div class="row">
-		<div class="col-md-6">
-			<a href="examples/primitives.html">
-				<img class="thumbnail" src="examples/thumbs/primitives.jpg">
-				<div class="caption">
-					<h3>Primitives</h3>
-				</div>
-			</a>
-		</div>
-		<div class="col-md-6">
-			<a href="examples/crate.html">
-				<img class="thumbnail" src="examples/thumbs/crate.jpg">
-				<div class="caption">
-					<h3>Crate</h3>
-				</div>
-			</a>
-		</div>
-	</div>
+		var container, camera, controls, scene, renderer, mesh, meshWire, anim, anim2, meshAnim, meshWireAnim, skeletonHelper, axesHelper, light, animationMixer;
 
-	<h2>Skinned / Rigged and animated meshes</h2>
-	<div class="row">
-		<div class="col-md-6">
-			<a href="examples/boxes.html">
-				<img class="thumbnail" src="examples/thumbs/boxes.jpg">
-				<div class="caption">
-					<h3>Boxes</h3>
-				</div>
-			</a>
-		</div>
-		<div class="col-md-6">
-			<a href="examples/gordon.html">
-				<img class="thumbnail" src="examples/thumbs/gordon.jpg">
-				<div class="caption">
-					<h3>Gordon</h3>
-				</div>
-			</a>
-		</div>
-	</div>
-	<div class="row">
-		<div class="col-md-6">
-			<a href="examples/justin_idle.html">
-				<img class="thumbnail" src="examples/thumbs/justin_idle.jpg">
-				<div class="caption">
-					<h3>Justin Idle</h3>
-				</div>
-			</a>
-		</div>
-		<div class="col-md-6">
-			<a href="examples/justin_walking.html">
-				<img class="thumbnail" src="examples/thumbs/justin_walking.jpg">
-				<div class="caption">
-					<h3>Justin Walking</h3>
-				</div>
-			</a>
-		</div>
-	</div>
-</div>
+		var clock = new THREE.Clock();
+
+		var reResult = /(\?|&)model=(.+?)(&.*)?$/.exec(window.location.search);
+		var modelToLoad = (reResult ? reResult[2] : "gordon");
+		console.log("modelToLoad", modelToLoad);
+
+		var mixers = [];
+
+		function main() {
+			console.log("main");
+			renderer = new THREE.WebGLRenderer({ antialias: true });
+			renderer.setClearColor(new THREE.Color(0x7f7f7f));
+			renderer.setSize(window.innerWidth, window.innerHeight);
+
+			container = document.getElementById('canvas-container');
+			container.appendChild(renderer.domElement);
+
+			camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.01, 1000);
+			camera.position.set(10, 0, 0);
+			controls = new TrackballControls(camera, container);
+			controls.rotateSpeed = 10.0;
+			controls.zoomSpeed = 1.1;
+			controls.panSpeed = 0.5;
+			controls.dynamicDampingFactor = 0.3;
+			controls.keys = [65, 83, 68];
+			controls.target = new THREE.Vector3(0, 0, 0);
+
+			scene = new THREE.Scene();
+
+			axesHelper = new THREE.AxesHelper(10);
+			scene.add(axesHelper);
+
+			light = new THREE.AmbientLight(0xffffff);
+			scene.add(light);
+
+			function createWireframe(skinnedMesh) {
+				console.log("createWireframe", skinnedMesh);
+				var wireColor = 0xffffff;
+				var wireOpacity = 0.2;
+				var material = new THREE.MeshBasicMaterial({ ambient: wireColor, opacity: wireOpacity, skinning: true, wireframe: true, transparent: true });
+				return new THREE.SkinnedMesh(skinnedMesh.geometry, material);
+			}
+
+			function processMesh(data) {
+				console.log("processMesh", data);
+
+				for (let mesh of data.meshes)
+				{
+					mesh.geometry.computeBoundingBox();
+					// Place camera
+					var heightX = mesh.geometry.boundingBox.max.x - mesh.geometry.boundingBox.min.x;
+					var heightY = mesh.geometry.boundingBox.max.y - mesh.geometry.boundingBox.min.y;
+					var heightZ = mesh.geometry.boundingBox.max.z - mesh.geometry.boundingBox.min.z;
+					var midX = mesh.geometry.boundingBox.min.x + heightX / 2;
+					var midY = mesh.geometry.boundingBox.min.y + heightY / 2;
+					var midZ = mesh.geometry.boundingBox.min.z + heightZ / 2;
+					const dist = heightX + heightY + heightZ;
+					camera.position.set(midX + dist * 0.25, midY, midZ + dist * 0.75);
+					controls.target.set(midX, midY, midZ);
+
+					scene.add(mesh);
+
+					skeletonHelper = new THREE.SkeletonHelper(mesh);
+					skeletonHelper.material.linewidth = 2;
+					scene.add(skeletonHelper);
+
+					const mixer = new THREE.AnimationMixer( mesh );
+					mesh.animations.forEach((clip) =>
+					{
+						mixer.clipAction(clip).play();
+					});
+					mixers.push(mixer);
+				}
+			}
+
+			function onLoad() {
+				console.log("Progress", arguments);
+			}
+
+			function onError(ex) {
+				console.error(ex);
+			}
+
+
+
+
+
+/*
+			const geometry = new THREE.BufferGeometry();
+
+			const indices = [];
+
+			const vertices = [];
+			const normals = [];
+			const colors = [];
+			const uvs = [];
+
+			const size = 20;
+			const segments = 10;
+
+			const halfSize = size / 2;
+			const segmentSize = size / segments;
+
+			// generate vertices, normals and color data for a simple grid geometry
+
+			vertices.push(-10, -10, -10);
+			vertices.push(10, -10, -10);
+			vertices.push(-10, 10, -10);
+			vertices.push(10, 10, -10);
+
+			normals.push(0, 0, 1);
+			normals.push(0, 0, 1);
+			normals.push(0, 0, 1);
+			normals.push(0, 0, 1);
+
+			colors.push(0, 0, 0);
+			colors.push(1, 0, 0);
+			colors.push(0, 1, 0);
+			colors.push(1, 1, 0);
+			
+			uvs.push(0, 0);
+			uvs.push(1, 0);
+			uvs.push(0, 1);
+			uvs.push(1, 1);
+
+			indices.push(0, 1, 2);
+			indices.push(1, 2, 3);
+
+			// for ( let i = 0; i <= segments; i ++ ) {
+
+			// 	const y = ( i * segmentSize ) - halfSize;
+
+			// 	for ( let j = 0; j <= segments; j ++ ) {
+
+			// 		const x = ( j * segmentSize ) - halfSize;
+
+			// 		vertices.push( x, - y, 0 );
+			// 		normals.push( 0, 0, 1 );
+
+			// 		const r = ( x / size ) + 0.5;
+			// 		const g = ( y / size ) + 0.5;
+
+			// 		colors.push( r, g, 1 );
+
+			// 	}
+
+			// }
+
+			// generate indices (data for element array buffer)
+
+			// for ( let i = 0; i < segments; i ++ ) {
+
+			// 	for ( let j = 0; j < segments; j ++ ) {
+
+			// 		const a = i * ( segments + 1 ) + ( j + 1 );
+			// 		const b = i * ( segments + 1 ) + j;
+			// 		const c = ( i + 1 ) * ( segments + 1 ) + j;
+			// 		const d = ( i + 1 ) * ( segments + 1 ) + ( j + 1 );
+
+			// 		// generate two faces (triangles) per iteration
+
+			// 		indices.push( a, b, d ); // face one
+			// 		indices.push( b, c, d ); // face two
+
+			// 	}
+
+			// }
+
+			//
+			geometry.addGroup(0, 3, 0);
+			geometry.addGroup(3, 3, 1);
+
+			geometry.setIndex( indices );
+			geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( vertices, 3 ) );
+			geometry.setAttribute( 'normal', new THREE.Float32BufferAttribute( normals, 3 ) );
+			geometry.setAttribute( 'color', new THREE.Float32BufferAttribute( colors, 3 ) );
+			geometry.setAttribute( 'uv', new THREE.Float32BufferAttribute( uvs, 2 ) );
+
+			// const material = new THREE.MeshPhongMaterial( {
+			// 	side: THREE.DoubleSide,
+			// 	vertexColors: true
+			// } );
+
+			// const material = new THREE.MeshNormalMaterial( {
+			// 	side: THREE.DoubleSide
+			// });
+
+			const material = [
+				new THREE.MeshStandardMaterial( {
+					side: THREE.DoubleSide,
+					map: (new THREE.TextureLoader()).load("examples/textures/crate02.jpg")
+				}),
+				new THREE.MeshStandardMaterial( {
+					side: THREE.DoubleSide,
+					map: (new THREE.TextureLoader()).load("examples/textures/crate02b.jpg"),
+					opacity: 0.8,
+					transparent: true
+				})
+			];
+
+			mesh = new THREE.Mesh( geometry, material );
+			scene.add( mesh );
+
+			console.log(mesh, geometry)
+*/
+
+			(new ALLoader).load(`./examples/data/${modelToLoad}.json`, "examples/textures", processMesh, onload, onError);
+
+			window.addEventListener('resize', onWindowResize, false);
+
+			onWindowResize();
+
+			render();
+		}
+
+		function onWindowResize() {
+			console.log("onWindowResize", container.offsetWidth, container.offsetHeight);
+			camera.aspect = container.offsetWidth / container.offsetHeight;
+			camera.updateProjectionMatrix();
+			renderer.setSize(container.offsetWidth, container.offsetHeight);
+			controls.handleResize();
+		}
+
+		function render() {
+			requestAnimationFrame(render);
+			var delta = clock.getDelta();
+			for (const mixer of mixers) mixer.update(delta);
+			controls.update();
+			renderer.render(scene, camera);
+		}
+
+		main();
+	</script>
 
 </body>
+
+</html>
