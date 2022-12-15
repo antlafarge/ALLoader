@@ -1,10 +1,10 @@
 -- MESH EXPORTER (ALM)
 
-include "tools/tools.ms"
-include "tools/tools_mesh.ms"
-include "tools/tools_anim.ms"
-
 clearListener()
+
+fileIn "tools/tools.ms"
+fileIn "tools/tools_mesh.ms"
+fileIn "tools/tools_anim.ms"
 
 fn export =
 (
@@ -49,19 +49,19 @@ fn export =
 
 rollout ALExporter "ALLoader exporter"
 (
-	checkbox flipYZCheckbox "Flip YZ-axis (Poser-like)" checked:true
+	checkbox flipYZCheckbox "Flip YZ-axis (Poser-like)" checked:flipYZ
 	
-	--checkbox exportMeshesCheckbox "Export meshes" checked:true
+	checkbox exportMeshesCheckbox "Export meshes" checked:exportMeshes
 	
-	--checkbox exportMaterialsCheckbox "Export materials" checked:true
+	checkbox exportMaterialsCheckbox "Export materials" checked:exportMaterials
 	
-	--checkbox exportSkinsCheckbox "Export Skins" checked:true
+	checkbox exportSkinsCheckbox "Export Skins" checked:exportSkins
 	
 	checkbox customAnimNameCheckbox "Custom animation name" checked:customAnimName
 
 	spinner decimalsSpinner "Decimals of floats" range:[0,9,4] type:#integer scale:1
 	
-	checkbox compressJsonCheckbox "Compress JSON" checked:false
+	checkbox compressJsonCheckbox "Compress JSON" checked:compressJson
 
 	button exportButton "Export"
 	
@@ -77,11 +77,11 @@ rollout ALExporter "ALLoader exporter"
 
 		flipYZ = flipYZCheckbox.checked
 		
-		--exportMeshes = exportMeshesCheckbox.checked
+		exportMeshes = exportMeshesCheckbox.checked
 		
-		--exportMaterials = exportMaterialsCheckbox.checked
+		exportMaterials = exportMaterialsCheckbox.checked
 		
-		--exportSkins = exportSkinsCheckbox.checked
+		exportSkins = exportSkinsCheckbox.checked
 		
 		customAnimName = customAnimNameCheckbox.checked
 		
@@ -94,6 +94,7 @@ rollout ALExporter "ALLoader exporter"
 )
 
 disableSceneRedraw()
+
 suspendEditing()
 
 undo on

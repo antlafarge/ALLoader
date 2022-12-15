@@ -1,6 +1,6 @@
 --  ANIMATION TOOLS
 
-include "tools.ms"
+fileIn "tools.ms"
 
 -- STRUCTURES
 

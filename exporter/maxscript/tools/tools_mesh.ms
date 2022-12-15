@@ -1,8 +1,8 @@
 --  MESH TOOLS
 
-include "tools.ms"
-include "tools_anim.ms"
-include "InputStringDialog.ms"
+fileIn "tools.ms"
+fileIn "tools_anim.ms"
+fileIn "InputStringDialog.ms"
 
 -- STRUCTURES
 struct MeshDataStruct (name="", material=undefined, vertices=#(), vertex_indices=#(), face_normals=#(), colors=#(), uvs=#(), uv_indices=#(), skinIndices=#(), skinWeights=#(), skinNames=#(), bones=#(), animData=undefined, position=undefined, orientation=undefined, scale=undefined)

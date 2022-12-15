@@ -1,4 +1,4 @@
-include "globals.ms"
+fileIn "globals.ms"
 
 -- Return the cached number of tabulations if output is not compressed
 fn tabs tab =

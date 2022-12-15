@@ -1,4 +1,4 @@
-include "globals.ms"
+fileIn "globals.ms"
 
 fn formatObject obj =
 (
