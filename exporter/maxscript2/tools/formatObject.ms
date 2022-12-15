@@ -1,6 +1,6 @@
-include "tools/globals.ms"
+include "globals.ms"
 
-function formatObject obj =
+fn formatObject obj =
 (
 	format ("formatObject '" + obj.name + "'")
 
@@ -105,8 +105,7 @@ function formatObject obj =
     -- )
 )
 
--- FUNCTIONS
-function processBoneForOneVertex objSkin meshData vertexIndex =
+fn processBoneForOneVertex objSkin meshData vertexIndex =
 (
 	local weightCountTotal = skinOps.GetVertexWeightCount objSkin vertexIndex
 	

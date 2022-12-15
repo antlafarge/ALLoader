@@ -1,8 +1,10 @@
-include "tools/globals.ms"
-include "tools/tools.ms"
-include "tools/formatObject.ms"
-
 clearListener()
+
+fileIn "tools/globals.ms"
+fileIn "tools/tools.ms"
+fileIn "tools/formatObject.ms"
+
+format "AAA => %\n" sp
 
 fn export =
 (
@@ -33,7 +35,7 @@ fn export =
 			(
                 select obj
                 max modify mode
-				formatObject obj
+				--formatObject obj
 			)
 		)
 	

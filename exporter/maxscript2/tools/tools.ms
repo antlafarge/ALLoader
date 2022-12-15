@@ -1,8 +1,9 @@
-include "tools/globals.ms"
+include "globals.ms"
 
 -- Return the cached number of tabulations if output is not compressed
 fn tabs tab =
 (
+	format "tabs %" tab
 	if (compressJson) then
 	(
 		""
