@@ -1,78 +1,88 @@
--- MESH EXPORTER (ALM)
-
 clearListener()
 
+fileIn "tools/globals.ms"
 fileIn "tools/tools.ms"
-fileIn "tools/tools_mesh.ms"
-fileIn "tools/tools_anim.ms"
+fileIn "tools/formatObject.ms"
 
 fn export =
 (
-	filepath = getSaveFileName caption:"Location for saving the Mesh file" types:"JSON (json)|*.json|Plain Text (txt)|*.txt|All Files|*.*|"
+	local filepath = getSaveFileName caption:"File location" types:"JSON (json)|*.json|Plain Text (txt)|*.txt|All Files|*.*|"
 	
 	if (filepath != undefined) then
 	(
 		deleteFile filepath
-		file = createFile filepath
+		local stream = createFile filepath
 		
-		mySelection = getCurrentSelection()
+		local mySelection = getCurrentSelection()
+        local mySelectionTmp = mySelection
 		
-		startTime = timeStamp()
+        if (mySelection.count == 0) then
+        (
+            mySelectionTmp = objects
+        )
 		
-		myObjects = #()
-		for o in objects do
+		local startTime = timeStamp()
+		
+	    format "{%" nl to:stream
+	    format "%\"version\":%\"0.2\",%" (tabs 1) sp nl to:stream
+	    format "%\"meshes\":%[%" (tabs 1) sp nl to:stream
+		
+		for obj in mySelectionTmp do
 		(
-			if (isGeometry o) then
+			if (isGeometry obj) then
 			(
-				append myObjects o
+                select obj
+                max modify mode
+				formatObject obj stream
 			)
 		)
 		
-		mySubMeshes = processObjects myObjects
+        format "%%]%}%" nl (tabs 1) nl nl to:stream
 		
-		formatObjects mySubMeshes file
-		
-		endTime = timeStamp()
+		local endTime = timeStamp()
 		
 		close file
 		
 		clearselection
 		select mySelection
 		
-		messageBox ("Export succeed (" + (((endTime - startTime) / 1000.0) as string) + " seconds).") title:"ALLoader exporter" beep:false
+		messageBox ("Export completed (" + (((endTime - startTime) / 1000.0) as string) + " seconds).") title:"ALLoader exporter" beep:false
 	)
 	else
 	(
-		messageBox "Export canceled." title:"ALLoader exporter" beep:false
+		messageBox "Export cancelled." title:"ALLoader exporter" beep:false
 	)
 )
 
 rollout ALExporter "ALLoader exporter"
 (
-	checkbox flipYZCheckbox "Flip YZ-axis (Poser-like)" checked:flipYZ
+	checkbox flipYZCheckbox "Flip YZ-axis (Poser-like)" checked:true
 	
-	checkbox exportMeshesCheckbox "Export meshes" checked:exportMeshes
+	checkbox exportMeshesCheckbox "Export meshes" checked:true
 	
-	checkbox exportMaterialsCheckbox "Export materials" checked:exportMaterials
+	checkbox exportMaterialsCheckbox "Export materials" checked:true
 	
-	checkbox exportSkinsCheckbox "Export Skins" checked:exportSkins
+	checkbox exportSkinsCheckbox "Export Skins" checked:true
 	
-	checkbox customAnimNameCheckbox "Custom animation name" checked:customAnimName
+	checkbox exportAnimsCheckbox "Export Animations" checked:true
+	
+	checkbox customAnimNameCheckbox "Custom animation name" checked:false
 
-	spinner decimalsSpinner "Decimals of floats" range:[0,9,4] type:#integer scale:1
+	spinner decimalsSpinner "Decimals" range:[0,9,4] type:#integer scale:1
 	
-	checkbox compressJsonCheckbox "Compress JSON" checked:compressJson
+	checkbox compressJsonCheckbox "Compress JSON" checked:false
 
 	button exportButton "Export"
 	
 	on exportButton pressed do
 	(
-		compressJson = compressJsonCheckbox.checked
+		local compressJson = compressJsonCheckbox.checked
 
-		if (compressJson) then
+		if (not compressJson) then
 		(
-			nl = ""
-			sp = ""
+			nl = "\n"
+            cnl = ",\n"
+			sp = " "
 		)
 
 		flipYZ = flipYZCheckbox.checked
@@ -82,6 +92,8 @@ rollout ALExporter "ALLoader exporter"
 		exportMaterials = exportMaterialsCheckbox.checked
 		
 		exportSkins = exportSkinsCheckbox.checked
+		
+		exportAnims = exportAnimsCheckbox.checked
 		
 		customAnimName = customAnimNameCheckbox.checked
 		
@@ -94,7 +106,6 @@ rollout ALExporter "ALLoader exporter"
 )
 
 disableSceneRedraw()
-
 suspendEditing()
 
 undo on
@@ -105,4 +116,4 @@ undo on
 resumeEditing()
 enableSceneRedraw()
 
-print "Script ended"
+print "Script end"

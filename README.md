@@ -45,7 +45,6 @@ http://antlafarge.github.io/ALLoader/
 ### Todo  
 - Interface  
 - Biped  
-- Python implementation  
 
 ### FAQ
 Q. Some objects in the scene are not well placed?  

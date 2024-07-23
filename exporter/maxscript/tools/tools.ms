@@ -1,36 +1,11 @@
--- GLOBAL TOOLS
-
--- GLOBAL VARIABLES
-
-global flipYZ = true
-global flipYZ_transform = matrix3 [1,0,0] [0,0,-1] [0,1,0] [0,0,0] -- matrix to transform to default opengl axis
-
-global exportMeshes = true
-global exportMaterials = true
-global exportSkins = true
-
-global customAnimName = false
-
-global formattedPrintFormat = ".5g"
-
-global compressJson = false
-
-global TAB = 0
-
-global TAB_ARRAY = #( "\t" )
-
-global nl = "\n"
-
-global sp = " "
-
--- FUNCTIONS
+fileIn "globals.ms"
 
 -- Return the cached number of tabulations if output is not compressed
 fn tabs tab =
 (
 	if (compressJson) then
 	(
-		""	
+		""
 	)
 	else
 	(
@@ -67,9 +42,45 @@ fn formatArray pieces =
 (
 	local stream = stringstream ""
 	local count = pieces.count
-	for index = 1 to count do
+	if (count > 0) then
 	(
-		format "%%" (if index > 1 then "," else "") (fp pieces[index]) to:stream
+		format "%" (fp pieces[1]) to:stream
+		for index = 2 to count do
+		(
+			format ",%" (fp pieces[index]) to:stream
+		)
+	)
+	stream as string
+)
+
+fn formatArrayAsInteger pieces =
+(
+	local stream = stringstream ""
+	local count = pieces.count
+	if (count > 0) then
+	(
+		format "%" (pieces[1] as integer) to:stream
+		for index = 2 to count do
+		(
+			format ",%" (pieces[index] as integer) to:stream
+		)
+	)
+	stream as string
+)
+
+fn formatUvArray pieces =
+(
+	local stream = stringstream ""
+	local count = pieces.count
+	if (count > 0) then
+	(
+		local piece = pieces[1]
+		format "%,%,%" (fp piece.x) (fp piece.y) to:stream
+		for index = 2 to count do
+		(
+			piece = pieces[index]
+			format ",%,%,%" (fp piece.x) (fp piece.y) to:stream
+		)
 	)
 	stream as string
 )
@@ -78,11 +89,49 @@ fn formatPoint3Array pieces =
 (
 	local stream = stringstream ""
 	local count = pieces.count
-	local myPoint3
-	for index = 1 to count do
+	if (count > 0) then
 	(
-		myPoint3 = pieces[index]
-		format "%%,%,%" (if index > 1 then "," else "") (fp myPoint3.x) (fp myPoint3.y) (fp myPoint3.z) to:stream
+		local piece = pieces[1]
+		format "%,%,%" (fp piece.x) (fp piece.y) (fp piece.z) to:stream
+		for index = 2 to count do
+		(
+			piece = pieces[index]
+			format ",%,%,%" (fp piece.x) (fp piece.y) (fp piece.z) to:stream
+		)
+	)
+	stream as string
+)
+
+fn formatColorRgbaArray pieces =
+(
+	local stream = stringstream ""
+	local count = pieces.count
+	if (count > 0) then
+	(
+		local piece = pieces[1]
+		format "%,%,%,%" (fp piece.r) (fp piece.g) (fp piece.b) (fp piece.a) to:stream
+		for index = 2 to count do
+		(
+			piece = pieces[index]
+			format ",%,%,%,%" (fp piece.r) (fp piece.g) (fp piece.b) (fp piece.a) to:stream
+		)
+	)
+	stream as string
+)
+
+fn formatColorRgbArray pieces =
+(
+	local stream = stringstream ""
+	local count = pieces.count
+	if (count > 0) then
+	(
+		local piece = pieces[1]
+		format "%,%,%" (fp piece.r) (fp piece.g) (fp piece.b) to:stream
+		for index = 2 to count do
+		(
+			piece = pieces[index]
+			format ",%,%,%" (fp piece.r) (fp piece.g) (fp piece.b) to:stream
+		)
 	)
 	stream as string
 )
@@ -91,11 +140,15 @@ fn formatQuatArray pieces =
 (
 	local stream = stringstream ""
 	local count = pieces.count
-	local myQuat
-	for index = 1 to count do
+	if (count > 0) then
 	(
-		myQuat = pieces[index]
-		format "%%,%,%,%" (if index > 1 then "," else "") (fp q4.x) (fp q4.y) (fp q4.z) (fp q4.w) to:stream
+		local myQuat = pieces[1]
+		format "%,%,%,%" (fp q4.x) (fp q4.y) (fp q4.z) (fp q4.w) to:stream
+		for index = 2 to count do
+		(
+			myQuat = pieces[index]
+			format ",%,%,%,%" (fp q4.x) (fp q4.y) (fp q4.z) (fp q4.w) to:stream
+		)
 	)
 	stream as string
 )
