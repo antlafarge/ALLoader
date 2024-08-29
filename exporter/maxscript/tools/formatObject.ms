@@ -229,7 +229,7 @@ fn formatObject obj stream =
 			)
 			format "]" to:stream
 		)
-		local bones = skinOps.GetBoneNodes objSkin
+		local allBones = skinOps.GetBoneNodes objSkin
 		local bonesCount = bones.count
 		if (bonesCount > 0) then
 		(
@@ -237,7 +237,7 @@ fn formatObject obj stream =
 			local firstBone = true;
 			for bi = 1 to bonesCount do
 			(
-				local b = bones[bi]
+				local b = allBones[bi]
 
 				-- retrive parent boneID
 				local parentBoneID = -1
@@ -245,7 +245,7 @@ fn formatObject obj stream =
 				(
 					for bi2 = 1 to bonesCount do
 					(
-						if (b.parent == bones[bi2]) then
+						if (b.parent == allBones[bi2]) then
 						(
 							parentBoneID = bi2 - 1
 							break
