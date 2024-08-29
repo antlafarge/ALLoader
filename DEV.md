@@ -11,11 +11,11 @@
 
 ## Update three.js
 
-- `git checkout -b r146`
 - `cd examples/libs/three.js`
-- `git checkout tags/r146 -b 146`
+- `git checkout tags/r167 -b r167`
 - `cd ../../..`
-- `git commit -m "r146"`
+- `git commit -m "Update Three.js r167"`
+- `git push origin main`
 
 # Start examples
 
