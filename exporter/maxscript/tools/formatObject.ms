@@ -230,7 +230,7 @@ fn formatObject obj stream =
 			format "]" to:stream
 		)
 		local allBones = skinOps.GetBoneNodes objSkin
-		local bonesCount = bones.count
+		local bonesCount = allBones.count
 		if (bonesCount > 0) then
 		(
 			format ",%%\"skin\":%[" nl (tabs 3) sp to:stream
@@ -252,7 +252,7 @@ fn formatObject obj stream =
 						)
 					)
 				)
-
+				
 				-- get the transform converted to OpenGL axis
 				local newTransform = (getRelativeTransformForOpenGL b)
 				
