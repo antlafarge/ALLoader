@@ -259,12 +259,13 @@ fn formatObject obj stream =
 				-- quaternion is inversed because of rotations are inversed in maxscript
 				-- cf. http://docs.autodesk.com/3DSMAX/15/ENU/MAXScript-Help/index.html?url=files/GUID-3B001F21-8FE9-4663-A972-E648682A0ACD.htm,topicNumber=d30e272529
 				
-				format "%%{%\"name\":\"%\",%\"parent\":%,%\"pos\":%,%\"rot\":[0,0,0],%\"rotq\":%,%\"scl\":%%}" nl (tabs 4) sp b.name sp parentBoneID sp (formatPoint3 newTransform.position) sp sp (formatQuaternion (inverse newTransform.rotation)) sp (formatPoint3 newTransform.scale) sp to:stream
-				
 				if (firstBone == false) then
 				(
 					format "," to:stream
 				)
+				
+				format "%%{%\"name\":\"%\",%\"parent\":%,%\"pos\":%,%\"rot\":[0,0,0],%\"rotq\":%,%\"scl\":%%}" nl (tabs 4) sp b.name sp parentBoneID sp (formatPoint3 newTransform.position) sp sp (formatQuaternion (inverse newTransform.rotation)) sp (formatPoint3 newTransform.scale) sp to:stream
+				
 				firstBone = false
 			)
 			format "%%]" nl (tabs 3) to:stream
