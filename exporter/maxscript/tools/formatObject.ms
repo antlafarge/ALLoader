@@ -3,66 +3,76 @@ fileIn "tools.ms"
 
 function formatMaterial mat stream =
 (
-	if ((classof mat) == MultiMaterial) then
+	if ((classof mat) == PhysicalMaterial) then
 	(
-		format "%{%" (tabs 2) nl to:stream
-		format "%\"name\":\"%\",%" (tabs 3) mat.name nl to:stream
-		format "%\"multi\":[%" (tabs 3) nl to:stream
+		format "%\"%\":%{%" (tabs 2) mat.name sp nl to:stream
+		if (mat.base_color_map != undefined) then
+		(
+			textureFilePath = mat.base_color_map.bitmap.filename
+			tokens = (filterString textureFilePath "\\")
+			textureFileName = tokens[tokens.count]
+			format "%\"texture\":%\"%\",%" (tabs 3) sp textureFileName nl to:stream
+		)
+		format "%\"ambient\":%[%,%,%],%" (tabs 3) sp (fp mat.Base_Color.r) (fp mat.Base_Color.g) (fp mat.Base_Color.b) nl to:stream
+		format "%\"diffuse\":%[%,%,%],%" (tabs 3) sp (fp mat.Base_Color.r) (fp mat.Base_Color.g) (fp mat.Base_Color.b) nl to:stream
+		format "%\"opacity\":%%%" (tabs 3) sp (fp (1 - mat.Transparency)) nl to:stream
+		format "%}" (tabs 2) to:stream
+	)
+	else if ((classof mat) == MultiMaterial) then
+	(
+		format "%\"%\":%{%" (tabs 2) mat.name sp nl to:stream
+		format "%\"multi\":%[%" (tabs 3) sp nl to:stream
 		-- display sub-material names
 		if (mat.numsubs > 1) then
 		(
 			format "%\"%\"" (tabs 4) mat.materialList[1].name to:stream
 			for index = 2 to mat.numsubs do
 			(
-				format ",%%\"%\"%" nl (tabs 4) mat.materialList[index].name nl to:stream
+				if (mat.materialList[index] != undefined) then
+				(
+					format ",%%\"%\"" nl (tabs 4) mat.materialList[index].name to:stream
+				)
 			)
 		)
-		format "%]%" (tabs 3) nl to:stream
+		format "%%]%" nl (tabs 3) nl to:stream
 		format "%}" (tabs 2) to:stream
 		-- recursive parse of sub-materials
 		for index = 1 to mat.numsubs do
 		(
-			format ",%" nl to:stream
-			formatMaterial mat.materialList[index] stream
+			if (mat.materialList[index] != undefined) then
+			(
+				format ",%" nl to:stream
+				formatMaterial mat.materialList[index] stream
+			)
 		)
-		format "%" nl to:stream
 	)
-	else if ((classof mat) == PhysicalMaterial) then
+	else if ((classof mat) == doubleSidedMat) then
 	(
-		format "%{%" (tabs 2) nl to:stream
-		format "%\"name\":\"%\",%" (tabs 3) mat.name nl to:stream
-		if (mat.base_color_map != undefined) then
+		local matName = mat.name
+		if (mat.map1Enabled) then
 		(
-			textureFilePath = mat.base_color_map.bitmap.filename
-			tokens = (filterString textureFilePath "\\")
-			textureFileName = tokens[tokens.count]
-			format "%\"texture\":\"%\",%" (tabs 3) textureFileName nl to:stream
+			mat = mat.material1
 		)
-		format "%\"ambient\":[%,%,%],%" (tabs 3) (fp mat.Base_Color.r) (fp mat.Base_Color.g) (fp mat.Base_Color.b) nl to:stream
-		format "%\"diffuse\":[%,%,%],%" (tabs 3) (fp mat.Base_Color.r) (fp mat.Base_Color.g) (fp mat.Base_Color.b) nl to:stream
-		format "%\"opacity\":%%" (tabs 3) (fp (1 - mat.Transparency)) nl to:stream
-		format "%}" (tabs 2) to:stream
-	)
-	else if ((classof mat) == Standardmaterial) then
-	(
-		format "%{%" (tabs 2) nl to:stream
-		format "%\"name\":\"%\",%" (tabs 3) mat.name nl to:stream
-		if (mat.diffuseMap != undefined) then
+		else if (mat.map2Enabled) then
 		(
-			textureFilePath = mat.diffuseMap.bitmap.filename
-			tokens = (filterString textureFilePath "\\")
-			textureFileName = tokens[tokens.count]
-			format "%\"texture\":\"%\",%" (tabs 3) textureFileName nl to:stream
+			mat = mat.material2
 		)
-		if (mat.twoSided == true) then
+		if (mat != undefined) then
 		(
-			format "%\"side\":\"double\",%" (tabs 3) nl to:stream
+			format "%\"%\":%{%" (tabs 2) matName sp nl to:stream
+			if (mat.base_color_map != undefined) then
+			(
+				textureFilePath = mat.base_color_map.bitmap.filename
+				tokens = (filterString textureFilePath "\\")
+				textureFileName = tokens[tokens.count]
+				format "%\"texture\":%\"%\",%" (tabs 3) sp textureFileName nl to:stream
+			)
+			format "%\"ambient\":%[%,%,%],%" (tabs 3) sp (fp mat.Base_Color.r) (fp mat.Base_Color.g) (fp mat.Base_Color.b) nl to:stream
+			format "%\"diffuse\":%[%,%,%],%" (tabs 3) sp (fp mat.Base_Color.r) (fp mat.Base_Color.g) (fp mat.Base_Color.b) nl to:stream
+			format "%\"opacity\":%%,%" (tabs 3) sp (fp (1 - mat.Transparency)) nl to:stream
+			format "%\"side\":%\"double\"%" (tabs 3) sp nl to:stream
+			format "%}" (tabs 2) to:stream
 		)
-		format "%\"ambient\":[%,%,%]," (tabs 3) (fp mat.ambient.r) (fp mat.ambient.g) (fp mat.ambient.b) nl to:stream
-		format "%\"diffuse\":[%,%,%]," (tabs 3) (fp mat.diffuse.r) (fp mat.diffuse.g) (fp mat.diffuse.b) nl to:stream
-		format "%\"specular\":[%,%,%]," (tabs 3) (fp mat.specular.r) (fp mat.specular.g) (fp mat.specular.b) nl to:stream
-		format "%\"opacity\":%%" (tabs 3) (fp (mat.opacity / 100)) nl to:stream
-		format "%}" (tabs 2) to:stream
 	)
 )
 
@@ -70,18 +80,16 @@ fn formatObject obj stream =
 (
 	--format ("formatObject '" + obj.name + "'\n") to:Listener
 
-	format "%{%" (tabs 2) nl to:stream
-
-	format "%\"name\":\"%\",%" (tabs 3) obj.name nl to:stream
+	format "%\"%\":%{%" (tabs 2) obj.name sp nl to:stream
 
 	if (obj.material != undefined) then
 	(
-		format "%\"material\":\"%\",%" (tabs 3) obj.material.name nl to:stream
+		format "%\"material\":%\"%\",%" (tabs 3) sp obj.material.name nl to:stream
 	)
 	
-	format "%\"position\":%,%" (tabs 3) (point3ForOpenGL obj.position) nl to:stream
-	format "%\"orientation\":%,%" (tabs 3) (formatQuaternion (quatForOpenGL obj.rotation)) nl to:stream
-	format "%\"scale\":%,%" (tabs 3) (formatPoint3 obj.scale) nl to:stream
+	format "%\"position\":%%,%" (tabs 3) sp (point3ForOpenGL obj.position) nl to:stream
+	format "%\"orientation\":%%,%" (tabs 3) sp (formatQuaternion (quatForOpenGL obj.rotation)) nl to:stream
+	format "%\"scale\":%%,%" (tabs 3) sp (formatPoint3 obj.scale) nl to:stream
 	
 	local objMesh = obj.mesh
     
@@ -126,7 +134,7 @@ fn formatObject obj stream =
 	)
 	
 	-- vertex
-	format "%\"vertex_positions\":[" (tabs 3) to:stream
+	format "%\"vertex_positions\":%[" (tabs 3) sp to:stream
 	if (objMesh.numverts > 0) then
 	(
 		local vert = (point3ForOpenGL (in coordsys local getVert objMesh 1))
@@ -134,13 +142,13 @@ fn formatObject obj stream =
 		for v = 2 to objMesh.numverts do
 		(
 			vert = (point3ForOpenGL (in coordsys local getVert objMesh v))
-			format ", %,%,%" (fp vert.x) (fp vert.y) (fp vert.z) to:stream
+			format ",%%,%,%" sp (fp vert.x) (fp vert.y) (fp vert.z) to:stream
 		)
 	)
 	format "],%" nl to:stream
 
 	-- vertex index
-	format "%\"vertex_indices\":[%" (tabs 3) nl to:stream
+	format "%\"vertex_indices\":%[%" (tabs 3) sp nl to:stream
 	if (vertex_indices.count > 0) then
 	(
 		format "%[%]" (tabs 4) (formatArray vertex_indices[1]) to:stream
@@ -152,7 +160,7 @@ fn formatObject obj stream =
 	format "%%],%" nl (tabs 3) nl to:stream
 
 	-- face normals
-	format "%\"face_normals\":[%" (tabs 3) nl to:stream
+	format "%\"face_normals\":%[%" (tabs 3) sp nl to:stream
 	if (face_normals.count > 0) then
 	(
 		format "%[%]" (tabs 4) (formatArray face_normals[1]) to:stream
@@ -164,7 +172,7 @@ fn formatObject obj stream =
 	format "%%],%" nl (tabs 3) nl to:stream
 
 	-- texture uvs
-	format "%\"uv\":[" (tabs 3) to:stream
+	format "%\"uv\":%[" (tabs 3) sp to:stream
 	if (objMesh.numTVerts > 0) then
 	(
 		local tvert = (getTVert objMesh 1)
@@ -172,13 +180,13 @@ fn formatObject obj stream =
 		for v = 2 to objMesh.numTVerts do
 		(
 			local tvert = (getTVert objMesh v)
-			format ", %,%" (fp tvert.x) (fp tvert.y) to:stream
+			format ",%%,%" sp (fp tvert.x) (fp tvert.y) to:stream
 		)
 	)
 	format "],%" nl to:stream
 
 	-- texture indices
-	format "%\"uv_indices\":[" (tabs 3) to:stream
+	format "%\"uv_indices\":%[" (tabs 3) sp to:stream
 	if (uv_indices.count > 0) then
 	(
 		format "%" (uv_indices[1] as integer) to:stream
@@ -187,51 +195,63 @@ fn formatObject obj stream =
 			format ",%" (uv_indices[index] as integer) to:stream
 		)
 	)
-	format "],%" nl to:stream
+	format "]" to:stream
 
-	-- local objSkin = obj.modifiers[#skin]
+	local objSkin = obj.modifiers[#skin]
+	if (objSkin != undefined) then
+	(
+		local bones2 = skinOps.GetBoneNodes objSkin
+		local skinIndices = #()
+		local skinWeights = #()
 	
-	-- local bones = #()
-	-- if (objSkin != undefined) then
-	-- (
-	-- 	meshData.bones = skinOps.GetBoneNodes objSkin
-	-- )
+		for vertexIndex = 1 to objMesh.numverts do
+		(
+			-- skin indices / skin weights
+			processBoneForOneVertex objSkin vertexIndex skinIndices skinWeights
+		)
+		
+		if (skinIndices.count > 0) then
+		(
+			format ",%%\"skin_indices\":%[%" nl (tabs 3) sp (skinIndices[1] as integer) to:stream
+			for skinIndex = 2 to skinIndices.count do
+			(
+				format ",%" (skinIndices[skinIndex] as integer) to:stream
+			)
+			format "]" to:stream
+		)
 	
-	-- for v = 1 to objMesh.numverts do
-	-- (
-	-- 	-- skin indices / skin weights
-	-- 	if (objSkin != undefined) then
-	-- 	(
-	-- 		processBoneForOneVertex objSkin meshData v
-	-- 	)
-	-- )
+		if (skinWeights.count > 0) then
+		(
+			format ",%%\"skin_weights\":%[%" nl (tabs 3) sp (fp skinWeights[1]) to:stream
+			for skinIndex = 2 to skinWeights.count do
+			(
+				format ",%" (fp skinWeights[skinIndex]) to:stream
+			)
+			format "]" to:stream
+		)
 	
-    -- if (obj.modifiers[#skin] != undefined) then
-    -- (
-    --     local animName = "anim_" + (animCount as String)
-    --     if (customAnimName == true) then
-    --     (
-    --         InputStringDialog = InputStringDialog()
-    --         animName = InputStringDialog.stringQuery.launch label:"Enter the animation name"
-    --     )
-    --     else
-    --     (
-    --         animCount += 1
-    --     )
-    --     meshData.animData = processAnimatedObject obj
-    --     meshData.animData.name = animName
-    -- )
+		local animName = "anim_" + (animCount as String)
+		if (customAnimName == true) then
+		(
+			InputStringDialog = InputStringDialog()
+			animName = InputStringDialog.stringQuery.launch label:"Enter the animation name"
+		)
+		else
+		(
+			animCount += 1
+		)
+		--meshData.animData = processAnimatedObject obj
+		--meshData.animData.name = animName
+	)
 	
-	format "%}%" (tabs 2) nl to:stream
+	format "%%}%" nl (tabs 2) nl to:stream
 )
 
-fn processBoneForOneVertex objSkin meshData vertexIndex =
+fn processBoneForOneVertex objSkin vertexIndex skinIndices skinWeights =
 (
 	local weightCountTotal = skinOps.GetVertexWeightCount objSkin vertexIndex
-	
-	local skinIndices = #()
-	local skinWeights = #()
-	
+	local vertexSkinIndices = #()
+	local vertexSkinWeights = #()
 	local weightIndex = 1
 	
 	-- Retrieve BoneIndices and BoneWeights
@@ -239,55 +259,32 @@ fn processBoneForOneVertex objSkin meshData vertexIndex =
 	(
 		-- boneIndexes
 		local boneIndex = skinOps.GetVertexWeightBoneID objSkin vertexIndex weightIndex
-		append skinIndices (boneIndex - 1)
+		append vertexSkinIndices (boneIndex - 1)
 		
 		-- skinWeights
 		local boneWeight = skinOps.GetVertexWeight objSkin vertexIndex weightIndex
-		append skinWeights boneWeight
-		
-		if (meshData.skinIndices[vertexIndex].count < 8) then
-		(
-			format "Retrieve boneIndex %\n" boneIndex
-			format "Retrieve boneWeight %\n" boneWeight
-		)
+		append vertexSkinWeights boneWeight
 	)
 	
 	-- padding empty unused bone slots
 	while (weightIndex < 4) do
 	(
-		append skinIndices 0
-		append skinWeights 0
+		append vertexSkinIndices 0
+		append vertexSkinWeights 0
 		weightIndex += 1
-		
-		if (meshData.skinIndices[vertexIndex].count < 8) then
-		(
-			format "Padding boneIndex\n"
-			format "Padding boneWeight\n"
-		)
 	)
 	
 	-- Keep only 4 values
-	while (skinIndices.count > 4) do
+	while (vertexSkinIndices.count > 4) do
 	(
-		local minValue = amin skinWeights
-		local index = findItem skinWeights minValue
-		
-		if (meshData.skinIndices[vertexIndex].count < 8) then
-		(
-			format "Remove min boneWeight % (index=%)\n" minValue index
-		)
-		
-		deleteItem skinIndices index
-		deleteItem skinWeights index
+		local minValue = amin vertexSkinWeights
+		local index = findItem vertexSkinWeights minValue
+		deleteItem vertexSkinIndices index
+		deleteItem vertexSkinWeights index
 	)
 	
-	if (meshData.skinIndices[vertexIndex].count < 8) then
-	(
-		format "Appening % (%) values\n" skinIndices.count skinWeights.count
-	)
-	
-	join meshData.skinIndices[vertexIndex] skinIndices
-	join meshData.skinWeights[vertexIndex] skinWeights
+	join skinIndices vertexSkinIndices
+	join skinWeights vertexSkinWeights
 )
 
 -- DEBUG
@@ -300,19 +297,30 @@ clearListener()
 undo on
 (
 	format "{%" nl to:Listener
-	format "%\"version\":\"1\",%" (tabs 1) nl to:Listener
-	format "%\"materials\":[%" (tabs 1) nl to:Listener
+	format "%\"version\": \"1\",%" (tabs 1) nl to:Listener
+	format "%\"materials\": {%" (tabs 1) nl to:Listener
+	local materials = #()
 	for obj in objects do
 	(
 		if (isGeometry obj) then
 		(
 			select obj
 			max modify mode
-			formatMaterial obj.material Listener
+			appendIfUnique materials obj.material
 		)
 	)
-	format "%],%" (tabs 1) nl to:Listener
-	format "%\"meshes\":[%" (tabs 1) nl to:Listener
+	local firstMat = true
+	for mat in materials do
+	(
+		if (firstMat == false) then
+		(
+			format ",%" nl to:Listener
+		)
+		formatMaterial mat Listener
+		firstMat = false
+	)
+	format "%%},%" nl (tabs 1) nl to:Listener
+	format "%\"meshes\":%{%" (tabs 1) sp nl to:Listener
 	for obj in objects do
 	(
 		if (isGeometry obj) then
@@ -322,7 +330,7 @@ undo on
 			formatObject obj Listener
 		)
 	)
-	format "%]%" (tabs 1) nl to:Listener
+	format "%}%" (tabs 1) nl to:Listener
 	format "}%" nl to:Listener
 )
 resumeEditing()

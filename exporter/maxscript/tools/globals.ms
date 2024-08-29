@@ -20,3 +20,5 @@ global nl = ""
 global cnl = ","
 
 global sp = ""
+
+global animCount = 1
