@@ -14,6 +14,7 @@
 - `cd examples/libs/three.js`
 - `git checkout tags/r167 -b r167`
 - `cd ../../..`
+- `git add .`
 - `git commit -m "Update Three.js r167"`
 - `git push origin main`
 
