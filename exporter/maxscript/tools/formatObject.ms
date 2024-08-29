@@ -338,7 +338,7 @@ clearListener()
 undo on
 (
 	format "{%" nl to:Listener
-	format "%\"version\": \"1\",%" (tabs 1) nl to:Listener
+	format "%\"version\": \"0.2\",%" (tabs 1) nl to:Listener
 	format "%\"materials\": {%" (tabs 1) nl to:Listener
 	local materials = #()
 	for obj in objects do
