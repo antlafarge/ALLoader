@@ -200,7 +200,7 @@ fn formatObject obj stream =
 	local objSkin = obj.modifiers[#skin]
 	if (objSkin != undefined) then
 	(
-		local bones2 = skinOps.GetBoneNodes objSkin
+		--local bones2 = skinOps.GetBoneNodes objSkin
 		local skinIndices = #()
 		local skinWeights = #()
 	
@@ -228,6 +228,46 @@ fn formatObject obj stream =
 				format ",%" (fp skinWeights[skinIndex]) to:stream
 			)
 			format "]" to:stream
+		)
+		local bones = skinOps.GetBoneNodes objSkin
+		local bonesCount = bones.count
+		if (bonesCount > 0) then
+		(
+			format ",%%\"skin\":%[" nl (tabs 3) sp to:stream
+			local firstBone = true;
+			for bi = 1 to bonesCount do
+			(
+				local b = bones[bi]
+
+				-- retrive parent boneID
+				local parentBoneID = -1
+				if (b.parent != undefined) then
+				(
+					for bi2 = 1 to bonesCount do
+					(
+						if (b.parent == bones[bi2]) then
+						(
+							parentBoneID = bi2 - 1
+							break
+						)
+					)
+				)
+
+				-- get the transform converted to OpenGL axis
+				local newTransform = (getRelativeTransformForOpenGL b)
+				
+				-- quaternion is inversed because of rotations are inversed in maxscript
+				-- cf. http://docs.autodesk.com/3DSMAX/15/ENU/MAXScript-Help/index.html?url=files/GUID-3B001F21-8FE9-4663-A972-E648682A0ACD.htm,topicNumber=d30e272529
+				
+				format "%%{%\"name\":\"%\",%\"parent\":%,%\"pos\":%,%\"rot\":[0,0,0],%\"rotq\":%,%\"scl\":%%}" nl (tabs 4) sp b.name sp parentBoneID sp (formatPoint3 newTransform.position) sp sp (formatQuaternion (inverse newTransform.rotation)) sp (formatPoint3 newTransform.scale) sp to:stream
+				
+				if (firstBone == false) then
+				(
+					format "," to:stream
+				)
+				firstBone = false
+			)
+			format "%%]" nl (tabs 3) to:stream
 		)
 	
 		local animName = "anim_" + (animCount as String)
