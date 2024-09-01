@@ -1,18 +1,18 @@
 # ALLoader  
 
-ALLoader is a 3dsMax exporter and loader for three.js (webgl) in a simple custom JSON format, which supports rigged, skinned and animated meshes.  
+ALLoader is an Autodesk 3dsMax exporter (MaxScript) to JSON, and a WebGL Three.js loader (Javascript) which supports skinned, rigged and animated meshes.
 
-### Live demos  
+### Live demos
 http://antlafarge.github.io/ALLoader/  
 
 ### Supported THREE.js versions
 - [r167](https://github.com/mrdoob/three.js/releases/tag/r167) (work in progress...)
 
-### Supported 3ds Max versions
+### Supported 3dsMax versions
 - [2022](https://github.com/antlafarge/ALLoader/tree/3dsmax2022) (work in progress...)
 - [2015](https://github.com/antlafarge/ALLoader/tree/3dsmax2015) ([release](https://github.com/antlafarge/ALLoader/releases/tag/3dsmax2015))
 
-### How to export meshes and animations  
+### How to export meshes and animations
 - Open 3ds Max and your scene *(all meshes will be exported)*  
 - Open the **Utilities** tab in the right lateral tool bar  
 - Clic on **MAXScript** button  
@@ -21,7 +21,7 @@ http://antlafarge.github.io/ALLoader/
 - Run the **exporter.ms** script  
 - Follow the instructions  
 
-### Exported data  
+### Exported data
 - Mesh name  
 - Vertices with indices  
 - UV with indices  
@@ -31,7 +31,7 @@ http://antlafarge.github.io/ALLoader/
 - skeleton hierarchy (skin, bones)  
 - time keys for bones rigged on a mesh  
 
-### 3ds Max elements supported  
+### 3ds Max elements supported
 - Axis conversion (Z-up to Y-up)  
 - Meshes  
 - Materials (Standard material, Multi/Sub-Object material)  
@@ -42,7 +42,7 @@ http://antlafarge.github.io/ALLoader/
 - Opacity  
 - Timeline playback speed  
 
-### Todo  
+### Todo
 - Interface  
 - Biped  
 
