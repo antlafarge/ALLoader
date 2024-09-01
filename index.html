@@ -121,10 +121,17 @@
 
 			function processMesh(data) {
 				console.log("processMesh", data);
-
-				for (let mesh of data.meshes)
+				
+				for (const matName in data.materials)
 				{
+					data.materials[matName].wireframe = true;
+				}
+
+				for (const meshName in data.meshes)
+				{
+					const mesh = data.meshes[meshName];
 					mesh.geometry.computeBoundingBox();
+
 					// Place camera
 					var heightX = mesh.geometry.boundingBox.max.x - mesh.geometry.boundingBox.min.x;
 					var heightY = mesh.geometry.boundingBox.max.y - mesh.geometry.boundingBox.min.y;
@@ -159,130 +166,7 @@
 				console.error(ex);
 			}
 
-
-
-
-
-/*
-			const geometry = new THREE.BufferGeometry();
-
-			const indices = [];
-
-			const vertices = [];
-			const normals = [];
-			const colors = [];
-			const uvs = [];
-
-			const size = 20;
-			const segments = 10;
-
-			const halfSize = size / 2;
-			const segmentSize = size / segments;
-
-			// generate vertices, normals and color data for a simple grid geometry
-
-			vertices.push(-10, -10, -10);
-			vertices.push(10, -10, -10);
-			vertices.push(-10, 10, -10);
-			vertices.push(10, 10, -10);
-
-			normals.push(0, 0, 1);
-			normals.push(0, 0, 1);
-			normals.push(0, 0, 1);
-			normals.push(0, 0, 1);
-
-			colors.push(0, 0, 0);
-			colors.push(1, 0, 0);
-			colors.push(0, 1, 0);
-			colors.push(1, 1, 0);
-			
-			uvs.push(0, 0);
-			uvs.push(1, 0);
-			uvs.push(0, 1);
-			uvs.push(1, 1);
-
-			indices.push(0, 1, 2);
-			indices.push(1, 2, 3);
-
-			// for ( let i = 0; i <= segments; i ++ ) {
-
-			// 	const y = ( i * segmentSize ) - halfSize;
-
-			// 	for ( let j = 0; j <= segments; j ++ ) {
-
-			// 		const x = ( j * segmentSize ) - halfSize;
-
-			// 		vertices.push( x, - y, 0 );
-			// 		normals.push( 0, 0, 1 );
-
-			// 		const r = ( x / size ) + 0.5;
-			// 		const g = ( y / size ) + 0.5;
-
-			// 		colors.push( r, g, 1 );
-
-			// 	}
-
-			// }
-
-			// generate indices (data for element array buffer)
-
-			// for ( let i = 0; i < segments; i ++ ) {
-
-			// 	for ( let j = 0; j < segments; j ++ ) {
-
-			// 		const a = i * ( segments + 1 ) + ( j + 1 );
-			// 		const b = i * ( segments + 1 ) + j;
-			// 		const c = ( i + 1 ) * ( segments + 1 ) + j;
-			// 		const d = ( i + 1 ) * ( segments + 1 ) + ( j + 1 );
-
-			// 		// generate two faces (triangles) per iteration
-
-			// 		indices.push( a, b, d ); // face one
-			// 		indices.push( b, c, d ); // face two
-
-			// 	}
-
-			// }
-
-			//
-			geometry.addGroup(0, 3, 0);
-			geometry.addGroup(3, 3, 1);
-
-			geometry.setIndex( indices );
-			geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( vertices, 3 ) );
-			geometry.setAttribute( 'normal', new THREE.Float32BufferAttribute( normals, 3 ) );
-			geometry.setAttribute( 'color', new THREE.Float32BufferAttribute( colors, 3 ) );
-			geometry.setAttribute( 'uv', new THREE.Float32BufferAttribute( uvs, 2 ) );
-
-			// const material = new THREE.MeshPhongMaterial( {
-			// 	side: THREE.DoubleSide,
-			// 	vertexColors: true
-			// } );
-
-			// const material = new THREE.MeshNormalMaterial( {
-			// 	side: THREE.DoubleSide
-			// });
-
-			const material = [
-				new THREE.MeshStandardMaterial( {
-					side: THREE.DoubleSide,
-					map: (new THREE.TextureLoader()).load("examples/textures/crate02.jpg")
-				}),
-				new THREE.MeshStandardMaterial( {
-					side: THREE.DoubleSide,
-					map: (new THREE.TextureLoader()).load("examples/textures/crate02b.jpg"),
-					opacity: 0.8,
-					transparent: true
-				})
-			];
-
-			mesh = new THREE.Mesh( geometry, material );
-			scene.add( mesh );
-
-			console.log(mesh, geometry)
-*/
-
-			(new ALLoader).load(`./examples/data/${modelToLoad}.json`, "examples/textures", processMesh, onload, onError);
+			(new ALLoader).load(`./examples/data/${modelToLoad}.json`, { texturePath:"examples/textures" }, processMesh, onload, onError);
 
 			window.addEventListener('resize', onWindowResize, false);
 
