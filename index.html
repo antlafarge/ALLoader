@@ -149,7 +149,7 @@
 					skeletonHelper.material.linewidth = 2;
 					scene.add(skeletonHelper);
 
-					const mixer = new THREE.AnimationMixer( mesh );
+					const mixer = new THREE.AnimationMixer(mesh);
 					mesh.animations.forEach((clip) =>
 					{
 						mixer.clipAction(clip).play();

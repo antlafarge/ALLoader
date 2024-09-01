@@ -1,4 +1,5 @@
 {
+	"version": "0.1",
 	"materials":{
 		"Gordon_Hi-ResDM1.smd":{ "multi":["DM_Base.jpg","DM_Face.jpg"] },
 		"DM_Base.jpg":{ "texture":"DM_Base.jpg", "ambient":[149.94,149.94,149.94], "diffuse":[149.94,149.94,149.94], "specular":[229.5,229.5,229.5], "opacity":1.0 },
@@ -75,6 +76,7 @@
 	"animations":{
 		"anim_1":{
 			"skeleton":"Gordon_Hi-ResDM1.smd",
+			"mesh": "Gordon_Hi-ResDM1.smd",
 			"fps":30,
 			"length":1.33333,
 			"JIT":0,

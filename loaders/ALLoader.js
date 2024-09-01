@@ -104,7 +104,7 @@ export class ALLoader extends THREE.Loader
 				const skeleton = skeletons[jsonAnimation.skeleton];
 				const animation = this.parseAnimation(jsonAnimation, skeleton);
 				animation.name = animName;
-				const mesh = meshes[jsonAnimation.skeleton];
+				const mesh = meshes[jsonAnimation.mesh];
 				mesh.animations.push(animation);
 				animations[animName] = animation;
 			}
