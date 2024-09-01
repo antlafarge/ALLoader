@@ -5,8 +5,8 @@ ALLoader is a 3dsMax exporter and loader for three.js (webgl) in a simple custom
 ### Live demos  
 http://antlafarge.github.io/ALLoader/  
 
-### Supported THREE.js version
-- [r146](https://github.com/mrdoob/three.js/releases/tag/r146) (work in progress...)
+### Supported THREE.js versions
+- [r167](https://github.com/mrdoob/three.js/releases/tag/r167) (work in progress...)
 
 ### Supported 3ds Max versions
 - [2022](https://github.com/antlafarge/ALLoader/tree/3dsmax2022) (work in progress...)
