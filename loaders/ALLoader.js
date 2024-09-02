@@ -40,6 +40,12 @@ export class ALLoader extends THREE.Loader
 		}, onProgress, onError);
 	}
 
+	// Multi parts load order : material, skeleton, mesh, animation
+	loadMultiParts(urls, data, onLoad, onProgress, onError)
+	{
+		this.load(urls.shift(), data, (urls.length ? (data) => this.loadMultiParts(urls, data, onLoad, onProgress, onError) : onLoad), onProgress, onError);
+	}
+
 	parse(json, data)
 	{
 		console.debug("parse", json, data);

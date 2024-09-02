@@ -165,8 +165,19 @@
 				console.error(ex);
 			}
 
-			(new ALLoader).load(`./examples/data/${modelToLoad}.json`, { texturePath:"examples/textures" }, processMesh, onload, onError);
-
+			(new ALLoader).loadMultiParts(
+				[
+					`./examples/data/${modelToLoad}.material.json`,
+					`./examples/data/${modelToLoad}.skeleton.json`,
+					`./examples/data/${modelToLoad}.mesh.json`,
+					`./examples/data/${modelToLoad}.animation.json`
+				],
+				{ texturePath:"examples/textures" },
+				processMesh,
+				onload,
+				onError
+			);
+			
 			window.addEventListener('resize', onWindowResize, false);
 
 			onWindowResize();
