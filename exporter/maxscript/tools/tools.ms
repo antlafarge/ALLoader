@@ -41,13 +41,16 @@ fn formatQuaternion myQuat =
 fn formatArray pieces =
 (
 	local stream = stringstream ""
-	local count = pieces.count
-	if (count > 0) then
+	if (pieces != undefined) then
 	(
-		format "%" (fp pieces[1]) to:stream
-		for index = 2 to count do
+		local count = pieces.count
+		if (count > 0) then
 		(
-			format ",%" (fp pieces[index]) to:stream
+			format "%" (fp pieces[1]) to:stream
+			for index = 2 to count do
+			(
+				format ",%" (fp pieces[index]) to:stream
+			)
 		)
 	)
 	stream as string
