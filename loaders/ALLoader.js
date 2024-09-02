@@ -7,8 +7,17 @@ export class ALLoader extends THREE.Loader
 		super(manager);
 	}
 
-	load(url, data, onLoad, onProgress, onError)
+	// urls : string or Array<string>
+	// Files have to be loaded in this order : materials, skeletons, meshs, animations
+	load(urls, data, onLoad, onProgress, onError)
 	{
+		if (urls instanceof Array)
+		{
+			this.#loadMultiParts(urls, data, onLoad, onProgress, onError);
+			return;
+		}
+
+		const url = urls;
 		const { texturePath = this.extractUrlBase(url), materials = {}, skeletons = {}, meshes = {}, animations = {} } = data;
 
 		const loader = new THREE.FileLoader(this.manager);
@@ -40,10 +49,9 @@ export class ALLoader extends THREE.Loader
 		}, onProgress, onError);
 	}
 
-	// Multi parts load order : material, skeleton, mesh, animation
-	loadMultiParts(urls, data, onLoad, onProgress, onError)
+	#loadMultiParts(urls, data, onLoad, onProgress, onError)
 	{
-		this.load(urls.shift(), data, (urls.length ? (data) => this.loadMultiParts(urls, data, onLoad, onProgress, onError) : onLoad), onProgress, onError);
+		this.load(urls.shift(), data, (urls.length ? (data) => this.#loadMultiParts(urls, data, onLoad, onProgress, onError) : onLoad), onProgress, onError);
 	}
 
 	parse(json, data)
