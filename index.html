@@ -79,13 +79,12 @@
 		var clock = new THREE.Clock();
 
 		var reResult = /(\?|&)model=(.+?)(&.*)?$/.exec(window.location.search);
-		var modelToLoad = (reResult ? reResult[2] : "gordon");
+		var modelToLoad = (reResult ? reResult[2] : "tank");
 		console.log("modelToLoad", modelToLoad);
 
 		var mixers = [];
 
 		function main() {
-			console.log("main");
 			renderer = new THREE.WebGLRenderer({ antialias: true });
 			renderer.setClearColor(new THREE.Color(0x7f7f7f));
 			renderer.setSize(window.innerWidth, window.innerHeight);
@@ -176,7 +175,7 @@
 		}
 
 		function onWindowResize() {
-			console.log("onWindowResize", container.offsetWidth, container.offsetHeight);
+			console.debug("onWindowResize", container.offsetWidth, container.offsetHeight);
 			camera.aspect = container.offsetWidth / container.offsetHeight;
 			camera.updateProjectionMatrix();
 			renderer.setSize(container.offsetWidth, container.offsetHeight);
