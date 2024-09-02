@@ -49,19 +49,6 @@ fn formatSkeleton obj stream =
 			
 			format "%%]%" nl (tabs 2) nl to:stream
 		)
-	
-		--local animName = "anim_" + (animCount as String)
-		--if (customAnimName == true) then
-		--(
-		--	InputStringDialog = InputStringDialog()
-		--	animName = InputStringDialog.stringQuery.launch label:"Enter the animation name"
-		--)
-		--else
-		--(
-		--	animCount += 1
-		--)
-		--meshData.animData = processAnimatedObject obj
-		--meshData.animData.name = animName
 	)
 )
 
