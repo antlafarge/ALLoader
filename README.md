@@ -5,12 +5,9 @@ ALLoader is an Autodesk 3dsMax exporter (MaxScript) to JSON, and a WebGL Three.j
 ### Live demos
 http://antlafarge.github.io/ALLoader/  
 
-### Supported THREE.js versions
-- [r167](https://github.com/mrdoob/three.js/releases/tag/r167) (work in progress...)
-
-### Supported 3dsMax versions
-- [2022](https://github.com/antlafarge/ALLoader/tree/3dsmax2022) (work in progress...)
-- [2015](https://github.com/antlafarge/ALLoader/tree/3dsmax2015) ([release](https://github.com/antlafarge/ALLoader/releases/tag/3dsmax2015))
+### Versions / releases
+- 3dsMax 2022 / [Three.js r167](https://github.com/mrdoob/three.js/releases/tag/r167) (*work in progress*)
+- [3dsMax 2015](https://github.com/antlafarge/ALLoader/tree/3dsmax2015) / [Three.js r71](https://github.com/mrdoob/three.js/releases/tag/r71) ([release](https://github.com/antlafarge/ALLoader/releases/tag/3dsmax2015))
 
 ### How to export meshes and animations
 - Open 3ds Max and your scene *(all meshes will be exported)*  
@@ -22,23 +19,22 @@ http://antlafarge.github.io/ALLoader/
 - Follow the instructions  
 
 ### Exported data
-- Mesh name  
+- Mesh data (name, position, rotation, scale)  
 - Vertices with indices  
-- UV with indices  
-- Normals  
+- Texture coordinates (UV) with indices  
+- Face normals  
 - Materials & multi-materials  
 - skin indices & weights  
 - skeleton hierarchy (skin, bones)  
-- time keys for bones rigged on a mesh  
+- time keys for bones rigged on a mesh (position, rotation, scale)
 
 ### 3ds Max elements supported
 - Axis conversion (Z-up to Y-up)  
 - Meshes  
-- Materials (Standard material, Multi/Sub-Object material)  
+- Materials (Physical material, Multi/Sub-Object material, TwoSided material)  
 - Material IDs  
-- Diffuse map (texture)  
+- Color map (texture)  
 - Wire  
-- 2-Sided  
 - Opacity  
 - Timeline playback speed  
 
