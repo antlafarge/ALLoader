@@ -6,21 +6,8 @@ fn formatAnimation obj stream =
 	local objSkin = obj.modifiers[#skin]
 	if (objSkin != undefined) then
 	(
-		local animName = "anim_" + (animCount as String)
-		if (customAnimName == true) then
-		(
-			InputStringDialog = InputStringDialog()
-			animName = InputStringDialog.stringQuery.launch label:"Enter the animation name"
-		)
-		else
-		(
-			animCount += 1
-		)
-		
 		format "%\"%\":%{%" (tabs 2) animName sp nl to:stream
-		
 		format "%\"sk\":%\"%\",%" (tabs 3) sp obj.name nl to:stream
-		
 		format "%\"ms\":%\"%\",%" (tabs 3) sp obj.name nl to:stream
 		
 		local timeFactor = 1
@@ -45,8 +32,8 @@ fn formatAnimation obj stream =
 			timeFactor = 0.25
 		)
 		local duration = ((((animationRange.end - animationRange.start) as float) / 4800) * timeFactor)
-		format "%\"dr\":%%,%" (tabs 3) sp duration nl to:stream
 		
+		format "%\"dr\":%%,%" (tabs 3) sp duration nl to:stream
 		format "%\"hr\":%[%" (tabs 3) sp nl to:stream
 		
 		-- get start and end of the animation
@@ -62,6 +49,7 @@ fn formatAnimation obj stream =
 		(
 			local bname = skinOps.GetBoneName objSkin i 1
 			local b = getNodeByName bname
+			
 			format "%{%" (tabs 4) nl
 			format "%\"bn\":%\"%\",%" (tabs 5) sp bname nl
 			format "%\"ky\":%[%" (tabs 5) sp nl
@@ -79,7 +67,7 @@ fn formatAnimation obj stream =
 					k == keyEnd or
 					in_array_time b.position.controller.keys ktime or
 					in_array_time b.rotation.controller.keys ktime or
-					in_array_time b.rotation.controller.keys ktime
+					in_array_time b.scale.controller.keys ktime
 				) then
 				(
 					local newTransform = (getRelativeTransformForOpenGL b)
