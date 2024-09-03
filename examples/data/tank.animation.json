@@ -1,7 +1,7 @@
 {
 	"version": "0.1",
 	"animations": {
-		"anim_1": {
+		"TANK": {
 			"sk": "TANK",
 			"ms": "TANK",
 			"dr": 3.33333,

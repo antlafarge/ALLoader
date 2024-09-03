@@ -6,7 +6,7 @@ fn formatAnimation obj stream =
 	local objSkin = obj.modifiers[#skin]
 	if (objSkin != undefined) then
 	(
-		format "%\"%\":%{%" (tabs 2) animName sp nl to:stream
+		format "%\"%\":%{%" (tabs 2) obj.name sp nl to:stream
 		format "%\"sk\":%\"%\",%" (tabs 3) sp obj.name nl to:stream
 		format "%\"ms\":%\"%\",%" (tabs 3) sp obj.name nl to:stream
 		
