@@ -65,75 +65,66 @@ fn formatObject obj stream =
 	
 	-- Vertex positions
 	format "%\"vp\":%[" (tabs 3) sp to:stream
-	if (objMesh.numverts > 0) then
+	for v = 1 to objMesh.numverts do
 	(
-		local vert = (point3ForOpenGL (in coordsys local getVert objMesh 1))
-		format "%,%,%" (fp vert.x) (fp vert.y) (fp vert.z) to:stream
-		for v = 2 to objMesh.numverts do
-		(
-			vert = (point3ForOpenGL (in coordsys local getVert objMesh v))
-			format ",%%,%,%" sp (fp vert.x) (fp vert.y) (fp vert.z) to:stream
-		)
-	)
-	format "],%" nl to:stream
-
-	-- Vertex indices
-	format "%\"vi\":%[%" (tabs 3) sp nl to:stream
-	if (vertex_indices.count > 0) then
-	(
-		format "%[%]" (tabs 4) (formatArray vertex_indices[1]) to:stream
-		for index = 2 to vertex_indices.count do
-		(
-			format "%%[%]" cnl (tabs 4) (formatArray vertex_indices[index]) to:stream
-		)
-	)
-	format "%%],%" nl (tabs 3) nl to:stream
-
-	-- Face normals
-	format "%\"fn\":%[%" (tabs 3) sp nl to:stream
-	if (face_normals.count > 0) then
-	(
-		format "%[%]" (tabs 4) (formatArray face_normals[1]) to:stream
-		for index = 2 to face_normals.count do
-		(
-			format "%%[%]" cnl (tabs 4) (formatArray face_normals[index]) to:stream
-		)
-	)
-	format "%%],%" nl (tabs 3) nl to:stream
-
-	-- Texture UV
-	format "%\"uv\":%[" (tabs 3) sp to:stream
-	if (objMesh.numTVerts > 0) then
-	(
-		local tvert = (getTVert objMesh 1)
-		format "%,%" (fp tvert.x) (fp tvert.y) to:stream
-		for v = 2 to objMesh.numTVerts do
-		(
-			local tvert = (getTVert objMesh v)
-			format ",%%,%" sp (fp tvert.x) (fp tvert.y) to:stream
-		)
-	)
-	format "],%" nl to:stream
-
-	-- Texture UV indices
-	format "%\"ui\":%[" (tabs 3) sp to:stream
-	if (uv_indices.count > 0) then
-	(
-		format "%" (uv_indices[1] as integer) to:stream
-		for index = 2 to uv_indices.count do
-		(
-			format ",%" (uv_indices[index] as integer) to:stream
-		)
+		local vert = (point3ForOpenGL (in coordsys local getVert objMesh v))
+		format "%,%,%%" (fp vert.x) (fp vert.y) (fp vert.z) (if v != objMesh.numverts then ("," + sp) else "") to:stream
 	)
 	format "]" to:stream
-
+	
+	-- Vertex indices
+	if (vertex_indices.count > 0) then
+	(
+		format ",%%\"vi\":%[%" nl (tabs 3) sp nl to:stream
+		for index = 1 to vertex_indices.count do
+		(
+			format "%[%]%%" (tabs 4) (formatArray vertex_indices[index]) (if index != vertex_indices.count then "," else "") nl to:stream
+		)
+		format "%]" (tabs 3) to:stream
+	)
+	
+	-- Face normals
+	if (face_normals.count > 0) then
+	(
+		format ",%%\"fn\":%[%" nl (tabs 3) sp nl to:stream
+		for index = 1 to face_normals.count do
+		(
+			format "%[%]%%" (tabs 4) (formatArray face_normals[index]) (if index != face_normals.count then "," else "") nl to:stream
+		)
+		format "%]" (tabs 3) to:stream
+	)
+	
+	-- Texture UV
+	if (objMesh.numTVerts > 0) then
+	(
+		format ",%%\"uv\":%[" nl (tabs 3) sp to:stream
+		local tvert = (getTVert objMesh 1)
+		for v = 1 to objMesh.numTVerts do
+		(
+			local tvert = (getTVert objMesh v)
+			format "%,%%" (fp tvert.x) (fp tvert.y) (if v != objMesh.numTVerts then ("," + sp) else "") to:stream
+		)
+		format "]" to:stream
+	)
+	
+	-- Texture UV indices
+	if (uv_indices.count > 0) then
+	(
+		format ",%%\"ui\":%[" nl (tabs 3) sp to:stream
+		for index = 1 to uv_indices.count do
+		(
+			format "%%%" (uv_indices[index] as integer) (if index != uv_indices.count then "," else "") sp to:stream
+		)
+		format "]" to:stream
+	)
+	
 	local objSkin = obj.modifiers[#skin]
 	if (objSkin != undefined) then
 	(
 		--local bones2 = skinOps.GetBoneNodes objSkin
 		local skinIndices = #()
 		local skinWeights = #()
-	
+		
 		for vertexIndex = 1 to objMesh.numverts do
 		(
 			-- skin indices / skin weights
@@ -207,28 +198,4 @@ fn processBoneForOneVertex objSkin vertexIndex skinIndices skinWeights =
 )
 
 -- DEBUG
-disableSceneRedraw()
-suspendEditing()
-nl = "\n"
-cnl = ",\n"
-sp = " "
-clearListener()
-undo on
-(
-	format "{%" nl to:Listener
-	format "%\"version\": \"0.1\",%" (tabs 1) nl to:Listener
-	format "%\"meshes\":%{%" (tabs 1) sp nl to:Listener
-	for obj in objects do
-	(
-		if (isGeometry obj) then
-		(
-			select obj
-			max modify mode
-			formatObject obj Listener
-		)
-	)
-	format "%}%" (tabs 1) nl to:Listener
-	format "}%" nl to:Listener
-)
-resumeEditing()
-enableSceneRedraw()
+debug false false true false

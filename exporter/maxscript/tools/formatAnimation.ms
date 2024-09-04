@@ -90,7 +90,6 @@ fn formatAnimation obj stream =
 		sliderTime = initialSliderTimePos
 		
 		format "%]%" (tabs 3) nl to:stream
-		
 		format "%}%" (tabs 2) nl to:stream
 	)
 )
@@ -110,28 +109,4 @@ fn in_array_time arr needle_time =
 )
 
 -- DEBUG
-disableSceneRedraw()
-suspendEditing()
-nl = "\n"
-cnl = ",\n"
-sp = " "
-clearListener()
-undo on
-(
-	format "{%" nl to:Listener
-	format "%\"version\": \"0.1\",%" (tabs 1) nl to:Listener
-	format "%\"animations\":%{%" (tabs 1) sp nl to:Listener
-	for obj in objects do
-	(
-		if (isGeometry obj) then
-		(
-			select obj
-			max modify mode
-			formatAnimation obj Listener
-		)
-	)
-	format "%}%" (tabs 1) nl to:Listener
-	format "}%" nl to:Listener
-)
-resumeEditing()
-enableSceneRedraw()
+debug false false false true

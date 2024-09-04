@@ -16,7 +16,7 @@ function formatMaterial mat stream =
 		format "%\"cl\":%[%,%,%],%" (tabs 3) sp (fp mat.Base_Color.r) (fp mat.Base_Color.g) (fp mat.Base_Color.b) nl to:stream -- Color
 		format "%\"sp\":%[%,%,%],%" (tabs 3) sp (fp mat.refl_color.r) (fp mat.refl_color.g) (fp mat.refl_color.b) nl to:stream -- Specular
 		format "%\"op\":%%%" (tabs 3) sp (fp (1 - mat.Transparency)) nl to:stream -- Opacity
-		format "%}" (tabs 2) to:stream
+		format "%}%" (tabs 2) nl to:stream
 	)
 	else if ((classof mat) == MultiMaterial) then
 	(
@@ -26,7 +26,7 @@ function formatMaterial mat stream =
 		(
 			if (mat.materialList[index] != undefined) then
 			(
-				append materials mat.materialList[index].name
+				append materials mat.materialList[index]
 			)
 			else
 			(
@@ -41,38 +41,27 @@ function formatMaterial mat stream =
 		
 		format "%\"%\":%{%" (tabs 2) mat.name sp nl to:stream
 		format "%\"ml\":%[%" (tabs 3) sp nl to:stream -- Multi
+
 		-- display sub-material names
 		if (materials.count > 1) then
 		(
-			if (materials[1] != undefined) then
+			for index = 1 to materials.count do
 			(
-				format "%\"%\"" (tabs 4) materials[1] to:stream
-			)
-			else
-			(
-				format "%null" (tabs 4) to:stream
-			)
-			for index = 2 to materials.count do
-			(
-				if (materials[index] != undefined) then
-				(
-					format ",%%\"%\"" nl (tabs 4) materials[index] to:stream
-				)
-				else
-				(
-					format ",%%null" nl (tabs 4) to:stream
-				)
+				local mat = materials[index];
+				format "%%%%" (tabs 4) (if mat != undefined then ("\"" + mat.name + "\"") else "null") (if index != materials.count then "," else "") nl to:stream
 			)
 		)
-		format "%%]%" nl (tabs 3) nl to:stream
-		format "%}" (tabs 2) to:stream
+
+		format "%]%" (tabs 3) nl to:stream
+		format "%}%" (tabs 2) nl to:stream
+
 		-- recursive parse of sub-materials
-		for index = 1 to mat.numsubs do
+		for index = 1 to materials.count do
 		(
-			if (mat.materialList[index] != undefined) then
+			if (materials[index] != undefined) then
 			(
-				format ",%" nl to:stream
-				formatMaterial mat.materialList[index] stream
+				format "%,%" (tabs 2) nl to:stream
+				formatMaterial materials[index] stream
 			)
 		)
 	)
@@ -107,39 +96,4 @@ function formatMaterial mat stream =
 )
 
 -- DEBUG
-disableSceneRedraw()
-suspendEditing()
-nl = "\n"
-cnl = ",\n"
-sp = " "
-clearListener()
-undo on
-(
-	format "{%" nl to:Listener
-	format "%\"version\": \"0.1\",%" (tabs 1) nl to:Listener
-	format "%\"materials\": {%" (tabs 1) nl to:Listener
-	local materials = #()
-	for obj in objects do
-	(
-		if (isGeometry obj) then
-		(
-			select obj
-			max modify mode
-			appendIfUnique materials obj.material
-		)
-	)
-	local firstMat = true
-	for mat in materials do
-	(
-		if (firstMat == false) then
-		(
-			format ",%" nl to:Listener
-		)
-		formatMaterial mat Listener
-		firstMat = false
-	)
-	format "%%}%" nl (tabs 1) nl to:Listener
-	format "}%" nl to:Listener
-)
-resumeEditing()
-enableSceneRedraw()
+debug true false false false

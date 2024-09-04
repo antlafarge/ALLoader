@@ -44,13 +44,9 @@ fn formatArray pieces =
 	if (pieces != undefined) then
 	(
 		local count = pieces.count
-		if (count > 0) then
+		for index = 1 to count do
 		(
-			format "%" (fp pieces[1]) to:stream
-			for index = 2 to count do
-			(
-				format ",%" (fp pieces[index]) to:stream
-			)
+			format "%%" (fp pieces[index]) (if index != count then "," else "") to:stream
 		)
 	)
 	stream as string
@@ -59,13 +55,12 @@ fn formatArray pieces =
 fn formatArrayAsInteger pieces =
 (
 	local stream = stringstream ""
-	local count = pieces.count
-	if (count > 0) then
+	if (pieces != undefined) then
 	(
-		format "%" (pieces[1] as integer) to:stream
-		for index = 2 to count do
+		local count = pieces.count
+		for index = 1 to count do
 		(
-			format ",%" (pieces[index] as integer) to:stream
+			format "%%" (pieces[index] as integer) (if index != count then "," else "") to:stream
 		)
 	)
 	stream as string
@@ -74,15 +69,13 @@ fn formatArrayAsInteger pieces =
 fn formatUvArray pieces =
 (
 	local stream = stringstream ""
-	local count = pieces.count
-	if (count > 0) then
+	if (pieces != undefined) then
 	(
-		local piece = pieces[1]
-		format "%,%,%" (fp piece.x) (fp piece.y) to:stream
-		for index = 2 to count do
+		local count = pieces.count
+		for index = 1 to count do
 		(
-			piece = pieces[index]
-			format ",%,%,%" (fp piece.x) (fp piece.y) to:stream
+			local piece = pieces[index]
+			format "%,%,%%%" (fp piece.x) (fp piece.y) (if index != count then "," else "") sp to:stream
 		)
 	)
 	stream as string
@@ -91,15 +84,13 @@ fn formatUvArray pieces =
 fn formatPoint3Array pieces =
 (
 	local stream = stringstream ""
-	local count = pieces.count
-	if (count > 0) then
+	if (pieces != undefined) then
 	(
-		local piece = pieces[1]
-		format "%,%,%" (fp piece.x) (fp piece.y) (fp piece.z) to:stream
-		for index = 2 to count do
+		local count = pieces.count
+		for index = 1 to count do
 		(
-			piece = pieces[index]
-			format ",%,%,%" (fp piece.x) (fp piece.y) (fp piece.z) to:stream
+			local piece = pieces[index]
+			format "%,%,%%%" (fp piece.x) (fp piece.y) (fp piece.z) (if index != count then "," else "") sp to:stream
 		)
 	)
 	stream as string
@@ -108,15 +99,13 @@ fn formatPoint3Array pieces =
 fn formatColorRgbaArray pieces =
 (
 	local stream = stringstream ""
-	local count = pieces.count
-	if (count > 0) then
+	if (pieces != undefined) then
 	(
-		local piece = pieces[1]
-		format "%,%,%,%" (fp piece.r) (fp piece.g) (fp piece.b) (fp piece.a) to:stream
-		for index = 2 to count do
+		local count = pieces.count
+		for index = 1 to count do
 		(
-			piece = pieces[index]
-			format ",%,%,%,%" (fp piece.r) (fp piece.g) (fp piece.b) (fp piece.a) to:stream
+			local piece = pieces[index]
+			format "%,%,%,%%%" (fp piece.r) (fp piece.g) (fp piece.b) (fp piece.a) (if index != count then "," else "") sp to:stream
 		)
 	)
 	stream as string
@@ -125,15 +114,13 @@ fn formatColorRgbaArray pieces =
 fn formatColorRgbArray pieces =
 (
 	local stream = stringstream ""
-	local count = pieces.count
-	if (count > 0) then
+	if (pieces != undefined) then
 	(
-		local piece = pieces[1]
-		format "%,%,%" (fp piece.r) (fp piece.g) (fp piece.b) to:stream
-		for index = 2 to count do
+		local count = pieces.count
+		for index = 1 to count do
 		(
-			piece = pieces[index]
-			format ",%,%,%" (fp piece.r) (fp piece.g) (fp piece.b) to:stream
+			local piece = pieces[index]
+			format "%,%,%%%" (fp piece.r) (fp piece.g) (fp piece.b) (if index != count then "," else "") sp to:stream
 		)
 	)
 	stream as string
@@ -142,15 +129,13 @@ fn formatColorRgbArray pieces =
 fn formatQuatArray pieces =
 (
 	local stream = stringstream ""
-	local count = pieces.count
-	if (count > 0) then
+	if (pieces != undefined) then
 	(
-		local myQuat = pieces[1]
-		format "%,%,%,%" (fp q4.x) (fp q4.y) (fp q4.z) (fp q4.w) to:stream
-		for index = 2 to count do
+		local count = pieces.count
+		for index = 1 to count do
 		(
-			myQuat = pieces[index]
-			format ",%,%,%,%" (fp q4.x) (fp q4.y) (fp q4.z) (fp q4.w) to:stream
+			local myQuat = pieces[index]
+			format "%,%,%,%%%" (fp q4.x) (fp q4.y) (fp q4.z) (fp q4.w) (if count != count then "," else "") sp to:stream
 		)
 	)
 	stream as string
@@ -194,4 +179,99 @@ fn point3ForOpenGL myPoint3 =
 fn quatForOpenGL myQuat =
 (
 	if flipYZ then (myQuat * flipYZ_transform) else myQuat
+)
+
+fn debug exportMaterials exportSkeletons exportMeshes exportAnimations =
+(
+	disableSceneRedraw()
+	suspendEditing()
+	nl = "\n"
+	cnl = ",\n"
+	sp = " "
+	clearListener()
+	undo on
+	(
+		format "{%" nl to:Listener
+		format "%\"version\": \"0.1\"" (tabs 1) to:Listener
+		
+		local started = false
+		if (exportMaterials) then
+		(
+			format ",%%\"materials\": {%" nl (tabs 1) nl to:Listener
+			local materials = #()
+			for obj in objects do
+			(
+				if (isGeometry obj) then
+				(
+					select obj
+					max modify mode
+					appendIfUnique materials obj.material
+				)
+			)
+			local firstMat = true
+			for mat in materials do
+			(
+				if (firstMat == false) then
+				(
+					format ",%" nl to:Listener
+				)
+				formatMaterial mat Listener
+				firstMat = false
+			)
+			format "%%}" nl (tabs 1) to:Listener
+			started = true
+		)
+		
+		if (exportSkeletons) then
+		(
+			format ",%%\"skeletons\":%{%" nl (tabs 1) sp nl to:Listener
+			for obj in objects do
+			(
+				if (isGeometry obj) then
+				(
+					select obj
+					max modify mode
+					formatSkeleton obj Listener
+				)
+			)
+			format "%}" (tabs 1) to:Listener
+			started = true
+		)
+		
+		if (exportMeshes) then
+		(
+			format ",%%\"meshes\":%{%" nl (tabs 1) sp nl to:Listener
+			for obj in objects do
+			(
+				if (isGeometry obj) then
+				(
+					select obj
+					max modify mode
+					formatObject obj Listener
+				)
+			)
+			format "%}" (tabs 1) to:Listener
+			started = true
+		)
+		
+		if (exportAnimations) then
+		(
+			format ",%%\"animations\":%{%" nl (tabs 1) sp nl to:Listener
+			for obj in objects do
+			(
+				if (isGeometry obj) then
+				(
+					select obj
+					max modify mode
+					formatAnimation obj Listener
+				)
+			)
+			format "%}" (tabs 1) to:Listener
+			started = true
+		)
+		
+		format "%}%" nl nl to:Listener
+	)
+	resumeEditing()
+	enableSceneRedraw()
 )
