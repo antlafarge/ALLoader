@@ -109,4 +109,4 @@ fn in_array_time arr needle_time =
 )
 
 -- DEBUG
-debug false false false true
+--debug false false false true

@@ -46,4 +46,4 @@ fn formatSkeleton obj stream =
 )
 
 -- DEBUG
-debug false true false false
+--debug false true false false

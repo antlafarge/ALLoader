@@ -1,11 +1,12 @@
 global flipYZ = true
 global flipYZ_transform = matrix3 [1,0,0] [0,0,-1] [0,1,0] [0,0,0] -- matrix to transform to default opengl axis
 
-global exportMeshes = true
 global exportMaterials = true
 global exportSkins = true
+global exportMeshes = true
+global exportAnimations = true
 
-global customAnimName = false
+global animName = "Animation_1"
 
 global formattedPrintFormat = ".6g"
 

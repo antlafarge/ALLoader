@@ -198,4 +198,4 @@ fn processBoneForOneVertex objSkin vertexIndex skinIndices skinWeights =
 )
 
 -- DEBUG
-debug false false true false
+--debug false false true false

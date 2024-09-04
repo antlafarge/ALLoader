@@ -96,4 +96,4 @@ function formatMaterial mat stream =
 )
 
 -- DEBUG
-debug true false false false
+--debug true false false false
