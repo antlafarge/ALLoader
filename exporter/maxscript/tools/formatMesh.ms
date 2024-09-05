@@ -198,4 +198,7 @@ fn processBoneForOneVertex objSkin vertexIndex skinIndices skinWeights =
 )
 
 -- DEBUG
---debug false false true false
+if (exporter != true) then
+(
+	export objects false false true false Listener
+)

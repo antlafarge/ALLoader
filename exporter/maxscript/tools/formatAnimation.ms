@@ -6,7 +6,7 @@ fn formatAnimation obj stream =
 	local objSkin = obj.modifiers[#skin]
 	if (objSkin != undefined) then
 	(
-		format "%\"%\":%{%" (tabs 2) obj.name sp nl to:stream
+		format "%\"%\":%{%" (tabs 2) animName sp nl to:stream
 		format "%\"sk\":%\"%\",%" (tabs 3) sp obj.name nl to:stream
 		format "%\"ms\":%\"%\",%" (tabs 3) sp obj.name nl to:stream
 		
@@ -50,14 +50,13 @@ fn formatAnimation obj stream =
 			local bname = skinOps.GetBoneName objSkin i 1
 			local b = getNodeByName bname
 			
-			format "%{%" (tabs 4) nl
-			format "%\"bn\":%\"%\",%" (tabs 5) sp bname nl
-			format "%\"ky\":%[%" (tabs 5) sp nl
+			format "%{%" (tabs 4) nl to:stream
+			format "%\"bn\":%\"%\",%" (tabs 5) sp bname nl to:stream
+			format "%\"ky\":%[%" (tabs 5) sp nl to:stream
 			
 			-- browse timeline
 			for k = keyStart to keyEnd do
 			(
-				--format "% " k
 				sliderTime = k
 				local ktime = (k as time)
 				
@@ -83,8 +82,8 @@ fn formatAnimation obj stream =
 				)
 			)
 			
-			format "%]%" (tabs 5) nl
-			format "%}%%" (tabs 4) (if i != bonesCount then "," else "") nl
+			format "%]%" (tabs 5) nl to:stream
+			format "%}%%" (tabs 4) (if i != bonesCount then "," else "") nl to:stream
 		)
 		
 		sliderTime = initialSliderTimePos
@@ -109,4 +108,7 @@ fn in_array_time arr needle_time =
 )
 
 -- DEBUG
---debug false false false true
+if (exporter != true) then
+(
+	export objects false false false true Listener
+)

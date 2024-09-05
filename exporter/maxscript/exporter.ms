@@ -7,7 +7,9 @@ fileIn "tools/formatSkeleton.ms"
 fileIn "tools/formatMesh.ms"
 fileIn "tools/formatAnimation.ms"
 
-fn export =
+global exporter = true
+
+fn launchExport =
 (
 	local filepath = getSaveFileName caption:"File location" types:"JSON (json)|*.json|Plain Text (txt)|*.txt|All Files|*.*|"
 	
@@ -16,34 +18,17 @@ fn export =
 		deleteFile filepath
 		local file = createFile filepath
 		
-		--local stream = file
-		local stream = listener
-		
 		local mySelection = getCurrentSelection()
-        local mySelectionTmp = mySelection
+        local objectsToExport = mySelection
 		
         if (mySelection.count == 0) then
         (
-            mySelectionTmp = objects
+            objectsToExport = objects
         )
 		
 		local startTime = timeStamp()
-		format "%%" animName nl to:stream
-	    format "{%" nl to:stream
-	    format "%\"version\":%\"0.1\",%" (tabs 1) sp nl to:stream
-	    format "%\"meshes\":%[%" (tabs 1) sp nl to:stream
 		
-		for obj in mySelectionTmp do
-		(
-			if (isGeometry obj) then
-			(
-                select obj
-                max modify mode
-				--formatObject obj stream
-			)
-		)
-		
-        format "%%]%}%" nl (tabs 1) nl nl to:stream
+		export objectsToExport exportMaterials exportSkins exportMeshes exportAnimations file
 		
 		local endTime = timeStamp()
 		
@@ -105,21 +90,15 @@ rollout ALExporter "ALLoader exporter"
 		
 		formattedPrintFormat = "." + ((decimalsSpinner.value + 1) as string) + "g"
 		
-		export()
+		launchExport()
 		
 		destroydialog ALExporter
 	)
 )
 
-disableSceneRedraw()
-suspendEditing()
-
 undo on
 (
 	createdialog ALExporter
 )
-
-resumeEditing()
-enableSceneRedraw()
 
 print "End of script"

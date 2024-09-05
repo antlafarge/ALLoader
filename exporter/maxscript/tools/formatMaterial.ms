@@ -96,4 +96,7 @@ function formatMaterial mat stream =
 )
 
 -- DEBUG
---debug true false false false
+if (exporter != true) then
+(
+	export objects true false false false Listener
+)

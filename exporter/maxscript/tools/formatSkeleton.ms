@@ -46,4 +46,7 @@ fn formatSkeleton obj stream =
 )
 
 -- DEBUG
---debug false true false false
+if (exporter != true) then
+(
+	export objects false true false false Listener
+)

@@ -181,7 +181,7 @@ fn quatForOpenGL myQuat =
 	if flipYZ then (myQuat * flipYZ_transform) else myQuat
 )
 
-fn debug exportMaterials exportSkeletons exportMeshes exportAnimations =
+fn export objectsToExport exportMaterials exportSkins exportMeshes exportAnimations stream =
 (
 	disableSceneRedraw()
 	suspendEditing()
@@ -191,15 +191,15 @@ fn debug exportMaterials exportSkeletons exportMeshes exportAnimations =
 	clearListener()
 	undo on
 	(
-		format "{%" nl to:Listener
-		format "%\"version\": \"0.1\"" (tabs 1) to:Listener
+		format "{%" nl to:stream
+		format "%\"version\":%\"0.1\"" (tabs 1) sp to:stream
 		
 		local started = false
 		if (exportMaterials) then
 		(
-			format ",%%\"materials\": {%" nl (tabs 1) nl to:Listener
+			format ",%%\"materials\":%{%" nl (tabs 1) sp nl to:stream
 			local materials = #()
-			for obj in objects do
+			for obj in objectsToExport do
 			(
 				if (isGeometry obj) then
 				(
@@ -213,64 +213,64 @@ fn debug exportMaterials exportSkeletons exportMeshes exportAnimations =
 			(
 				if (firstMat == false) then
 				(
-					format ",%" nl to:Listener
+					format ",%" nl to:stream
 				)
-				formatMaterial mat Listener
+				formatMaterial mat stream
 				firstMat = false
 			)
-			format "%%}" nl (tabs 1) to:Listener
+			format "%%}" nl (tabs 1) to:stream
 			started = true
 		)
 		
 		if (exportSkeletons) then
 		(
-			format ",%%\"skeletons\":%{%" nl (tabs 1) sp nl to:Listener
-			for obj in objects do
+			format ",%%\"skeletons\":%{%" nl (tabs 1) sp nl to:stream
+			for obj in objectsToExport do
 			(
 				if (isGeometry obj) then
 				(
 					select obj
 					max modify mode
-					formatSkeleton obj Listener
+					formatSkeleton obj stream
 				)
 			)
-			format "%}" (tabs 1) to:Listener
+			format "%}" (tabs 1) to:stream
 			started = true
 		)
 		
 		if (exportMeshes) then
 		(
-			format ",%%\"meshes\":%{%" nl (tabs 1) sp nl to:Listener
-			for obj in objects do
+			format ",%%\"meshes\":%{%" nl (tabs 1) sp nl to:stream
+			for obj in objectsToExport do
 			(
 				if (isGeometry obj) then
 				(
 					select obj
 					max modify mode
-					formatObject obj Listener
+					formatObject obj stream
 				)
 			)
-			format "%}" (tabs 1) to:Listener
+			format "%}" (tabs 1) to:stream
 			started = true
 		)
 		
 		if (exportAnimations) then
 		(
-			format ",%%\"animations\":%{%" nl (tabs 1) sp nl to:Listener
-			for obj in objects do
+			format ",%%\"animations\":%{%" nl (tabs 1) sp nl to:stream
+			for obj in objectsToExport do
 			(
 				if (isGeometry obj) then
 				(
 					select obj
 					max modify mode
-					formatAnimation obj Listener
+					formatAnimation obj stream
 				)
 			)
-			format "%}" (tabs 1) to:Listener
+			format "%}" (tabs 1) to:stream
 			started = true
 		)
 		
-		format "%}%" nl nl to:Listener
+		format "%}%" nl nl to:stream
 	)
 	resumeEditing()
 	enableSceneRedraw()
