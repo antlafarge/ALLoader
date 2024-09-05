@@ -222,7 +222,7 @@ fn export objectsToExport exportMaterials exportSkins exportMeshes exportAnimati
 			started = true
 		)
 		
-		if (exportSkeletons) then
+		if (exportSkins) then
 		(
 			format ",%%\"skeletons\":%{%" nl (tabs 1) sp nl to:stream
 			for obj in objectsToExport do

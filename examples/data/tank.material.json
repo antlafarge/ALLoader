@@ -1,36 +1,27 @@
 {
 	"version": "0.1",
 	"materials": {
-		"Material #95": {
+		"Tank": {
 			"ml": [
-				"Material #42",
-				"Material #44",
-				"Material #45",
-				"Material #43"
+				"Mat Camo",
+				null,
+				null,
+				"Mat Grey"
 			]
-		},
-		"Material #42": {
+		}
+		,
+		"Mat Camo": {
 			"cm": "camo.png",
 			"cl": [102,102,102],
-			"sp": [102,102,102],
-			"op": 1
-		},
-		"Material #44": {
-			"cm": "camo.png",
-			"cl": [255,154,154],
-			"sp": [255,154,154],
-			"op": 1
-		},
-		"Material #45": {
-			"cm": "camo.png",
-			"cl": [204,204,204],
-			"sp": [204,204,204],
-			"op": 1
-		},
-		"Material #43": {
-			"cl": [25.5,25.5,25.5],
-			"sp": [25.5,25.5,25.5],
+			"sp": [255,255,255],
 			"op": 1
 		}
+		,
+		"Mat Grey": {
+			"cl": [25.5,25.5,25.5],
+			"sp": [255,255,255],
+			"op": 1
+		}
+
 	}
 }
