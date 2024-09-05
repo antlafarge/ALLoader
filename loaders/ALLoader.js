@@ -79,7 +79,7 @@ export class ALLoader extends THREE.Loader
 					const materials2 = materials[matName];
 					for (const matName2 of jsonMat.ml)
 					{
-						materials2.push(materials[matName2]);
+						materials2.push(materials[matName2] ?? null);
 					}
 				}
 			}
@@ -116,7 +116,6 @@ export class ALLoader extends THREE.Loader
 			{
 				const jsonAnimation = json.animations[animName];
 				const animation = this.parseAnimation(jsonAnimation, animName);
-				animation.name = animName;
 				const mesh = meshes[jsonAnimation.ms];
 				mesh.animations.push(animation);
 				animations[animName] = animation;
@@ -378,7 +377,10 @@ export class ALLoader extends THREE.Loader
 			{
 				for (const mat of material)
 				{
-					mat.skinning = true;
+					if (mat)
+					{
+						mat.skinning = true;
+					}
 				}
 			}
 			else
