@@ -131,6 +131,9 @@ fn formatObject obj stream =
 			processBoneForOneVertex objSkin vertexIndex skinIndices skinWeights
 		)
 		
+		-- Skin name
+		format ",%%\"sk\":%\"%\"" nl (tabs 3) sp obj.name to:stream
+		
 		-- Skin indices
 		if (skinIndices.count > 0) then
 		(
