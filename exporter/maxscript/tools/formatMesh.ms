@@ -1,5 +1,9 @@
-fileIn "globals.ms"
-fileIn "tools.ms"
+-- DEBUG
+if (exporter != true) then
+(
+	fileIn "globals.ms"
+	fileIn "tools.ms"
+)
 
 fn formatObject obj stream =
 (
@@ -203,5 +207,6 @@ fn processBoneForOneVertex objSkin vertexIndex skinIndices skinWeights =
 -- DEBUG
 if (exporter != true) then
 (
+	clearListener()
 	export objects false false true false Listener
 )

@@ -1,5 +1,9 @@
-fileIn "globals.ms"
-fileIn "tools.ms"
+-- DEBUG
+if (exporter != true) then
+(
+	fileIn "globals.ms"
+	fileIn "tools.ms"
+)
 
 function formatMaterial mat stream =
 (
@@ -98,5 +102,6 @@ function formatMaterial mat stream =
 -- DEBUG
 if (exporter != true) then
 (
+	clearListener()
 	export objects true false false false Listener
 )

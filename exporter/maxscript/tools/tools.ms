@@ -1,5 +1,3 @@
-fileIn "globals.ms"
-
 -- Return the cached number of tabulations if output is not compressed
 fn tabs tab =
 (
@@ -188,7 +186,6 @@ fn export objectsToExport exportMaterials exportSkins exportMeshes exportAnimati
 	nl = "\n"
 	cnl = ",\n"
 	sp = " "
-	clearListener()
 	undo on
 	(
 		format "{%" nl to:stream

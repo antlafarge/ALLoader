@@ -1,4 +1,4 @@
-clearListener()
+local exporter = true
 
 fileIn "tools/globals.ms"
 fileIn "tools/tools.ms"
@@ -6,8 +6,6 @@ fileIn "tools/formatMaterial.ms"
 fileIn "tools/formatSkeleton.ms"
 fileIn "tools/formatMesh.ms"
 fileIn "tools/formatAnimation.ms"
-
-global exporter = true
 
 fn launchExport =
 (
@@ -98,6 +96,7 @@ rollout ALExporter "ALLoader exporter"
 
 undo on
 (
+	clearListener()
 	createdialog ALExporter
 )
 

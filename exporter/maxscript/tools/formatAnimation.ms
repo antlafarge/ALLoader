@@ -1,5 +1,9 @@
-fileIn "globals.ms"
-fileIn "tools.ms"
+-- DEBUG
+if (exporter != true) then
+(
+	fileIn "globals.ms"
+	fileIn "tools.ms"
+)
 
 fn formatAnimation obj stream =
 (
@@ -110,5 +114,6 @@ fn in_array_time arr needle_time =
 -- DEBUG
 if (exporter != true) then
 (
+	clearListener()
 	export objects false false false true Listener
 )
