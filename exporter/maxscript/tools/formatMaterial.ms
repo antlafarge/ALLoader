@@ -5,7 +5,7 @@ if (exporter != true) then
 	fileIn "tools.ms"
 )
 
-function formatMaterial mat stream =
+fn formatMaterial mat stream =
 (
 	if ((classof mat) == PhysicalMaterial) then
 	(
@@ -98,6 +98,8 @@ function formatMaterial mat stream =
 		)
 	)
 )
+
+fileIn "export.ms"
 
 -- DEBUG
 if (exporter != true) then
