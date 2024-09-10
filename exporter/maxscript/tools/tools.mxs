@@ -7,7 +7,7 @@ fn tabs tab =
 	)
 	else
 	(
-		local count = TAB_ARRAY.count
+		 count = TAB_ARRAY.count
 		if (tab > count) then
 		(
 			for tabIndex = count + 1 to tab do
@@ -31,17 +31,17 @@ fn formatPoint3 myPoint3 =
 
 fn formatQuaternion myQuat =
 (
-	local stream = stringstream ""
+	 stream = stringstream ""
 	format "[%,%,%,%]" (fp myQuat.x) (fp myQuat.y) (fp myQuat.z) (fp myQuat.w) to:stream
 	stream as string
 )
 
 fn formatArray pieces =
 (
-	local stream = stringstream ""
+	 stream = stringstream ""
 	if (pieces != undefined) then
 	(
-		local count = pieces.count
+		 count = pieces.count
 		for index = 1 to count do
 		(
 			format "%%" (fp pieces[index]) (if index != count then "," else "") to:stream
@@ -52,10 +52,10 @@ fn formatArray pieces =
 
 fn formatArrayAsInteger pieces =
 (
-	local stream = stringstream ""
+	 stream = stringstream ""
 	if (pieces != undefined) then
 	(
-		local count = pieces.count
+		 count = pieces.count
 		for index = 1 to count do
 		(
 			format "%%" (pieces[index] as integer) (if index != count then "," else "") to:stream
@@ -66,13 +66,13 @@ fn formatArrayAsInteger pieces =
 
 fn formatUvArray pieces =
 (
-	local stream = stringstream ""
+	 stream = stringstream ""
 	if (pieces != undefined) then
 	(
-		local count = pieces.count
+		 count = pieces.count
 		for index = 1 to count do
 		(
-			local piece = pieces[index]
+			 piece = pieces[index]
 			format "%,%,%%%" (fp piece.x) (fp piece.y) (if index != count then "," else "") sp to:stream
 		)
 	)
@@ -81,13 +81,13 @@ fn formatUvArray pieces =
 
 fn formatPoint3Array pieces =
 (
-	local stream = stringstream ""
+	 stream = stringstream ""
 	if (pieces != undefined) then
 	(
-		local count = pieces.count
+		 count = pieces.count
 		for index = 1 to count do
 		(
-			local piece = pieces[index]
+			 piece = pieces[index]
 			format "%,%,%%%" (fp piece.x) (fp piece.y) (fp piece.z) (if index != count then "," else "") sp to:stream
 		)
 	)
@@ -96,13 +96,13 @@ fn formatPoint3Array pieces =
 
 fn formatColorRgbaArray pieces =
 (
-	local stream = stringstream ""
+	 stream = stringstream ""
 	if (pieces != undefined) then
 	(
-		local count = pieces.count
+		 count = pieces.count
 		for index = 1 to count do
 		(
-			local piece = pieces[index]
+			 piece = pieces[index]
 			format "%,%,%,%%%" (fp piece.r) (fp piece.g) (fp piece.b) (fp piece.a) (if index != count then "," else "") sp to:stream
 		)
 	)
@@ -111,13 +111,13 @@ fn formatColorRgbaArray pieces =
 
 fn formatColorRgbArray pieces =
 (
-	local stream = stringstream ""
+	 stream = stringstream ""
 	if (pieces != undefined) then
 	(
-		local count = pieces.count
+		 count = pieces.count
 		for index = 1 to count do
 		(
-			local piece = pieces[index]
+			 piece = pieces[index]
 			format "%,%,%%%" (fp piece.r) (fp piece.g) (fp piece.b) (if index != count then "," else "") sp to:stream
 		)
 	)
@@ -126,13 +126,13 @@ fn formatColorRgbArray pieces =
 
 fn formatQuatArray pieces =
 (
-	local stream = stringstream ""
+	 stream = stringstream ""
 	if (pieces != undefined) then
 	(
-		local count = pieces.count
+		 count = pieces.count
 		for index = 1 to count do
 		(
-			local myQuat = pieces[index]
+			 myQuat = pieces[index]
 			format "%,%,%,%%%" (fp q4.x) (fp q4.y) (fp q4.z) (fp q4.w) (if count != count then "," else "") sp to:stream
 		)
 	)
@@ -153,14 +153,14 @@ fn isGeometry o =
 fn getRelativeTransformForOpenGL myObject =
 (
 	-- transform of the object converted to OpenGL axis
-	local myTransform = (if (flipYZ) then (myObject.transform * flipYZ_transform) else myObject.transform)
+	 myTransform = (if (flipAxis) then (myObject.transform * flipAxisMatrix) else myObject.transform)
 	
-	local parent = myObject.parent
+	 parent = myObject.parent
 	
 	-- if a parent exists
 	if (parent != undefined) then
 	(
-		myTransform *= inverse (if (flipYZ) then (parent.transform * flipYZ_transform) else parent.transform)
+		myTransform *= inverse (if (flipAxis) then (parent.transform * flipAxisMatrix) else parent.transform)
 	)
 	
 	-- return converted transform
@@ -170,11 +170,11 @@ fn getRelativeTransformForOpenGL myObject =
 -- convert a 3d point to openGL axis
 fn point3ForOpenGL myPoint3 =
 (
-	if flipYZ then (myPoint3 * flipYZ_transform) else myPoint3
+	if flipAxis then (myPoint3 * flipAxisMatrix) else myPoint3
 )
 
 -- convert a quaternion orientation to openGL axis
 fn quatForOpenGL myQuat =
 (
-	if flipYZ then (myQuat * flipYZ_transform) else myQuat
+	if flipAxis then (myQuat * flipAxisMatrix) else myQuat
 )

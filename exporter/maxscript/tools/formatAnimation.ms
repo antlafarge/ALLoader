@@ -1,20 +1,20 @@
 -- DEBUG
-if (exporter != true) then
+if (exporter == undefined) then
 (
-	fileIn "globals.mxs"
-	fileIn "tools.mxs"
+	include "globals.mxs"
+	include "tools.mxs"
 )
 
 fn formatAnimation obj stream =
 (
-	local objSkin = obj.modifiers[#skin]
+	objSkin = obj.modifiers[#skin]
 	if (objSkin != undefined) then
 	(
 		format "%\"%\":%{%" (tabs 2) animName sp nl to:stream
 		format "%\"sk\":%\"%\",%" (tabs 3) sp obj.name nl to:stream
 		format "%\"ms\":%\"%\",%" (tabs 3) sp obj.name nl to:stream
 		
-		local timeFactor = 1
+		timeFactor = 1
 		if (timeConfiguration.playbackSpeed == 1) then
 		(
 			timeFactor = 4
@@ -35,24 +35,24 @@ fn formatAnimation obj stream =
 		(
 			timeFactor = 0.25
 		)
-		local duration = ((((animationRange.end - animationRange.start) as float) / 4800) * timeFactor)
+		 duration = ((((animationRange.end - animationRange.start) as float) / TicksPerFrame) * timeFactor)
 		
 		format "%\"dr\":%%,%" (tabs 3) sp duration nl to:stream
 		format "%\"hr\":%[%" (tabs 3) sp nl to:stream
 		
 		-- get start and end of the animation
-		local keyStart = (animationRange.start as integer) / 160
-		local keyEnd = (animationRange.end as integer) / 160
-		local keyCount = keyEnd - keyStart + 1
+		 keyStart = (animationRange.start as integer) / 160
+		 keyEnd = (animationRange.end as integer) / 160
+		 keyCount = keyEnd - keyStart + 1
 		
-		local initialSliderTimePos = sliderTime
+		 initialSliderTimePos = sliderTime
 		
-		local bonesCount = skinOps.GetNumberBones objSkin
-		local comma = ""
+		 bonesCount = skinOps.GetNumberBones objSkin
+		 comma = ""
 		for i = 1 to bonesCount do
 		(
-			local bname = skinOps.GetBoneName objSkin i 1
-			local b = getNodeByName bname
+			 bname = skinOps.GetBoneName objSkin i 1
+			 b = getNodeByName bname
 			
 			format "%{%" (tabs 4) nl to:stream
 			format "%\"bn\":%\"%\",%" (tabs 5) sp bname nl to:stream
@@ -62,7 +62,7 @@ fn formatAnimation obj stream =
 			for k = keyStart to keyEnd do
 			(
 				sliderTime = k
-				local ktime = (k as time)
+				 ktime = (k as time)
 				
 				-- check if a key has to be created
 				if (
@@ -73,15 +73,15 @@ fn formatAnimation obj stream =
 					in_array_time b.scale.controller.keys ktime
 				) then
 				(
-					local newTransform = (getRelativeTransformForOpenGL b)
+					 newTransform = (getRelativeTransformForOpenGL b)
 					
-					local bpos = newTransform.position
+					 bpos = newTransform.position
 					-- quaternion is inversed because of rotations are inversed in maxscript
 					-- cf. http://docs.autodesk.com/3DSMAX/15/ENU/MAXScript-Help/index.html?url=files/GUID-3B001F21-8FE9-4663-A972-E648682A0ACD.htm,topicNumber=d30e272529
-					local brot = inverse newTransform.rotation
-					local bscl = newTransform.scale
+					 brot = inverse newTransform.rotation
+					 bscl = newTransform.scale
 					
-					local btime = (((ktime as float) / 4800) * timeFactor)
+					 btime = (((ktime as float) / 4800) * timeFactor)
 					format "%{%\"tm\":%,%\"ps\":%,%\"rt\":%,%\"sc\":%%}%%" (tabs 6) sp btime sp (formatPoint3 bpos) sp (formatQuaternion brot) sp (formatPoint3 bscl) sp (if k != keyEnd then "," else "") nl to:stream
 				)
 			)
@@ -112,9 +112,9 @@ fn in_array_time arr needle_time =
 )
 
 -- DEBUG
-if (exporter != true) then
+if (exporter == undefined) then
 (
-	fileIn "export.mxs"
+	include "export.mxs"
 	clearListener()
 	export objects false false false true Listener
 )

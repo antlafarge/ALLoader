@@ -1,8 +1,8 @@
 -- DEBUG
-if (exporter != true) then
+if (exporter == undefined) then
 (
-	fileIn "globals.mxs"
-	fileIn "tools.mxs"
+	include "globals.mxs"
+	include "tools.mxs"
 )
 
 fn formatObject obj stream =
@@ -25,19 +25,19 @@ fn formatObject obj stream =
 	-- Scale
 	format "%\"sc\":%%,%" (tabs 3) sp (formatPoint3 obj.scale) nl to:stream
 	
-	local objMesh = obj.mesh
+	 objMesh = obj.mesh
     
 	-- Faces
-	local vertex_indices = #()
-	local face_normals = #()
-	local uv_indices = #()
+	 vertex_indices = #()
+	 face_normals = #()
+	 uv_indices = #()
 	for f = 1 to objMesh.numfaces do
 	(
 		-- Get face
-		local face = getFace objMesh f
+		 face = getFace objMesh f
 		
 		-- Processing for multi material
-		local matID = getFaceMatID objMesh f
+		 matID = getFaceMatID objMesh f
 		
 		-- Create indices array if not existing
 		if (vertex_indices[matID] == undefined) then
@@ -52,7 +52,7 @@ fn formatObject obj stream =
 		append vertex_indices[matID] (face.z - 1)
 	
 		-- Normals
-		local normal = (point3ForOpenGL (getfacenormal objMesh f))
+		 normal = (point3ForOpenGL (getfacenormal objMesh f))
 		append face_normals[matID] (normal.x)
 		append face_normals[matID] (normal.y)
 		append face_normals[matID] (normal.z)
@@ -60,7 +60,7 @@ fn formatObject obj stream =
 		-- UV indices
 		if (getNumTVerts objMesh > 0) then
 		(
-			local tvface = GetTVFace objMesh f
+			 tvface = GetTVFace objMesh f
 			append uv_indices (tvface.x - 1)
 			append uv_indices (tvface.y - 1)
 			append uv_indices (tvface.z - 1)
@@ -71,7 +71,7 @@ fn formatObject obj stream =
 	format "%\"vp\":%[" (tabs 3) sp to:stream
 	for v = 1 to objMesh.numverts do
 	(
-		local vert = (point3ForOpenGL (in coordsys local getVert objMesh v))
+		 vert = (point3ForOpenGL (in coordsys  getVert objMesh v))
 		format "%,%,%%" (fp vert.x) (fp vert.y) (fp vert.z) (if v != objMesh.numverts then ("," + sp) else "") to:stream
 	)
 	format "]" to:stream
@@ -102,10 +102,10 @@ fn formatObject obj stream =
 	if (objMesh.numTVerts > 0) then
 	(
 		format ",%%\"uv\":%[" nl (tabs 3) sp to:stream
-		local tvert = (getTVert objMesh 1)
+		 tvert = (getTVert objMesh 1)
 		for v = 1 to objMesh.numTVerts do
 		(
-			local tvert = (getTVert objMesh v)
+			 tvert = (getTVert objMesh v)
 			format "%,%%" (fp tvert.x) (fp tvert.y) (if v != objMesh.numTVerts then ("," + sp) else "") to:stream
 		)
 		format "]" to:stream
@@ -122,12 +122,12 @@ fn formatObject obj stream =
 		format "]" to:stream
 	)
 	
-	local objSkin = obj.modifiers[#skin]
+	 objSkin = obj.modifiers[#skin]
 	if (objSkin != undefined) then
 	(
-		--local bones2 = skinOps.GetBoneNodes objSkin
-		local skinIndices = #()
-		local skinWeights = #()
+		-- bones2 = skinOps.GetBoneNodes objSkin
+		 skinIndices = #()
+		 skinWeights = #()
 		
 		for vertexIndex = 1 to objMesh.numverts do
 		(
@@ -166,20 +166,20 @@ fn formatObject obj stream =
 
 fn processBoneForOneVertex objSkin vertexIndex skinIndices skinWeights =
 (
-	local weightCountTotal = skinOps.GetVertexWeightCount objSkin vertexIndex
-	local vertexSkinIndices = #()
-	local vertexSkinWeights = #()
-	local weightIndex = 1
+	 weightCountTotal = skinOps.GetVertexWeightCount objSkin vertexIndex
+	 vertexSkinIndices = #()
+	 vertexSkinWeights = #()
+	 weightIndex = 1
 	
 	-- Retrieve BoneIndices and BoneWeights
 	for weightIndex = 1 to weightCountTotal do
 	(
 		-- boneIndexes
-		local boneIndex = skinOps.GetVertexWeightBoneID objSkin vertexIndex weightIndex
+		 boneIndex = skinOps.GetVertexWeightBoneID objSkin vertexIndex weightIndex
 		append vertexSkinIndices (boneIndex - 1)
 		
 		-- skinWeights
-		local boneWeight = skinOps.GetVertexWeight objSkin vertexIndex weightIndex
+		 boneWeight = skinOps.GetVertexWeight objSkin vertexIndex weightIndex
 		append vertexSkinWeights boneWeight
 	)
 	
@@ -194,8 +194,8 @@ fn processBoneForOneVertex objSkin vertexIndex skinIndices skinWeights =
 	-- Keep only 4 values
 	while (vertexSkinIndices.count > 4) do
 	(
-		local minValue = amin vertexSkinWeights
-		local index = findItem vertexSkinWeights minValue
+		 minValue = amin vertexSkinWeights
+		 index = findItem vertexSkinWeights minValue
 		deleteItem vertexSkinIndices index
 		deleteItem vertexSkinWeights index
 	)
@@ -205,7 +205,7 @@ fn processBoneForOneVertex objSkin vertexIndex skinIndices skinWeights =
 )
 
 -- DEBUG
-if (exporter != true) then
+if (exporter == undefined) then
 (
 	clearListener()
 	export objects false false true false Listener

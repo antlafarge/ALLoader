@@ -1,8 +1,8 @@
 -- DEBUG
-if (exporter != true) then
+if (exporter == undefined) then
 (
-	fileIn "globals.mxs"
-	fileIn "tools.mxs"
+	include "globals.mxs"
+	include "tools.mxs"
 )
 
 fn formatMaterial mat stream =
@@ -25,7 +25,7 @@ fn formatMaterial mat stream =
 	else if ((classof mat) == MultiMaterial) then
 	(
 		-- Extract material names
-		local materials = #()
+		 materials = #()
 		for index = 1 to mat.materialList.count do
 		(
 			if (mat.materialList[index] != undefined) then
@@ -51,7 +51,7 @@ fn formatMaterial mat stream =
 		(
 			for index = 1 to materials.count do
 			(
-				local mat = materials[index];
+				 mat = materials[index];
 				format "%%%%" (tabs 4) (if mat != undefined then ("\"" + mat.name + "\"") else "null") (if index != materials.count then "," else "") nl to:stream
 			)
 		)
@@ -71,7 +71,7 @@ fn formatMaterial mat stream =
 	)
 	else if ((classof mat) == doubleSidedMat) then
 	(
-		local matName = mat.name
+		 matName = mat.name
 		if (mat.map1Enabled) then
 		(
 			mat = mat.material1
@@ -100,9 +100,11 @@ fn formatMaterial mat stream =
 )
 
 -- DEBUG
-if (exporter != true) then
+if (exporter == undefined) then
 (
-	fileIn "export.mxs"
+	format "A %" (if export != undefined then export else undefined)
+	include "export.mxs"
+	format "B %" (if export != undefined then export else undefined)
 	clearListener()
 	export objects true false false false Listener
 )

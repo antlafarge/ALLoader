@@ -2,19 +2,21 @@ fn export objectsToExport exportMaterials exportSkins exportMeshes exportAnimati
 (
 	disableSceneRedraw()
 	suspendEditing()
-	nl = "\n"
-	cnl = ",\n"
-	sp = " "
+	if (exporter == undefined) then
+	(
+		global nl = "\n"
+		global sp = " "
+	)
 	undo on
 	(
 		format "{%" nl to:stream
 		format "%\"version\":%\"0.1\"" (tabs 1) sp to:stream
 		
-		local started = false
+		started = false
 		if (exportMaterials) then
 		(
 			format ",%%\"materials\":%{%" nl (tabs 1) sp nl to:stream
-			local materials = #()
+			materials = #()
 			for obj in objectsToExport do
 			(
 				if (isGeometry obj) then
@@ -24,7 +26,7 @@ fn export objectsToExport exportMaterials exportSkins exportMeshes exportAnimati
 					appendIfUnique materials obj.material
 				)
 			)
-			local firstMat = true
+			firstMat = true
 			for mat in materials do
 			(
 				if (firstMat == false) then

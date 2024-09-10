@@ -1,28 +1,28 @@
 -- DEBUG
-if (exporter != true) then
+if (exporter == undefined) then
 (
-	fileIn "globals.mxs"
-	fileIn "tools.mxs"
+	include "globals.mxs"
+	include "tools.mxs"
 )
 
 fn formatSkeleton obj stream =
 (
-	local objSkin = obj.modifiers[#skin]
+	 objSkin = obj.modifiers[#skin]
 	if (objSkin != undefined) then
 	(
-		local allBones = skinOps.GetBoneNodes objSkin
-		local bonesCount = allBones.count
+		 allBones = skinOps.GetBoneNodes objSkin
+		 bonesCount = allBones.count
 		if (bonesCount > 0) then
 		(
 			format "%\"%\":%[%" (tabs 2) obj.name sp nl to:stream
 			
-			local firstBone = true;
+			 firstBone = true;
 			for bi = 1 to bonesCount do
 			(
-				local b = allBones[bi]
+				 b = allBones[bi]
 				
 				-- retrive parent boneID
-				local parentBoneID = -1
+				 parentBoneID = -1
 				if (b.parent != undefined) then
 				(
 					for bi2 = 1 to bonesCount do
@@ -36,7 +36,7 @@ fn formatSkeleton obj stream =
 				)
 				
 				-- get the transform converted to OpenGL axis
-				local newTransform = (getRelativeTransformForOpenGL b)
+				 newTransform = (getRelativeTransformForOpenGL b)
 				
 				-- quaternion is inversed because of rotations are inversed in maxscript
 				-- cf. http://docs.autodesk.com/3DSMAX/15/ENU/MAXScript-Help/index.html?url=files/GUID-3B001F21-8FE9-4663-A972-E648682A0ACD.htm,topicNumber=d30e272529
@@ -50,9 +50,9 @@ fn formatSkeleton obj stream =
 )
 
 -- DEBUG
-if (exporter != true) then
+if (exporter == undefined) then
 (
-	fileIn "export.mxs"
+	include "export.mxs"
 	clearListener()
 	export objects false true false false Listener
 )
