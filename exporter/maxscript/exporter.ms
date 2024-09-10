@@ -1,11 +1,12 @@
 local exporter = true
 
-fileIn "tools/globals.ms"
-fileIn "tools/tools.ms"
+fileIn "tools/globals.mxs"
+fileIn "tools/tools.mxs"
 fileIn "tools/formatMaterial.ms"
 fileIn "tools/formatSkeleton.ms"
 fileIn "tools/formatMesh.ms"
 fileIn "tools/formatAnimation.ms"
+fileIn "tools/export.mxs"
 
 fn launchExport =
 (

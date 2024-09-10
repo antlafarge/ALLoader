@@ -1,8 +1,8 @@
 -- DEBUG
 if (exporter != true) then
 (
-	fileIn "globals.ms"
-	fileIn "tools.ms"
+	fileIn "globals.mxs"
+	fileIn "tools.mxs"
 )
 
 fn formatMaterial mat stream =
@@ -99,11 +99,10 @@ fn formatMaterial mat stream =
 	)
 )
 
-fileIn "export.ms"
-
 -- DEBUG
 if (exporter != true) then
 (
+	fileIn "export.mxs"
 	clearListener()
 	export objects true false false false Listener
 )

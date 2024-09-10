@@ -1,8 +1,8 @@
 -- DEBUG
 if (exporter != true) then
 (
-	fileIn "globals.ms"
-	fileIn "tools.ms"
+	fileIn "globals.mxs"
+	fileIn "tools.mxs"
 )
 
 fn formatObject obj stream =

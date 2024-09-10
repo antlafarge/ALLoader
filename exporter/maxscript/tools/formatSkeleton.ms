@@ -1,8 +1,8 @@
 -- DEBUG
 if (exporter != true) then
 (
-	fileIn "globals.ms"
-	fileIn "tools.ms"
+	fileIn "globals.mxs"
+	fileIn "tools.mxs"
 )
 
 fn formatSkeleton obj stream =
@@ -52,6 +52,7 @@ fn formatSkeleton obj stream =
 -- DEBUG
 if (exporter != true) then
 (
+	fileIn "export.mxs"
 	clearListener()
 	export objects false true false false Listener
 )
