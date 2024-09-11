@@ -1,10 +1,3 @@
--- DEBUG
-if (exporter == undefined) then
-(
-	include "globals.mxs"
-	include "tools.mxs"
-)
-
 fn formatSkeleton obj stream =
 (
 	 objSkin = obj.modifiers[#skin]
@@ -47,12 +40,4 @@ fn formatSkeleton obj stream =
 			format "%%]%" nl (tabs 2) nl to:stream
 		)
 	)
-)
-
--- DEBUG
-if (exporter == undefined) then
-(
-	include "export.mxs"
-	clearListener()
-	export objects false true false false Listener
 )

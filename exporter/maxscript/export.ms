@@ -1,12 +1,10 @@
-exporter = true
-
-include "tools/globals.mxs"
-include "tools/tools.mxs"
-include "tools/formatMaterial.ms"
-include "tools/formatSkeleton.ms"
-include "tools/formatMesh.ms"
-include "tools/formatAnimation.ms"
-include "tools/export.mxs"
+fileIn "tools/globals.mxs"
+fileIn "tools/tools.mxs"
+fileIn "tools/formatMaterial.mxs"
+fileIn "tools/formatSkeleton.mxs"
+fileIn "tools/formatMesh.mxs"
+fileIn "tools/formatAnimation.mxs"
+fileIn "tools/export.mxs"
 
 fn launchExport =
 (

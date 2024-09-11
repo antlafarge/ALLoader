@@ -1,8 +1,15 @@
--- DEBUG
-if (exporter == undefined) then
+-- check if a key of the array of keys has the specified time
+fn in_array_time arr needle_time =
 (
-	include "globals.mxs"
-	include "tools.mxs"
+	for ai = 1 to arr.count do
+	(
+		if (arr[ai].time == needle_time) then
+		(
+			return true
+		)
+	)
+	
+	return false
 )
 
 fn formatAnimation obj stream =
@@ -95,26 +102,4 @@ fn formatAnimation obj stream =
 		format "%]%" (tabs 3) nl to:stream
 		format "%}%" (tabs 2) nl to:stream
 	)
-)
-
--- check if a key of the array of keys has the specified time
-fn in_array_time arr needle_time =
-(
-	for ai = 1 to arr.count do
-	(
-		if (arr[ai].time == needle_time) then
-		(
-			return true
-		)
-	)
-	
-	return false
-)
-
--- DEBUG
-if (exporter == undefined) then
-(
-	include "export.mxs"
-	clearListener()
-	export objects false false false true Listener
 )
