@@ -1,21 +1,43 @@
 global exportSelection = true
 
+global exportMeshes = true
+global exportMeshAssociatedMaterial = true
+global exportMeshPosition = true
+global exportMeshRotation = true
+global exportMeshScale = true
+global exportMeshVertices = true
+global exportMeshIndexedVertices = true
+global exportMeshFaceNormals = true
+global exportMeshUVs = true
+global exportMeshIndexedUVs = false
+global exportMeshAssociatedSkin = true
+global exportMeshSkinIndices = true
+global exportMeshSkinWeights = true
+
 global exportMaterials = true
+global exportMaterialBaseColor = true
+global exportMaterialBaseColorMap = true
+global exportMaterialBaseColorIfNoBaseColorMap = true
+global exportMaterialSpecularColor = true
+global exportMaterialTransparency = true
 
 global exportSkins = true
-
-global exportMeshes = true
-global indexedVertices = true
-global indexedUVs = true
+global exportSkinBoneParent = true
+global exportSkinBonePosition = true
+global exportSkinBoneRotation = true
+global exportSkinBoneScale = true
 
 global exportAnimations = true
 global animName = "Animation"
-
-global formattedPrintFormat = ".6g"
+global exportAnimationAssociatedSkin = true
+global exportAnimationAssociatedMesh = true
+global exportAnimationBonePosition = true
+global exportAnimationBoneRotation = true
+global exportAnimationBoneScale = true
 
 global flipAxis = true
 global flipAxisMatrix = matrix3 [1,0,0] [0,0,-1] [0,1,0] [0,0,0]
-
+global formattedPrintFormat = ".6g"
 global compressJson = false
 global TAB = 0
 global TAB_ARRAY = #( "\t" )

@@ -58,7 +58,7 @@ rollout ALExporter "ALLoader exporter"
 		checkbox exportMeshIndexedVerticesCheckbox "Indexed vertices (vi)" checked:true
 		checkbox exportMeshFaceNormalsCheckbox "Face normals (fn)" checked:true
 		checkbox exportMeshUVsCheckbox "Texture coordinates (uv)" checked:true
-		checkbox exportMeshIndexedUVsCheckbox "Indexed texture coordinates UV (ui)" checked:true
+		checkbox exportMeshIndexedUVsCheckbox "Indexed texture coordinates UV (ui)" checked:false
 		checkbox exportMeshAssociatedSkinCheckbox "Associated skin (sk)" checked:true
 		checkbox exportMeshSkinIndicesCheckbox "Skin indices (si)" checked:true
 		checkbox exportMeshSkinWeightsCheckbox "Skin weights (sw)" checked:true
@@ -109,23 +109,49 @@ rollout ALExporter "ALLoader exporter"
 	(
 		exportSelection = (if selectionGroup.state == "selection" then true else false)
 		
-		exportMaterials = exportMaterialsCheckbox.checked
-		exportSkins = exportSkinsCheckbox.checked
 		exportMeshes = exportMeshesCheckbox.checked
-		exportAnimations = exportAnimationsCheckbox.checked
+		exportMeshAssociatedMaterial = exportMeshAssociatedMaterialCheckbox.checked
+		exportMeshPosition = exportMeshPositionCheckbox.checked
+		exportMeshRotation = exportMeshRotationCheckbox.checked
+		exportMeshScale = exportMeshScaleCheckbox.checked
+		exportMeshVertices = exportMeshVerticesCheckbox.checked
+		exportMeshIndexedVertices = exportMeshIndexedVerticesCheckbox.checked
+		exportMeshFaceNormals = exportMeshFaceNormalsCheckbox.checked
+		exportMeshUVs = exportMeshUVsCheckbox.checked
+		exportMeshIndexedUVs = exportMeshIndexedUVsCheckbox.checked
+		exportMeshAssociatedSkin = exportMeshAssociatedSkinCheckbox.checked
+		exportMeshSkinIndices = exportMeshSkinIndicesCheckbox.checked
+		exportMeshSkinWeights = exportMeshSkinWeightsCheckbox.checked
+
+		exportMaterials = exportMaterialsCheckbox.checked
+		exportMaterialBaseColor = exportMaterialBaseColorCheckbox.checked
+		exportMaterialBaseColorMap = exportMaterialBaseColorMapCheckbox.checked
+		exportMaterialBaseColorIfNoBaseColorMap = exportMaterialBaseColorIfNoBaseColorMapCheckbox.checked
+		exportMaterialSpecularColor = exportMaterialSpecularColorCheckbox.checked
+		exportMaterialTransparency = exportMaterialTransparencyCheckbox.checked
 		
+		exportSkins = exportSkinsCheckbox.checked
+		exportSkinBoneParent = exportSkinBoneParentCheckbox.checked
+		exportSkinBonePosition = exportSkinBonePositionCheckbox.checked
+		exportSkinBoneRotation = exportSkinBoneRotationCheckbox.checked
+		exportSkinBoneScale = exportSkinBoneScaleCheckbox.checked
+		
+		exportAnimations = exportAnimationsCheckbox.checked
 		animName = animNameEditText.text
+		exportAnimationAssociatedSkin = exportAnimationAssociatedSkinCheckbox.checked
+		exportAnimationAssociatedMesh = exportAnimationAssociatedMeshCheckbox.checked
+		exportAnimationBonePosition = exportAnimationBonePositionCheckbox.checked
+		exportAnimationBoneRotation = exportAnimationBoneRotationCheckbox.checked
+		exportAnimationBoneScale = exportAnimationBoneScaleCheckbox.checked
 		
 		flipAxis = flipYZCheckbox.checked
-		
 		formattedPrintFormat = "." + ((decimalsSpinner.value + 1) as string) + "g"
-		
 		compressJson = compressJsonCheckbox.checked
 		
 		if (not compressJson) then
 		(
-			nl = "\n"
-			sp = " "
+			global nl = "\n"
+			global sp = " "
 		)
 		
 		launchExport()
@@ -137,7 +163,7 @@ rollout ALExporter "ALLoader exporter"
 undo on
 (
 	clearListener()
-	createdialog ALExporter
+	createdialog ALExporter width:200
 )
 
 print "End of script"
