@@ -50,38 +50,38 @@ rollout ALExporter "ALLoader exporter"
 
 	Group "Meshes"
 	(
-		checkbox exportMeshAssociatedMaterialCheckbox "Associated material (mt)" checked:true
-		checkbox exportMeshPositionCheckbox "Position (ps)" checked:true
-		checkbox exportMeshRotationCheckbox "Rotation (rt)" checked:true
-		checkbox exportMeshScaleCheckbox "Scale (sc)" checked:true
-		checkbox exportMeshVerticesCheckbox "Vertices (vp)" checked:true
-		checkbox exportMeshIndexedVerticesCheckbox "Indexed vertices (vi)" checked:true
-		checkbox exportMeshFaceNormalsCheckbox "Face normals (fn)" checked:true
-		checkbox exportMeshUVsCheckbox "Texture coordinates (uv)" checked:true
-		checkbox exportMeshIndexedUVsCheckbox "Indexed texture coordinates UV (ui)" checked:false
-		checkbox exportMeshAssociatedSkinCheckbox "Associated skin (sk)" checked:true
-		checkbox exportMeshSkinIndicesCheckbox "Skin indices (si)" checked:true
-		checkbox exportMeshSkinWeightsCheckbox "Skin weights (sw)" checked:true
+		checkbox exportMeshAssociatedMaterialCheckbox "Associated material (mt)" checked:true enabled:false
+		checkbox exportMeshPositionCheckbox "Position (ps)" checked:true enabled:false
+		checkbox exportMeshRotationCheckbox "Rotation (rt)" checked:true enabled:false
+		checkbox exportMeshScaleCheckbox "Scale (sc)" checked:true enabled:false
+		checkbox exportMeshVerticesCheckbox "Vertices (vp)" checked:true enabled:false
+		checkbox exportMeshIndexedVerticesCheckbox "Indexed vertices (vi)" checked:true enabled:false
+		checkbox exportMeshFaceNormalsCheckbox "Face normals (fn)" checked:true enabled:false
+		checkbox exportMeshUVsCheckbox "Texture coordinates (uv)" checked:true enabled:false
+		checkbox exportMeshIndexedUVsCheckbox "Indexed texture coordinates UV (ui)" checked:true enabled:false
+		checkbox exportMeshAssociatedSkinCheckbox "Associated skin (sk)" checked:true enabled:false
+		checkbox exportMeshSkinIndicesCheckbox "Skin indices (si)" checked:true enabled:false
+		checkbox exportMeshSkinWeightsCheckbox "Skin weights (sw)" checked:true enabled:false
 	)
 	
 	checkbox exportMaterialsCheckbox "Export materials" checked:true
 
 	Group "Materials"
 	(
-		checkbox exportMaterialBaseColorCheckbox "Base color (cl)" checked:true
-		checkbox exportMaterialBaseColorMapCheckbox "Base color map (cm)" checked:true
-		checkbox exportMaterialBaseColorIfNoBaseColorMapCheckbox "Base color only if no Base color map" checked:true
-		checkbox exportMaterialSpecularColorCheckbox "Specular color (sp)" checked:true
-		checkbox exportMaterialTransparencyCheckbox "Transparency (op)" checked:true
+		checkbox exportMaterialBaseColorCheckbox "Base color (cl)" checked:true enabled:false
+		checkbox exportMaterialBaseColorMapCheckbox "Base color map (cm)" checked:true enabled:false
+		checkbox exportMaterialBaseColorIfNoBaseColorMapCheckbox "Base color only if no Base color map" checked:true enabled:false
+		checkbox exportMaterialSpecularColorCheckbox "Specular color (sp)" checked:true enabled:false
+		checkbox exportMaterialTransparencyCheckbox "Transparency (op)" checked:true enabled:false
 	)
 	checkbox exportSkinsCheckbox "Export Skins" checked:true
 	
 	Group "Skins"
 	(
-		checkbox exportSkinBoneParentCheckbox "Bone parent (pr)" checked:true
-		checkbox exportSkinBonePositionCheckbox "Bone position (ps)" checked:true
-		checkbox exportSkinBoneRotationCheckbox "Bone rotation (rt)" checked:true
-		checkbox exportSkinBoneScaleCheckbox "Bone scale (sc)" checked:true
+		checkbox exportSkinBoneParentCheckbox "Bone parent (pr)" checked:true enabled:false
+		checkbox exportSkinBonePositionCheckbox "Bone position (ps)" checked:true enabled:false
+		checkbox exportSkinBoneRotationCheckbox "Bone rotation (rt)" checked:true enabled:false
+		checkbox exportSkinBoneScaleCheckbox "Bone scale (sc)" checked:true enabled:false
 	)
 
 	checkbox exportAnimationsCheckbox "Export Animations" checked:true
@@ -89,11 +89,11 @@ rollout ALExporter "ALLoader exporter"
 	Group "Animations"
 	(
 		edittext animNameEditText "Animation name" text:"Animation" labelOnTop:true
-		checkbox exportAnimationAssociatedSkinCheckbox "Associated skin (sk)" checked:true
-		checkbox exportAnimationAssociatedMeshCheckbox "Associated mesh (ms)" checked:true
-		checkbox exportAnimationBonePositionCheckbox "Bone position (ps)" checked:true
-		checkbox exportAnimationBoneRotationCheckbox "Bone rotation (rt)" checked:true
-		checkbox exportAnimationBoneScaleCheckbox "Bone scale (sc)" checked:true
+		checkbox exportAnimationAssociatedSkinCheckbox "Associated skin (sk)" checked:true enabled:false
+		checkbox exportAnimationAssociatedMeshCheckbox "Associated mesh (ms)" checked:true enabled:false
+		checkbox exportAnimationBonePositionCheckbox "Bone position (ps)" checked:true enabled:false
+		checkbox exportAnimationBoneRotationCheckbox "Bone rotation (rt)" checked:true enabled:false
+		checkbox exportAnimationBoneScaleCheckbox "Bone scale (sc)" checked:true enabled:false
 	)
 	
 	group "Options"
@@ -110,8 +110,8 @@ rollout ALExporter "ALLoader exporter"
 		exportSelection = (if selectionGroup.state == "selection" then true else false)
 		
 		exportMeshes = exportMeshesCheckbox.checked
-		exportMeshAssociatedMaterial = exportMeshAssociatedMaterialCheckbox.checked
-		exportMeshPosition = exportMeshPositionCheckbox.checked
+		exportMeshAssociatedMaterial = exportMeshAssociatedMaterialCheckbox.indeterminate
+		exportMeshPosition = exportMeshPositionCheckbox.indeterminate
 		exportMeshRotation = exportMeshRotationCheckbox.checked
 		exportMeshScale = exportMeshScaleCheckbox.checked
 		exportMeshVertices = exportMeshVerticesCheckbox.checked
