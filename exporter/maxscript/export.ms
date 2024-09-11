@@ -13,15 +13,12 @@ fn launchExport =
 	if (filepath != undefined) then
 	(
 		deleteFile filepath
+		
 		file = createFile filepath
 		
 		mySelection = getCurrentSelection()
-        objectsToExport = mySelection
 		
-        if (mySelection.count == 0) then
-        (
-            objectsToExport = objects
-        )
+        objectsToExport = (if (exportSelection and mySelection.count > 0) then mySelection else objects)
 		
 		startTime = timeStamp()
 		
@@ -32,19 +29,16 @@ fn launchExport =
 		close file
 		
 		clearselection
+		
 		select mySelection
 		
 		messageBox ("Export completed (" + (((endTime - startTime) / 1000.0) as string) + " seconds).") title:"ALLoader exporter" beep:false
-	)
-	else
-	(
-		messageBox "Export cancelled." title:"ALLoader exporter" beep:false
 	)
 )
 
 rollout ALExporter "ALLoader exporter"
 (
-	radiobuttons exportObjects "Export" labels:#("selection", "all objects") default:1 columns:1
+	radiobuttons exportObjectsRadiobuttons "Export" labels:#("selection", "all objects") default:1 columns:1
 
 	checkbox exportMeshesCheckbox "Export meshes" checked:true
 
@@ -107,11 +101,11 @@ rollout ALExporter "ALLoader exporter"
 	
 	on exportButton pressed do
 	(
-		exportSelection = (if selectionGroup.state == "selection" then true else false)
+		exportSelection = (if exportObjectsRadiobuttons.state == 1 then true else false)
 		
 		exportMeshes = exportMeshesCheckbox.checked
-		exportMeshAssociatedMaterial = exportMeshAssociatedMaterialCheckbox.indeterminate
-		exportMeshPosition = exportMeshPositionCheckbox.indeterminate
+		exportMeshAssociatedMaterial = exportMeshAssociatedMaterialCheckbox.checked
+		exportMeshPosition = exportMeshPositionCheckbox.checked
 		exportMeshRotation = exportMeshRotationCheckbox.checked
 		exportMeshScale = exportMeshScaleCheckbox.checked
 		exportMeshVertices = exportMeshVerticesCheckbox.checked
@@ -150,13 +144,11 @@ rollout ALExporter "ALLoader exporter"
 		
 		if (not compressJson) then
 		(
-			global nl = "\n"
-			global sp = " "
+			nl = "\n"
+			sp = " "
 		)
 		
 		launchExport()
-		
-		destroydialog ALExporter
 	)
 )
 
@@ -165,5 +157,3 @@ undo on
 	clearListener()
 	createdialog ALExporter width:200
 )
-
-print "End of script"
