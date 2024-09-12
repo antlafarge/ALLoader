@@ -12,10 +12,10 @@
 	<script type="importmap">
 		{
 			"imports": {
-			"three": "./examples/libs/three.js/build/three.module.js",
-			"TrackballControls": "./examples/libs/three.js/examples/jsm/controls/TrackballControls.js",
-			"stats.module":"./examples/libs/three.js/examples/jsm/libs/stats.module.js",
-			"dat.gui.module":"./examples/libs/three.js/examples/jsm/libs/dat.gui.module.js"
+				"three": "./examples/libs/three.js/build/three.module.js",
+				"TrackballControls": "./examples/libs/three.js/examples/jsm/controls/TrackballControls.js",
+				"stats.module":"./examples/libs/three.js/examples/jsm/libs/stats.module.js",
+				"dat.gui.module":"./examples/libs/three.js/examples/jsm/libs/dat.gui.module.js"
 			}
 		}
 	</script>
@@ -72,7 +72,7 @@
 	<script type="module">
 		import * as THREE from 'three';
 		import { TrackballControls } from 'TrackballControls';
-		import { ALLoader } from '../loaders/ALLoader.js';
+		import { ALLoader } from '../loader/ALLoader.js';
 
 		var container, camera, controls, scene, renderer, mesh, meshWire, anim, anim2, meshAnim, meshWireAnim, skeletonHelper, axesHelper, light, animationMixer;
 
