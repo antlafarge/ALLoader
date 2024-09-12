@@ -87,7 +87,7 @@ fn formatAnimation obj stream =
 					
 					newTransform = (getRelativeTransformForOpenGL b)
 					
-					format "%{%\"tm\":%,%\"ps\":%,%\"rt\":%,%\"sc\":%%}%%" (tabs 6) sp btimeInSeconds sp (formatPoint3 newTransform.position) sp (formatQuaternion (newTransform.rotation)) sp (formatPoint3 newTransform.scale) sp (if k != keyEnd then "," else "") nl to:stream
+					format "%{%\"tm\":%,%\"ps\":%,%\"rt\":%,%\"sc\":%%}%%" (tabs 6) sp btimeInSeconds sp (formatPoint3 newTransform.position) sp (formatQuaternion (inverse newTransform.rotation)) sp (formatPoint3 newTransform.scale) sp (if k != keyEnd then "," else "") nl to:stream
 				)
 			)
 			

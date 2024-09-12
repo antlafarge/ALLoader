@@ -1,21 +1,21 @@
 fn formatSkeleton obj stream =
 (
-	 objSkin = obj.modifiers[#skin]
+	objSkin = obj.modifiers[#skin]
 	if (objSkin != undefined) then
 	(
-		 allBones = skinOps.GetBoneNodes objSkin
-		 bonesCount = allBones.count
+		allBones = skinOps.GetBoneNodes objSkin
+		bonesCount = allBones.count
 		if (bonesCount > 0) then
 		(
 			format "%\"%\":%[%" (tabs 2) obj.name sp nl to:stream
 			
-			 firstBone = true;
+			firstBone = true;
 			for bi = 1 to bonesCount do
 			(
-				 b = allBones[bi]
+				b = allBones[bi]
 				
 				-- retrive parent boneID
-				 parentBoneID = -1
+				parentBoneID = -1
 				if (b.parent != undefined) then
 				(
 					for bi2 = 1 to bonesCount do
@@ -30,7 +30,7 @@ fn formatSkeleton obj stream =
 				
 				newTransform = (getRelativeTransformForOpenGL b)
 				
-				format "%{%\"nm\":\"%\",%\"pr\":%,%\"ps\":%,%\"rt\":%,%\"sc\":%%}%%" (tabs 3) sp b.name sp parentBoneID sp (formatPoint3 newTransform.position) sp (formatQuaternion (newTransform.rotation)) sp (formatPoint3 newTransform.scale) sp (if bi != bonesCount then "," else "") nl to:stream
+				format "%{%\"nm\":\"%\",%\"pr\":%,%\"ps\":%,%\"rt\":%,%\"sc\":%%}%%" (tabs 3) sp b.name sp parentBoneID sp (formatPoint3 newTransform.position) sp (formatQuaternion (inverse newTransform.rotation)) sp (formatPoint3 newTransform.scale) sp (if bi != bonesCount then "," else "") nl to:stream
 			)
 			
 			format "%%]%" nl (tabs 2) nl to:stream

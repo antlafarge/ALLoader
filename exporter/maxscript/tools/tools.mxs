@@ -153,14 +153,14 @@ fn isGeometry o =
 fn getRelativeTransformForOpenGL myObject =
 (
 	-- transform of the object converted to OpenGL axis
-	myTransform = (if (flipAxis) then (myObject.transform * flipAxisMatrix) else myObject.transform)
+	myTransform = (if flipAxis then (myObject.transform * flipAxisMatrix) else myObject.transform)
 	
 	parent = myObject.parent
 	
 	-- if a parent exists
 	if (parent != undefined) then
 	(
-		myTransform *= inverse (if (flipAxis) then (parent.transform * flipAxisMatrix) else parent.transform)
+		myTransform *= (inverse (if flipAxis then (parent.transform * flipAxisMatrix) else parent.transform))
 	)
 	
 	-- return converted transform
