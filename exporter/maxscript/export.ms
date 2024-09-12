@@ -40,7 +40,7 @@ rollout ALExporter "ALLoader exporter"
 (
 	radiobuttons exportObjectsRadiobuttons "Export" labels:#("selection", "all objects") default:1 columns:1
 
-	checkbox exportMeshesCheckbox "Export meshes" checked:true
+	checkbox exportMeshesCheckbox "Export meshes" checked:exportMeshes
 
 	Group "Meshes"
 	(
@@ -58,17 +58,27 @@ rollout ALExporter "ALLoader exporter"
 		checkbox exportMeshSkinWeightsCheckbox "Skin weights (sw)" checked:true enabled:false
 	)
 	
-	checkbox exportMaterialsCheckbox "Export materials" checked:true
+	checkbox exportMaterialsCheckbox "Export materials" checked:exportMaterials
 
 	Group "Materials"
 	(
-		checkbox exportMaterialBaseColorCheckbox "Base color (cl)" checked:true enabled:false
-		checkbox exportMaterialBaseColorMapCheckbox "Base color map (cm)" checked:true enabled:false
-		checkbox exportMaterialBaseColorIfNoBaseColorMapCheckbox "Base color only if no Base color map" checked:true enabled:false
-		checkbox exportMaterialSpecularColorCheckbox "Specular color (sp)" checked:true enabled:false
-		checkbox exportMaterialTransparencyCheckbox "Transparency (op)" checked:true enabled:false
+		checkbox exportMaterialBaseColorCheckbox "Base color (cl)" checked:exportMaterialBaseColor enabled:exportMaterials
+		checkbox exportMaterialBaseColorMapCheckbox "Base color map (cm)" checked:exportMaterialBaseColorMap enabled:exportMaterials
+		checkbox exportMaterialBaseColorOnlyIfNoBaseColorMapCheckbox "Base color only if no base color map" checked:exportMaterialBaseColorOnlyIfNoBaseColorMap enabled:exportMaterials
+		checkbox exportMaterialSpecularColorCheckbox "Specular color (sp)" checked:exportMaterialSpecularColor enabled:exportMaterials
+		checkbox exportMaterialTransparencyCheckbox "Transparency (op)" checked:exportMaterialTransparency enabled:exportMaterials
 	)
-	checkbox exportSkinsCheckbox "Export Skins" checked:true
+	
+	on exportMaterialsCheckbox changed exportMaterials do
+	(
+		exportMaterialBaseColorCheckbox.enabled = exportMaterials
+		exportMaterialBaseColorMapCheckbox.enabled = exportMaterials
+		exportMaterialBaseColorOnlyIfNoBaseColorMapCheckbox.enabled = exportMaterials
+		exportMaterialSpecularColorCheckbox.enabled = exportMaterials
+		exportMaterialTransparencyCheckbox.enabled = exportMaterials
+	)
+	
+	checkbox exportSkinsCheckbox "Export Skins" checked:exportSkins
 	
 	Group "Skins"
 	(
@@ -78,7 +88,7 @@ rollout ALExporter "ALLoader exporter"
 		checkbox exportSkinBoneScaleCheckbox "Bone scale (sc)" checked:true enabled:false
 	)
 
-	checkbox exportAnimationsCheckbox "Export Animations" checked:true
+	checkbox exportAnimationsCheckbox "Export Animations" checked:exportAnimations
 
 	Group "Animations"
 	(
@@ -120,7 +130,7 @@ rollout ALExporter "ALLoader exporter"
 		exportMaterials = exportMaterialsCheckbox.checked
 		exportMaterialBaseColor = exportMaterialBaseColorCheckbox.checked
 		exportMaterialBaseColorMap = exportMaterialBaseColorMapCheckbox.checked
-		exportMaterialBaseColorIfNoBaseColorMap = exportMaterialBaseColorIfNoBaseColorMapCheckbox.checked
+		exportMaterialBaseColorOnlyIfNoBaseColorMap = exportMaterialBaseColorOnlyIfNoBaseColorMapCheckbox.checked
 		exportMaterialSpecularColor = exportMaterialSpecularColorCheckbox.checked
 		exportMaterialTransparency = exportMaterialTransparencyCheckbox.checked
 		
@@ -155,5 +165,5 @@ rollout ALExporter "ALLoader exporter"
 undo on
 (
 	clearListener()
-	createdialog ALExporter width:200
+	createdialog ALExporter width:208
 )

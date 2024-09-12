@@ -17,7 +17,7 @@ global exportMeshSkinWeights = true
 global exportMaterials = true
 global exportMaterialBaseColor = true
 global exportMaterialBaseColorMap = true
-global exportMaterialBaseColorIfNoBaseColorMap = true
+global exportMaterialBaseColorOnlyIfNoBaseColorMap = true
 global exportMaterialSpecularColor = true
 global exportMaterialTransparency = true
 

@@ -2,18 +2,32 @@ fn formatMaterial mat stream =
 (
 	if ((classof mat) == PhysicalMaterial) then
 	(
-		format "%\"%\":%{%" (tabs 2) mat.name sp nl to:stream
-		if (mat.base_color_map != undefined) then
+		comma = ""
+		format "%\"%\":%{" (tabs 2) mat.name sp to:stream
+		if (exportMaterialBaseColorMap and mat.base_color_map != undefined) then
 		(
 			textureFilePath = mat.base_color_map.bitmap.filename
 			tokens = (filterString textureFilePath "\\")
 			textureFileName = tokens[tokens.count]
-			format "%\"cm\":%\"%\",%" (tabs 3) sp textureFileName nl to:stream -- Color Map
+			format "%%%\"cm\":%\"%\"" comma nl (tabs 3) sp textureFileName to:stream
+			comma = ","
 		)
-		format "%\"cl\":%[%,%,%],%" (tabs 3) sp (fp mat.Base_Color.r) (fp mat.Base_Color.g) (fp mat.Base_Color.b) nl to:stream -- Color
-		format "%\"sp\":%[%,%,%],%" (tabs 3) sp (fp mat.refl_color.r) (fp mat.refl_color.g) (fp mat.refl_color.b) nl to:stream -- Specular
-		format "%\"op\":%%%" (tabs 3) sp (fp (1 - mat.Transparency)) nl to:stream -- Opacity
-		format "%}%" (tabs 2) nl to:stream
+		if (exportMaterialBaseColor and (not exportMaterialBaseColorMap or not exportMaterialBaseColorOnlyIfNoBaseColorMap or mat.base_color_map == undefined)) then
+		(
+			format "%%%\"cl\":%[%,%,%]" comma nl (tabs 3) sp (fp mat.Base_Color.r) (fp mat.Base_Color.g) (fp mat.Base_Color.b) to:stream
+			comma = ","
+		)
+		if (exportMaterialSpecularColor) then
+		(
+			format "%%%\"sp\":%[%,%,%]" comma nl (tabs 3) sp (fp mat.refl_color.r) (fp mat.refl_color.g) (fp mat.refl_color.b) to:stream
+			comma = ","
+		)
+		if (exportMaterialTransparency and mat.Transparency > 0) then
+		(
+			format "%%%\"op\":%%" comma nl (tabs 3) sp (fp (1 - mat.Transparency)) to:stream
+			comma = ","
+		)
+		format "%%}%" nl (tabs 2) nl to:stream
 	)
 	else if ((classof mat) == MultiMaterial) then
 	(
