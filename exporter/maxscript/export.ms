@@ -40,6 +40,8 @@ rollout ALExporter "ALLoader exporter"
 (
 	radiobuttons exportObjectsRadiobuttons "Export" labels:#("selection", "all objects") default:1 columns:1
 
+	-- MESHES
+	
 	checkbox exportMeshesCheckbox "Export meshes" checked:exportMeshes
 
 	Group "Meshes"
@@ -57,6 +59,8 @@ rollout ALExporter "ALLoader exporter"
 		checkbox exportMeshSkinIndicesCheckbox "Skin indices (si)" checked:true enabled:false
 		checkbox exportMeshSkinWeightsCheckbox "Skin weights (sw)" checked:true enabled:false
 	)
+	
+	-- MATERIALS
 	
 	checkbox exportMaterialsCheckbox "Export materials" checked:exportMaterials
 
@@ -78,16 +82,28 @@ rollout ALExporter "ALLoader exporter"
 		exportMaterialTransparencyCheckbox.enabled = exportMaterials
 	)
 	
+	-- SKINS
+	
 	checkbox exportSkinsCheckbox "Export Skins" checked:exportSkins
 	
 	Group "Skins"
 	(
-		checkbox exportSkinBoneParentCheckbox "Bone parent (pr)" checked:true enabled:false
-		checkbox exportSkinBonePositionCheckbox "Bone position (ps)" checked:true enabled:false
-		checkbox exportSkinBoneRotationCheckbox "Bone rotation (rt)" checked:true enabled:false
-		checkbox exportSkinBoneScaleCheckbox "Bone scale (sc)" checked:true enabled:false
+		checkbox exportSkinBoneParentCheckbox "Bone parent (pr)" checked:exportSkinBoneParent enabled:exportSkins
+		checkbox exportSkinBonePositionCheckbox "Bone position (ps)" checked:exportSkinBonePosition enabled:exportSkins
+		checkbox exportSkinBoneRotationCheckbox "Bone rotation (rt)" checked:exportSkinBoneRotation enabled:exportSkins
+		checkbox exportSkinBoneScaleCheckbox "Bone scale (sc)" checked:exportSkinBoneScale enabled:exportSkins
 	)
 
+	on exportSkinsCheckbox changed exportSkins do
+	(
+		exportSkinBoneParentCheckbox.enabled = exportSkins
+		exportSkinBonePositionCheckbox.enabled = exportSkins
+		exportSkinBoneRotationCheckbox.enabled = exportSkins
+		exportSkinBoneScaleCheckbox.enabled = exportSkins
+	)
+	
+	-- ANIMATIONS
+	
 	checkbox exportAnimationsCheckbox "Export Animations" checked:exportAnimations
 
 	Group "Animations"
@@ -99,6 +115,8 @@ rollout ALExporter "ALLoader exporter"
 		checkbox exportAnimationBoneRotationCheckbox "Bone rotation (rt)" checked:true enabled:false
 		checkbox exportAnimationBoneScaleCheckbox "Bone scale (sc)" checked:true enabled:false
 	)
+
+	-- OPTIONS
 	
 	group "Options"
 	(
@@ -106,6 +124,8 @@ rollout ALExporter "ALLoader exporter"
 		spinner decimalsSpinner "Decimals count" range:[0,9,4] type:#integer scale:1	
 		checkbox compressJsonCheckbox "Compress JSON" checked:false
 	)
+
+	-- EXPORT BUTTON
 	
 	button exportButton "Export"
 	
