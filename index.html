@@ -144,16 +144,16 @@
 
 					scene.add(mesh);
 
-					skeletonHelper = new THREE.SkeletonHelper(mesh);
-					skeletonHelper.material.linewidth = 2;
-					scene.add(skeletonHelper);
+					// skeletonHelper = new THREE.SkeletonHelper(mesh);
+					// skeletonHelper.material.linewidth = 2;
+					// scene.add(skeletonHelper);
 
-					const mixer = new THREE.AnimationMixer(mesh);
-					mesh.animations.forEach((clip) =>
-					{
-						mixer.clipAction(clip).play();
-					});
-					mixers.push(mixer);
+					// const mixer = new THREE.AnimationMixer(mesh);
+					// mesh.animations.forEach((clip) =>
+					// {
+					// 	mixer.clipAction(clip).play();
+					// });
+					// mixers.push(mixer);
 				}
 			}
 
@@ -172,7 +172,11 @@
 					`./examples/data/${modelToLoad}.mesh.json`,
 					`./examples/data/${modelToLoad}.animation.json`
 				],
-				{ texturePath:"examples/textures" },
+				{
+					texturePath:"examples/textures",
+					loadSkeletons:false,
+					loadAnimations: false
+				},
 				processMesh,
 				onload,
 				onError

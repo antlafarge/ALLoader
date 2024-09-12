@@ -18,7 +18,17 @@ export class ALLoader extends THREE.Loader
 		}
 
 		const url = urls;
-		const { texturePath = this.extractUrlBase(url), materials = {}, skeletons = {}, meshes = {}, animations = {} } = data;
+		const {
+			texturePath = this.extractUrlBase(url),
+			materials = {},
+			skeletons = {},
+			meshes = {},
+			animations = {},
+			loadMaterials = true,
+			loadSkeletons = true,
+			loadMeshes = true,
+			loadAnimations = true
+		} = data;
 
 		const loader = new THREE.FileLoader(this.manager);
 		loader.setPath(this.path );
@@ -30,7 +40,7 @@ export class ALLoader extends THREE.Loader
 		{
 			try
 			{
-				onLoad(this.parse(text, { texturePath, materials, skeletons, meshes, animations }));
+				onLoad(this.parse(text, { texturePath, materials, skeletons, meshes, animations, loadMaterials, loadSkeletons, loadMeshes, loadAnimations }));
 			}
 			catch(ex)
 			{
@@ -58,10 +68,15 @@ export class ALLoader extends THREE.Loader
 	{
 		console.debug("parse", json, data);
 
-		const { texturePath, materials, skeletons, meshes, animations } = data;
+		if (json == null)
+		{
+			return data;
+		}
+
+		const { texturePath, materials, skeletons, meshes, animations, loadMaterials, loadSkeletons, loadMeshes, loadAnimations } = data;
 
 		// MATERIALS
-		if (json.materials)
+		if (loadMaterials && json.materials)
 		{
 			for (const matName in json.materials)
 			{
@@ -86,7 +101,7 @@ export class ALLoader extends THREE.Loader
 		}
 
 		// SKELETONS
-		if (json.skeletons)
+		if (loadSkeletons && json.skeletons)
 		{
 			for (const skeName in json.skeletons)
 			{
@@ -98,19 +113,19 @@ export class ALLoader extends THREE.Loader
 		}
 
 		// MESHES
-		if (json.meshes)
+		if (loadMeshes && json.meshes)
 		{
 			for (const meshName in json.meshes)
 			{
 				const jsonMesh = json.meshes[meshName];
-				const mesh = this.parseMesh(jsonMesh, materials, skeletons);
+				const mesh = this.parseMesh(jsonMesh, materials, skeletons, loadMaterials, loadSkeletons);
 				mesh.name = meshName;
 				meshes[meshName] = mesh;
 			}
 		}
 		
 		// ANIMATIONS
-		if (json.animations)
+		if (loadAnimations && json.animations)
 		{
 			for (const animName in json.animations)
 			{
@@ -228,13 +243,13 @@ export class ALLoader extends THREE.Loader
 		return new THREE.Skeleton(bones);
 	}
 
-	parseMesh(jsonMesh, materials, skeletons)
+	parseMesh(jsonMesh, materials, skeletons, loadMaterials, loadSkeletons)
 	{
 		console.debug("parseMesh", jsonMesh, materials, skeletons);
 
 		// MATERIAL
 		let material = materials[jsonMesh.mt];
-		if (material == null)
+		if (!loadMaterials || material == null)
 		{
 			material = new THREE.MeshNormalMaterial();
 		}
@@ -323,9 +338,9 @@ export class ALLoader extends THREE.Loader
 			geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(jsonMesh.uv), 2));
 		}
 
-		// MESH
+		// SKIN INDICES / WEIGHTS
 		let mesh;
-		if (jsonMesh.si && jsonMesh.sw)
+		if (loadSkeletons && jsonMesh.si && jsonMesh.sw)
 		{
 			const skinIndicesSize = 4 * jsonMesh.vi.reduce((acc, value) => (acc + value.length), 0);
 			const skinIndices = new Uint16Array(skinIndicesSize);
