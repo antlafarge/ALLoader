@@ -1,3 +1,7 @@
+-- STRUCTURES
+struct OneBone (bone=undefined, bn=undefined, ky=#())
+struct OneKey (tm=undefined, ps=undefined, rt=undefined, sc=undefined)
+
 -- check if a key of the array of keys has the specified time
 fn in_array_time arr needle_time =
 (
@@ -57,23 +61,27 @@ fn formatAnimation obj stream =
 		initialSliderTimePos = sliderTime
 		
 		bonesCount = skinOps.GetNumberBones objSkin
-		comma = ""
+		allBones = #()
+		
+		-- Initialize array
 		for i = 1 to bonesCount do
 		(
 			bname = skinOps.GetBoneName objSkin i 1
 			b = getNodeByName bname
+			append allBones (OneBone bone:b bn:bname)
+		)
+		
+		-- Extract data (by parsing all frames only one time by mesh)
+		for k = keyStart to keyEnd do
+		(
+			sliderTime = k
+			ktime = (k as time)
 			
-			format "%{%" (tabs 4) nl to:stream
-			format "%\"bn\":%\"%\",%" (tabs 5) sp bname nl to:stream
-			format "%\"ky\":%[%" (tabs 5) sp nl to:stream
-			
-			-- browse timeline
-			for k = keyStart to keyEnd do
+			for i = 1 to bonesCount do
 			(
-				sliderTime = k
-				ktime = (k as time)
+				oneBone = allBones[i]
+				b = oneBone.bone
 				
-				-- check if a key has to be created
 				if (
 					k == keyStart or
 					k == keyEnd or
@@ -87,8 +95,25 @@ fn formatAnimation obj stream =
 					
 					newTransform = (getRelativeTransformForOpenGL b)
 					
-					format "%{%\"tm\":%,%\"ps\":%,%\"rt\":%,%\"sc\":%%}%%" (tabs 6) sp btimeInSeconds sp (formatPoint3 newTransform.position) sp (formatQuaternion (inverse newTransform.rotation)) sp (formatPoint3 newTransform.scale) sp (if k != keyEnd then "," else "") nl to:stream
+					append oneBone.ky (OneKey tm:btimeInSeconds ps:newTransform.position rt:(inverse newTransform.rotation) sc:newTransform.scale)
 				)
+			)
+		)
+		
+		-- Write data
+		for i = 1 to bonesCount do
+		(
+			oneBone = allBones[i]
+			
+			format "%{%" (tabs 4) nl to:stream
+			format "%\"bn\":%\"%\",%" (tabs 5) sp oneBone.bn nl to:stream
+			format "%\"ky\":%[%" (tabs 5) sp nl to:stream
+			
+			keyCount = oneBone.ky.count
+			for k = 1 to keyCount do
+			(
+				oneKey = oneBone.ky[k]
+				format "%{%\"tm\":%,%\"ps\":%,%\"rt\":%,%\"sc\":%%}%%" (tabs 6) sp oneKey.tm sp (formatPoint3 oneKey.ps) sp (formatQuaternion oneKey.rt) sp (formatPoint3 oneKey.sc) sp (if k != keyCount then "," else "") nl to:stream
 			)
 			
 			format "%]%" (tabs 5) nl to:stream
