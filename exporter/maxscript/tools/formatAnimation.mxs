@@ -82,17 +82,12 @@ fn formatAnimation obj stream =
 					in_array_time b.scale.controller.keys ktime
 				) then
 				(
-					newTransform = (getRelativeTransformForOpenGL b)
-					
-					bpos = newTransform.position
-					-- quaternion is inversed because of rotations are inversed in maxscript
-					-- cf. http://docs.autodesk.com/3DSMAX/15/ENU/MAXScript-Help/index.html?url=files/GUID-3B001F21-8FE9-4663-A972-E648682A0ACD.htm,topicNumber=d30e272529
-					brot = inverse newTransform.rotation
-					bscl = newTransform.scale
-					
 					ticksCount = ktime as float
 					btimeInSeconds = (ticksCount / ticksPerSeconds) * timeFactor
-					format "%{%\"tm\":%,%\"ps\":%,%\"rt\":%,%\"sc\":%%}%%" (tabs 6) sp btimeInSeconds sp (formatPoint3 bpos) sp (formatQuaternion brot) sp (formatPoint3 bscl) sp (if k != keyEnd then "," else "") nl to:stream
+					
+					newTransform = (getRelativeTransformForOpenGL b)
+					
+					format "%{%\"tm\":%,%\"ps\":%,%\"rt\":%,%\"sc\":%%}%%" (tabs 6) sp btimeInSeconds sp (formatPoint3 newTransform.position) sp (formatQuaternion (newTransform.rotation)) sp (formatPoint3 newTransform.scale) sp (if k != keyEnd then "," else "") nl to:stream
 				)
 			)
 			
