@@ -233,7 +233,7 @@ export class ALLoader extends THREE.Loader
 		console.debug("parseMesh", jsonMesh, materials, skeletons);
 
 		// MATERIAL
-		const material = materials[jsonMesh.mt];
+		let material = materials[jsonMesh.mt];
 		if (material == null)
 		{
 			material = new THREE.MeshNormalMaterial();
