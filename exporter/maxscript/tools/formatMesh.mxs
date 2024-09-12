@@ -1,3 +1,43 @@
+fn processBoneForOneVertex objSkin vertexIndex skinIndices skinWeights =
+(
+	weightCountTotal = skinOps.GetVertexWeightCount objSkin vertexIndex
+	vertexSkinIndices = #()
+	vertexSkinWeights = #()
+	weightIndex = 1
+	
+	-- Retrieve BoneIndices and BoneWeights
+	for weightIndex = 1 to weightCountTotal do
+	(
+		-- boneIndexes
+		boneIndex = skinOps.GetVertexWeightBoneID objSkin vertexIndex weightIndex
+		append vertexSkinIndices (boneIndex - 1)
+		
+		-- skinWeights
+		boneWeight = skinOps.GetVertexWeight objSkin vertexIndex weightIndex
+		append vertexSkinWeights boneWeight
+	)
+	
+	-- padding empty unused bone slots
+	while (weightIndex < 4) do
+	(
+		append vertexSkinIndices 0
+		append vertexSkinWeights 0
+		weightIndex += 1
+	)
+	
+	-- Keep only 4 values
+	while (vertexSkinIndices.count > 4) do
+	(
+		minValue = amin vertexSkinWeights
+		index = findItem vertexSkinWeights minValue
+		deleteItem vertexSkinIndices index
+		deleteItem vertexSkinWeights index
+	)
+	
+	join skinIndices vertexSkinIndices
+	join skinWeights vertexSkinWeights
+)
+
 fn formatObject obj stream =
 (
 	--format ("formatObject '" + obj.name + "'\n") to:Listener
@@ -155,44 +195,4 @@ fn formatObject obj stream =
 	)
 	
 	format "%%}%" nl (tabs 2) nl to:stream
-)
-
-fn processBoneForOneVertex objSkin vertexIndex skinIndices skinWeights =
-(
-	weightCountTotal = skinOps.GetVertexWeightCount objSkin vertexIndex
-	vertexSkinIndices = #()
-	vertexSkinWeights = #()
-	weightIndex = 1
-	
-	-- Retrieve BoneIndices and BoneWeights
-	for weightIndex = 1 to weightCountTotal do
-	(
-		-- boneIndexes
-		boneIndex = skinOps.GetVertexWeightBoneID objSkin vertexIndex weightIndex
-		append vertexSkinIndices (boneIndex - 1)
-		
-		-- skinWeights
-		boneWeight = skinOps.GetVertexWeight objSkin vertexIndex weightIndex
-		append vertexSkinWeights boneWeight
-	)
-	
-	-- padding empty unused bone slots
-	while (weightIndex < 4) do
-	(
-		append vertexSkinIndices 0
-		append vertexSkinWeights 0
-		weightIndex += 1
-	)
-	
-	-- Keep only 4 values
-	while (vertexSkinIndices.count > 4) do
-	(
-		minValue = amin vertexSkinWeights
-		index = findItem vertexSkinWeights minValue
-		deleteItem vertexSkinIndices index
-		deleteItem vertexSkinWeights index
-	)
-	
-	join skinIndices vertexSkinIndices
-	join skinWeights vertexSkinWeights
 )
