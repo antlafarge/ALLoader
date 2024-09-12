@@ -132,28 +132,30 @@
 					mesh.geometry.computeBoundingBox();
 
 					// Place camera
-					var heightX = mesh.geometry.boundingBox.max.x - mesh.geometry.boundingBox.min.x;
-					var heightY = mesh.geometry.boundingBox.max.y - mesh.geometry.boundingBox.min.y;
-					var heightZ = mesh.geometry.boundingBox.max.z - mesh.geometry.boundingBox.min.z;
-					var midX = mesh.geometry.boundingBox.min.x + heightX / 2;
-					var midY = mesh.geometry.boundingBox.min.y + heightY / 2;
-					var midZ = mesh.geometry.boundingBox.min.z + heightZ / 2;
-					const dist = heightX + heightY + heightZ;
-					camera.position.set(midX + dist * 0.25, midY, midZ + dist * 0.75);
-					controls.target.set(midX, midY, midZ);
+					const size = mesh.geometry.boundingBox.max.clone().sub(mesh.geometry.boundingBox.min);
+					const dist = size.x + size.y + size.z;
+					const mid = size.divideScalar(2).add(mesh.geometry.boundingBox.min);
+					camera.position.set(mid.x + dist * 0.25, mid.y + dist * 0.50, mid.z + dist * 0.75);
+					controls.target.copy(mid);
 
 					scene.add(mesh);
 
-					// skeletonHelper = new THREE.SkeletonHelper(mesh);
-					// skeletonHelper.material.linewidth = 2;
-					// scene.add(skeletonHelper);
+					if (mesh.skeleton)
+					{
+						skeletonHelper = new THREE.SkeletonHelper(mesh);
+						skeletonHelper.material.linewidth = 2;
+						scene.add(skeletonHelper);
+					}
 
-					// const mixer = new THREE.AnimationMixer(mesh);
-					// mesh.animations.forEach((clip) =>
-					// {
-					// 	mixer.clipAction(clip).play();
-					// });
-					// mixers.push(mixer);
+					if (mesh.animations.length)
+					{
+						const mixer = new THREE.AnimationMixer(mesh);
+						mesh.animations.forEach((clip) =>
+						{
+							mixer.clipAction(clip).play();
+						});
+						mixers.push(mixer);
+					}
 				}
 			}
 
@@ -173,9 +175,11 @@
 					`./examples/data/${modelToLoad}.animation.json`
 				],
 				{
-					texturePath:"examples/textures",
-					loadSkeletons:false,
-					loadAnimations: false
+					texturePath: "examples/textures",
+					loadMaterials: true,
+					loadSkeletons: true,
+					loadMeshes: true,
+					loadAnimations: true
 				},
 				processMesh,
 				onload,

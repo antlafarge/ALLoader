@@ -1,10 +1,10 @@
 {
 	"version": "0.1",
 	"animations": {
-		"Animation_1": {
+		"Animation": {
 			"sk": "TANK",
 			"ms": "TANK",
-			"dr": 3.33333,
+			"dr": 3.36667,
 			"hr": [
 				{
 					"bn": "Bone001",
