@@ -2,14 +2,24 @@
 
 ALLoader is an Autodesk 3dsMax exporter (MaxScript) to JSON, and a WebGL Three.js loader (Javascript) which supports skinned, rigged and animated meshes.
 
-### Live demos
+## Live demos
 http://antlafarge.github.io/ALLoader/  
 
-### Versions / releases
-- [3dsMax 2022](https://github.com/antlafarge/ALLoader/tree/3dsmax2022) / [Three.js r167](https://github.com/mrdoob/three.js/releases/tag/r167) ([tag](https://github.com/antlafarge/ALLoader/releases/tag/3dsmax2022))
-- [3dsMax 2015](https://github.com/antlafarge/ALLoader/tree/3dsmax2015) / [Three.js r71](https://github.com/mrdoob/three.js/releases/tag/r71) ([release](https://github.com/antlafarge/ALLoader/releases/tag/3dsmax2015))
+## Versions
 
-### How to export meshes and animations
+### 3dsMax 2022
+
+- State : Work in progress
+- Three.js : [r167](https://github.com/mrdoob/three.js/releases/tag/r167)
+
+### 3dsMax 2015
+
+- State : Released
+- Release : [3ds Max 2015](https://github.com/antlafarge/ALLoader/releases/tag/3dsmax2015)
+- Source : [3dsmax2015](https://github.com/antlafarge/ALLoader/tree/3dsmax2015)
+- Three.js : [r71](https://github.com/mrdoob/three.js/releases/tag/r71)
+
+## How to export meshes and animations
 - Open 3ds Max and your scene *(all meshes will be exported)*  
 - Open the **Utilities** tab in the right lateral tool bar  
 - Clic on **MAXScript** button  
@@ -18,7 +28,7 @@ http://antlafarge.github.io/ALLoader/
 - Run the **exporter.ms** script  
 - Follow the instructions  
 
-### Exported data
+## Exported data
 - Mesh data (name, position, rotation, scale)  
 - Vertices with indices  
 - Texture coordinates (UV) with indices  
@@ -28,7 +38,7 @@ http://antlafarge.github.io/ALLoader/
 - skeleton hierarchy (skin, bones)  
 - time keys for bones rigged on a mesh (position, rotation, scale)
 
-### 3ds Max elements supported
+## 3ds Max elements supported
 - Axis conversion (Z-up to Y-up)  
 - Meshes  
 - Materials (Physical material, Multi/Sub-Object material, TwoSided material)  
@@ -38,11 +48,11 @@ http://antlafarge.github.io/ALLoader/
 - Opacity  
 - Timeline playback speed  
 
-### Todo
+## Todo
 - Interface  
 - Biped  
 
-### FAQ
+## FAQ
 Q. Some objects in the scene are not well placed?  
 A. Add a reset XForm on these objects and export.  
 
