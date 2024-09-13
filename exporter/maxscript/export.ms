@@ -38,26 +38,42 @@ fn launchExport =
 
 rollout ALExporter "ALLoader exporter"
 (
-	radiobuttons exportObjectsRadiobuttons "Export" labels:#("selection", "all objects") default:1 columns:1
-
+	radiobuttons exportObjectsRadiobuttons "Export" labels:#("selection", "all objects") default:1 columns:2
+	
 	-- MESHES
 	
 	checkbox exportMeshesCheckbox "Export meshes" checked:exportMeshes
-
+	
 	Group "Meshes"
 	(
-		checkbox exportMeshAssociatedMaterialCheckbox "Associated material (mt)" checked:true enabled:false
-		checkbox exportMeshPositionCheckbox "Position (ps)" checked:true enabled:false
-		checkbox exportMeshRotationCheckbox "Rotation (rt)" checked:true enabled:false
-		checkbox exportMeshScaleCheckbox "Scale (sc)" checked:true enabled:false
-		checkbox exportMeshVerticesCheckbox "Vertices (vp)" checked:true enabled:false
-		checkbox exportMeshIndexedVerticesCheckbox "Indexed vertices (vi)" checked:true enabled:false
-		checkbox exportMeshFaceNormalsCheckbox "Face normals (fn)" checked:true enabled:false
-		checkbox exportMeshUVsCheckbox "Texture coordinates (uv)" checked:true enabled:false
-		checkbox exportMeshIndexedUVsCheckbox "Indexed texture coordinates UV (ui)" checked:true enabled:false
-		checkbox exportMeshAssociatedSkinCheckbox "Associated skin (sk)" checked:true enabled:false
-		checkbox exportMeshSkinIndicesCheckbox "Skin indices (si)" checked:true enabled:false
-		checkbox exportMeshSkinWeightsCheckbox "Skin weights (sw)" checked:true enabled:false
+		checkbox exportMeshAssociatedMaterialCheckbox "Associated material (mt)" checked:exportMeshAssociatedMaterial enabled:exportMeshes
+		checkbox exportMeshPositionCheckbox "Position (ps)" checked:exportMeshPosition enabled:exportMeshes
+		checkbox exportMeshRotationCheckbox "Rotation (rt)" checked:exportMeshRotation enabled:exportMeshes
+		checkbox exportMeshScaleCheckbox "Scale (sc)" checked:exportMeshScale enabled:exportMeshes
+		checkbox exportMeshVerticesCheckbox "Vertices (vp)" checked:exportMeshVertices enabled:exportMeshes
+		checkbox exportMeshIndexedVerticesCheckbox "Indexed vertices (vi)" checked:exportMeshIndexedVertices enabled:exportMeshes
+		checkbox exportMeshFaceNormalsCheckbox "Face normals (fn)" checked:exportMeshFaceNormals enabled:exportMeshes
+		checkbox exportMeshUVsCheckbox "Texture coordinates (uv)" checked:exportMeshUVs enabled:exportMeshes
+		checkbox exportMeshIndexedUVsCheckbox "Indexed texture coordinates UV (ui)" checked:exportMeshIndexedUVs enabled:exportMeshes
+		checkbox exportMeshAssociatedSkinCheckbox "Associated skin (sk)" checked:exportMeshAssociatedSkin enabled:exportMeshes
+		checkbox exportMeshSkinIndicesCheckbox "Skin indices (si)" checked:exportMeshSkinIndices enabled:exportMeshes
+		checkbox exportMeshSkinWeightsCheckbox "Skin weights (sw)" checked:exportMeshSkinWeights enabled:exportMeshes
+	)
+	
+	on exportMeshesCheckbox changed exportMeshes do
+	(
+		exportMeshAssociatedMaterialCheckbox.enabled = exportMeshes
+		exportMeshPositionCheckbox.enabled = exportMeshes
+		exportMeshRotationCheckbox.enabled = exportMeshes
+		exportMeshScaleCheckbox.enabled = exportMeshes
+		exportMeshVerticesCheckbox.enabled = exportMeshes
+		exportMeshIndexedVerticesCheckbox.enabled = exportMeshes
+		exportMeshFaceNormalsCheckbox.enabled = exportMeshes
+		exportMeshUVsCheckbox.enabled = exportMeshes
+		exportMeshIndexedUVsCheckbox.enabled = exportMeshes
+		exportMeshAssociatedSkinCheckbox.enabled = exportMeshes
+		exportMeshSkinIndicesCheckbox.enabled = exportMeshes
+		exportMeshSkinWeightsCheckbox.enabled = exportMeshes
 	)
 	
 	-- MATERIALS

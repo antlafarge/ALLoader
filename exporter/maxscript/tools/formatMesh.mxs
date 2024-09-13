@@ -40,23 +40,33 @@ fn processBoneForOneVertex objSkin vertexIndex skinIndices skinWeights =
 
 fn formatObject obj stream =
 (
-	--format ("formatObject '" + obj.name + "'\n") to:Listener
-
-	format "%\"%\":%{%" (tabs 2) obj.name sp nl to:stream
-
-	if (obj.material != undefined) then
+	comma = ""
+	
+	format "%\"%\":%{" (tabs 2) obj.name sp to:stream
+	
+	if (exportMeshAssociatedMaterial and obj.material != undefined) then
 	(
-		format "%\"mt\":%\"%\",%" (tabs 3) sp obj.material.name nl to:stream -- Material
+		format "%%%\"mt\":%\"%\"" comma nl (tabs 3) sp obj.material.name to:stream
+		comma = ","
 	)
 	
-	-- Position
-	format "%\"ps\":%%,%" (tabs 3) sp (point3ForOpenGL obj.position) nl to:stream
+	if (exportMeshPosition) then
+	(
+		format "%%%\"ps\":%%" comma nl (tabs 3) sp (point3ForOpenGL obj.position) to:stream
+		comma = ","
+	)
 	
-	-- Rotation
-	format "%\"rt\":%%,%" (tabs 3) sp (formatQuaternion (quatForOpenGL obj.rotation)) nl to:stream
+	if (exportMeshRotation) then
+	(
+		format "%%%\"rt\":%%" comma nl (tabs 3) sp (formatQuaternion (quatForOpenGL obj.rotation)) to:stream
+		comma = ","
+	)
 	
-	-- Scale
-	format "%\"sc\":%%,%" (tabs 3) sp (formatPoint3 obj.scale) nl to:stream
+	if (exportMeshScale) then
+	(
+		format "%%%\"sc\":%%" comma nl (tabs 3) sp (formatPoint3 obj.scale) to:stream
+		comma = ","
+	)
 	
 	objMesh = obj.mesh
     
@@ -100,97 +110,114 @@ fn formatObject obj stream =
 		)
 	)
 	
-	-- Vertex positions
-	format "%\"vp\":%[" (tabs 3) sp to:stream
-	for v = 1 to objMesh.numverts do
+	if (exportMeshVertices) then
 	(
-		vert = (point3ForOpenGL (in coordsys local getVert objMesh v))
-		format "%,%,%%" (fp vert.x) (fp vert.y) (fp vert.z) (if v != objMesh.numverts then ("," + sp) else "") to:stream
+		format "%%%\"vp\":%[" comma nl (tabs 3) sp to:stream
+		comma2 = ""
+		for v = 1 to objMesh.numverts do
+		(
+			vert = (point3ForOpenGL (in coordsys local getVert objMesh v))
+			format "%%%,%,%" comma2 sp (fp vert.x) (fp vert.y) (fp vert.z) to:stream
+			comma2 = ","
+		)
+		format "%]" sp to:stream
+		comma = ","
 	)
-	format "]" to:stream
 	
-	-- Vertex indices
-	if (vertex_indices.count > 0) then
+	if (exportMeshIndexedVertices and vertex_indices.count > 0) then
 	(
-		format ",%%\"vi\":%[%" nl (tabs 3) sp nl to:stream
+		format "%%%\"vi\":%[" comma nl (tabs 3) sp to:stream
+		comma2 = ""
 		for index = 1 to vertex_indices.count do
 		(
-			format "%[%]%%" (tabs 4) (formatArray vertex_indices[index]) (if index != vertex_indices.count then "," else "") nl to:stream
+			format "%%%[%]" comma2 nl (tabs 4) (formatArray vertex_indices[index]) to:stream
+			comma2 = ","
 		)
-		format "%]" (tabs 3) to:stream
+		format "%%]" nl (tabs 3) to:stream
+		comma = ","
 	)
 	
-	-- Face normals
-	if (face_normals.count > 0) then
+	if (exportMeshFaceNormals and face_normals.count > 0) then
 	(
-		format ",%%\"fn\":%[%" nl (tabs 3) sp nl to:stream
+		format "%%%\"fn\":%[" comma nl (tabs 3) sp to:stream
+		comma2 = ""
 		for index = 1 to face_normals.count do
 		(
-			format "%[%]%%" (tabs 4) (formatArray face_normals[index]) (if index != face_normals.count then "," else "") nl to:stream
+			format "%%%[%]" comma2 nl (tabs 4) (formatArray face_normals[index]) to:stream
+			comma2 = ","
 		)
-		format "%]" (tabs 3) to:stream
+		format "%%]" nl (tabs 3) to:stream
+		comma = ","
 	)
 	
-	-- Texture UV
-	if (objMesh.numTVerts > 0) then
+	if (exportMeshUVs and objMesh.numTVerts > 0) then
 	(
-		format ",%%\"uv\":%[" nl (tabs 3) sp to:stream
-		tvert = (getTVert objMesh 1)
+		format "%%%\"uv\":%[" comma nl (tabs 3) sp to:stream
+		comma2 = ""
 		for v = 1 to objMesh.numTVerts do
 		(
 			tvert = (getTVert objMesh v)
-			format "%,%%" (fp tvert.x) (fp tvert.y) (if v != objMesh.numTVerts then ("," + sp) else "") to:stream
+			format "%%%,%" comma2 sp (fp tvert.x) (fp tvert.y) to:stream
+			comma2 = ","
 		)
-		format "]" to:stream
+		format "%]" sp to:stream
+		comma = ","
 	)
 	
-	-- Texture UV indices
-	if (uv_indices.count > 0) then
+	if (exportMeshIndexedUVs and uv_indices.count > 0) then
 	(
-		format ",%%\"ui\":%[" nl (tabs 3) sp to:stream
+		format "%%%\"ui\":%[" comma nl (tabs 3) sp to:stream
+		comma2 = ""
 		for index = 1 to uv_indices.count do
 		(
-			format "%%%" (uv_indices[index] as integer) (if index != uv_indices.count then "," else "") sp to:stream
+			format "%%" comma2 (uv_indices[index] as integer) to:stream
+			comma2 = ","
 		)
-		format "]" to:stream
+		format "%]" sp to:stream
+		comma = ","
 	)
 	
 	objSkin = obj.modifiers[#skin]
-	if (objSkin != undefined) then
+	if ((exportMeshAssociatedSkin or exportMeshSkinIndices or exportMeshSkinWeights) and objSkin != undefined) then
 	(
-		-- bones2 = skinOps.GetBoneNodes objSkin
 		skinIndices = #()
 		skinWeights = #()
 		
 		for vertexIndex = 1 to objMesh.numverts do
 		(
-			-- skin indices / skin weights
 			processBoneForOneVertex objSkin vertexIndex skinIndices skinWeights
 		)
 		
-		-- Skin name
-		format ",%%\"sk\":%\"%\"" nl (tabs 3) sp obj.name to:stream
-		
-		-- Skin indices
-		if (skinIndices.count > 0) then
+		if (exportMeshAssociatedSkin) then
 		(
-			format ",%%\"si\":%[%" nl (tabs 3) sp (skinIndices[1] as integer) to:stream
-			for skinIndex = 2 to skinIndices.count do
-			(
-				format ",%" (skinIndices[skinIndex] as integer) to:stream
-			)
-			format "]" to:stream
+			format "%%%\"sk\":%\"%\"" comma nl (tabs 3) sp obj.name to:stream
+			comma = ","
 		)
 		
-		-- Skin Weights
-		if (skinWeights.count > 0) then
+		if (exportMeshSkinIndices and skinIndices.count > 0) then
 		(
-			format ",%%\"sw\":%[%" nl (tabs 3) sp (fp skinWeights[1]) to:stream
-			for skinIndex = 2 to skinWeights.count do
+			format "%%%\"si\":%[" comma nl (tabs 3) sp to:stream
+			comma2 = ""
+			for skinIndex = 1 to skinIndices.count do
 			(
-				format ",%" (fp skinWeights[skinIndex]) to:stream
+				format "%%" comma2 (skinIndices[skinIndex] as integer) to:stream
+				comma2 = ","
 			)
 			format "]" to:stream
+			comma = ","
+		)
+		
+		if (exportMeshSkinWeights and skinWeights.count > 0) then
+		(
+			format "%%%\"sw\":%[" comma nl (tabs 3) sp to:stream
+			comma2 = ""
+			for skinIndex = 1 to skinWeights.count do
+			(
+				format "%%" comma2 (fp skinWeights[skinIndex]) to:stream
+				comma2 = ","
+			)
+			format "]" to:stream
+			comma = ","
 		)
 	)
 	
