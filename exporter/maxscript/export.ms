@@ -44,7 +44,7 @@ rollout ALExporter "ALLoader exporter"
 	
 	checkbox exportMeshesCheckbox "Export meshes" checked:exportMeshes
 	
-	Group "Meshes"
+	Group "Meshes options"
 	(
 		checkbox exportMeshAssociatedMaterialCheckbox "Associated material (mt)" checked:exportMeshAssociatedMaterial enabled:exportMeshes
 		checkbox exportMeshPositionCheckbox "Position (ps)" checked:exportMeshPosition enabled:exportMeshes
@@ -80,7 +80,7 @@ rollout ALExporter "ALLoader exporter"
 	
 	checkbox exportMaterialsCheckbox "Export materials" checked:exportMaterials
 
-	Group "Materials"
+	Group "Materials options"
 	(
 		checkbox exportMaterialBaseColorCheckbox "Base color (cl)" checked:exportMaterialBaseColor enabled:exportMaterials
 		checkbox exportMaterialBaseColorMapCheckbox "Base color map (cm)" checked:exportMaterialBaseColorMap enabled:exportMaterials
@@ -102,7 +102,7 @@ rollout ALExporter "ALLoader exporter"
 	
 	checkbox exportSkinsCheckbox "Export Skins" checked:exportSkins
 	
-	Group "Skins"
+	Group "Skins options"
 	(
 		checkbox exportSkinBoneParentCheckbox "Bone parent (pr)" checked:exportSkinBoneParent enabled:exportSkins
 		checkbox exportSkinBonePositionCheckbox "Bone position (ps)" checked:exportSkinBonePosition enabled:exportSkins
@@ -122,7 +122,7 @@ rollout ALExporter "ALLoader exporter"
 	
 	checkbox exportAnimationsCheckbox "Export Animations" checked:exportAnimations
 
-	Group "Animations"
+	Group "Animations options"
 	(
 		edittext exportAnimationsNameEditText "Animation name" text:exportAnimationsName labelOnTop:true enabled:exportAnimations
 		checkbox exportAnimationAssociatedSkinCheckbox "Associated skin (sk)" checked:exportAnimationAssociatedSkin enabled:exportAnimations
@@ -144,7 +144,7 @@ rollout ALExporter "ALLoader exporter"
 	
 	-- OPTIONS
 	
-	group "Options"
+	group "Other options"
 	(
 		checkbox flipYZCheckbox "Flip YZ-axis (Poser-like)" checked:true
 		spinner decimalsSpinner "Decimals count" range:[0,9,4] type:#integer scale:1	
