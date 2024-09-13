@@ -108,14 +108,24 @@ rollout ALExporter "ALLoader exporter"
 
 	Group "Animations"
 	(
-		edittext animNameEditText "Animation name" text:"Animation" labelOnTop:true
-		checkbox exportAnimationAssociatedSkinCheckbox "Associated skin (sk)" checked:true enabled:false
-		checkbox exportAnimationAssociatedMeshCheckbox "Associated mesh (ms)" checked:true enabled:false
-		checkbox exportAnimationBonePositionCheckbox "Bone position (ps)" checked:true enabled:false
-		checkbox exportAnimationBoneRotationCheckbox "Bone rotation (rt)" checked:true enabled:false
-		checkbox exportAnimationBoneScaleCheckbox "Bone scale (sc)" checked:true enabled:false
+		edittext exportAnimationsNameEditText "Animation name" text:exportAnimationsName labelOnTop:true enabled:exportAnimations
+		checkbox exportAnimationAssociatedSkinCheckbox "Associated skin (sk)" checked:exportAnimationAssociatedSkin enabled:exportAnimations
+		checkbox exportAnimationAssociatedMeshCheckbox "Associated mesh (ms)" checked:exportAnimationAssociatedMesh enabled:exportAnimations
+		checkbox exportAnimationBonePositionCheckbox "Bone position (ps)" checked:exportAnimationBonePosition enabled:exportAnimations
+		checkbox exportAnimationBoneRotationCheckbox "Bone rotation (rt)" checked:exportAnimationBoneRotation enabled:exportAnimations
+		checkbox exportAnimationBoneScaleCheckbox "Bone scale (sc)" checked:exportAnimationBoneScale enabled:exportAnimations
 	)
 
+	on exportAnimationsCheckbox changed exportAnimations do
+	(
+		exportAnimationsNameEditText.enabled = exportAnimations
+		exportAnimationAssociatedSkinCheckbox.enabled = exportAnimations
+		exportAnimationAssociatedMeshCheckbox.enabled = exportAnimations
+		exportAnimationBonePositionCheckbox.enabled = exportAnimations
+		exportAnimationBoneRotationCheckbox.enabled = exportAnimations
+		exportAnimationBoneScaleCheckbox.enabled = exportAnimations
+	)
+	
 	-- OPTIONS
 	
 	group "Options"
@@ -161,7 +171,7 @@ rollout ALExporter "ALLoader exporter"
 		exportSkinBoneScale = exportSkinBoneScaleCheckbox.checked
 		
 		exportAnimations = exportAnimationsCheckbox.checked
-		animName = animNameEditText.text
+		exportAnimationsName = exportAnimationsNameEditText.text
 		exportAnimationAssociatedSkin = exportAnimationAssociatedSkinCheckbox.checked
 		exportAnimationAssociatedMesh = exportAnimationAssociatedMeshCheckbox.checked
 		exportAnimationBonePosition = exportAnimationBonePositionCheckbox.checked

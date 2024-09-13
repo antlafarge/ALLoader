@@ -1,7 +1,3 @@
--- STRUCTURES
-struct OneBone (bone=undefined, bn=undefined, ky=#())
-struct OneKey (tm=undefined, ps=undefined, rt=undefined, sc=undefined)
-
 -- check if a key of the array of keys has the specified time
 fn in_array_time arr needle_time =
 (
@@ -20,9 +16,21 @@ fn formatAnimation obj stream =
 	objSkin = obj.modifiers[#skin]
 	if (objSkin != undefined) then
 	(
-		format "%\"%\":%{%" (tabs 2) animName sp nl to:stream
-		format "%\"sk\":%\"%\",%" (tabs 3) sp obj.name nl to:stream
-		format "%\"ms\":%\"%\",%" (tabs 3) sp obj.name nl to:stream
+		comma = ""
+		
+		format "%\"%\":%{" (tabs 2) (if (exportAnimationsName.count > 0) then exportAnimationsName else "Anim") sp to:stream
+		
+		if (exportAnimationAssociatedSkin) then
+		(
+			format "%%%\"sk\":%\"%\"" comma nl (tabs 3) sp obj.name to:stream
+			comma = ","
+		)
+		
+		if (exportAnimationAssociatedMesh) then
+		(
+			format "%%%\"ms\":%\"%\"" comma nl (tabs 3) sp obj.name to:stream
+			comma = ","
+		)
 		
 		timeFactor = 1
 		if (timeConfiguration.playbackSpeed == 1) then
@@ -50,8 +58,10 @@ fn formatAnimation obj stream =
 		ticksCount = framesCount as float
 		durationInSeconds = (ticksCount / ticksPerSeconds) * timeFactor
 		
-		format "%\"dr\":%%,%" (tabs 3) sp durationInSeconds nl to:stream
-		format "%\"hr\":%[%" (tabs 3) sp nl to:stream
+		format "%%%\"dr\":%%" comma nl (tabs 3) sp durationInSeconds to:stream
+		comma = ","
+		
+		format "%%%\"hr\":%[" comma nl (tabs 3) sp to:stream
 		
 		-- get start and end of the animation
 		keyStart = (animationRange.start as integer) / 160
@@ -62,6 +72,8 @@ fn formatAnimation obj stream =
 		
 		bonesCount = skinOps.GetNumberBones objSkin
 		allBones = #()
+		struct OneBone (bone=undefined, bn=undefined, ky=#())
+		struct OneKey (tm=undefined, ps=undefined, rt=undefined, sc=undefined)
 		
 		-- Initialize array
 		for i = 1 to bonesCount do
@@ -101,28 +113,52 @@ fn formatAnimation obj stream =
 		)
 		
 		-- Write data
+		comma2 = ""
 		for i = 1 to bonesCount do
 		(
 			oneBone = allBones[i]
 			
-			format "%{%" (tabs 4) nl to:stream
-			format "%\"bn\":%\"%\",%" (tabs 5) sp oneBone.bn nl to:stream
-			format "%\"ky\":%[%" (tabs 5) sp nl to:stream
+			format "%%%{" comma2 nl (tabs 4) to:stream
+			format "%%\"bn\":%\"%\"" nl (tabs 5) sp oneBone.bn to:stream
+			format ",%%\"ky\":%[" nl (tabs 5) sp to:stream
 			
 			keyCount = oneBone.ky.count
+			comma3 = ""
 			for k = 1 to keyCount do
 			(
 				oneKey = oneBone.ky[k]
-				format "%{%\"tm\":%,%\"ps\":%,%\"rt\":%,%\"sc\":%%}%%" (tabs 6) sp oneKey.tm sp (formatPoint3 oneKey.ps) sp (formatQuaternion oneKey.rt) sp (formatPoint3 oneKey.sc) sp (if k != keyCount then "," else "") nl to:stream
+				
+				format "%%%{%\"tm\":%" comma3 nl (tabs 6) sp oneKey.tm to:stream
+				
+				if (exportAnimationBonePosition) then
+				(
+					format ",%\"ps\":%" sp (formatPoint3 oneKey.ps) to:stream
+				)
+				
+				
+				if (exportAnimationBoneRotation) then
+				(
+					format ",%\"rt\":%" sp (formatQuaternion oneKey.rt) to:stream
+				)
+				
+				if (exportAnimationBoneScale) then
+				(
+					format ",%\"sc\":%" sp (formatPoint3 oneKey.sc) to:stream
+				)
+				
+				format "%}" sp to:stream
+				
+				comma3 = ","
 			)
 			
-			format "%]%" (tabs 5) nl to:stream
-			format "%}%%" (tabs 4) (if i != bonesCount then "," else "") nl to:stream
+			format "%%]" nl (tabs 5) to:stream
+			format "%%}" nl (tabs 4) to:stream
+			comma2 = ","
 		)
 		
 		sliderTime = initialSliderTimePos
 		
-		format "%]%" (tabs 3) nl to:stream
-		format "%}%" (tabs 2) nl to:stream
+		format "%%]" nl (tabs 3) to:stream
+		format "%%}%" nl (tabs 2) nl to:stream
 	)
 )

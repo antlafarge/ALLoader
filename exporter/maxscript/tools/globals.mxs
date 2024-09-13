@@ -28,7 +28,7 @@ global exportSkinBoneRotation = true
 global exportSkinBoneScale = true
 
 global exportAnimations = true
-global animName = "Animation"
+global exportAnimationsName = "Anim"
 global exportAnimationAssociatedSkin = true
 global exportAnimationAssociatedMesh = true
 global exportAnimationBonePosition = true
