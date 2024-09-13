@@ -159,19 +159,19 @@ export class ALLoader extends THREE.Loader
 			material = new THREE.MeshPhongMaterial();
 
 			// COLOR
-			if (jsonMat.cl)
+			if (jsonMat.cl != null)
 			{
 				material.color.set(jsonMat.cl[0] / 255, jsonMat.cl[1] / 255, jsonMat.cl[2] / 255);
 			}
 			
 			// SPECULAR
-			if (jsonMat.sp)
+			if (jsonMat.sp != null)
 			{
 				material.specular.set(jsonMat.sp[0] / 255, jsonMat.sp[1] / 255, jsonMat.sp[2] / 255);
 			}
 
 			// OPACITY
-			if (jsonMat.op)
+			if (jsonMat.op != null)
 			{
 				material.opacity = jsonMat.op;
 				if (material.opacity != 1)
@@ -181,7 +181,7 @@ export class ALLoader extends THREE.Loader
 			}
 			
 			// COLOR MAP (TEXTURE)
-			if (jsonMat.cm)
+			if (jsonMat.cm != null)
 			{
 				const textureUrl = `${texturePath}/${jsonMat.cm}`;
 
@@ -197,7 +197,7 @@ export class ALLoader extends THREE.Loader
 				material.map = (new THREE.TextureLoader()).load(textureUrl, onTextureLoaded, onTextureProgress, onTextureError);
 			}
 			
-			if (jsonMat.sd)
+			if (jsonMat.sd != null)
 			{
 				if (jsonMat.sd == "double")
 				{
@@ -217,17 +217,16 @@ export class ALLoader extends THREE.Loader
 	{
 		console.debug("parseSkeleton", jsonSkeleton);
 
-		// SKELETON / BONES
 		const bones = [];
 
 		for (const jsonBone of jsonSkeleton)
 		{
 			const bone = new THREE.Bone();
 			bone.name = jsonBone.nm;
-			bone.userData.parent = jsonBone.pr;
-			bone.position.fromArray(jsonBone.ps);
-			bone.quaternion.fromArray(jsonBone.rt);
-			bone.scale.fromArray(jsonBone.sc);
+			if (jsonBone.pr != null) bone.userData.parent = jsonBone.pr;
+			if (jsonBone.ps != null) bone.position.fromArray(jsonBone.ps);
+			if (jsonBone.rt != null) bone.quaternion.fromArray(jsonBone.rt);
+			if (jsonBone.sc != null) bone.scale.fromArray(jsonBone.sc);
 			bones.push(bone);
 		}
 
@@ -248,44 +247,47 @@ export class ALLoader extends THREE.Loader
 		console.debug("parseMesh", jsonMesh, materials, skeletons);
 
 		// MATERIAL
-		let material = materials[jsonMesh.mt];
+		let material = (jsonMesh.mt != null) ? materials[jsonMesh.mt] : null;
 		if (!loadMaterials || material == null)
 		{
 			material = new THREE.MeshNormalMaterial();
 		}
-		
+
 		// GEOMETRY
 		const geometry = new THREE.BufferGeometry();
 
 		// VERTICES (Vertex Positions and Vertex Indices)
-		if (jsonMesh.vi && jsonMesh.vi.length)
+		if (jsonMesh.vp != null && jsonMesh.vp.length)
 		{
-			// INDEXED (remove indices)
-			const verticesSize = 3 * jsonMesh.vi.reduce((acc, value) => (acc + value.length), 0);
-			const vertices = new Float32Array(verticesSize);
-			let index = 0;
-			let materialIndex = 0;
-			for (const groupVertexIndices of jsonMesh.vi)
+			if (jsonMesh.vi != null && jsonMesh.vi.length)
 			{
-				geometry.addGroup((index / 3), groupVertexIndices.length, materialIndex++);
-				for (const vertexIndex of groupVertexIndices)
+				// INDEXED (remove indices)
+				const verticesSize = 3 * jsonMesh.vi.reduce((acc, value) => (acc + value.length), 0);
+				const vertices = new Float32Array(verticesSize);
+				let index = 0;
+				let materialIndex = 0;
+				for (const groupVertexIndices of jsonMesh.vi)
 				{
-					const vertexIndexPosition = vertexIndex * 3;
-					vertices[index++] = jsonMesh.vp[vertexIndexPosition];
-					vertices[index++] = jsonMesh.vp[vertexIndexPosition + 1];
-					vertices[index++] = jsonMesh.vp[vertexIndexPosition + 2];
+					geometry.addGroup((index / 3), groupVertexIndices.length, materialIndex++);
+					for (const vertexIndex of groupVertexIndices)
+					{
+						const vertexIndexPosition = vertexIndex * 3;
+						vertices[index++] = jsonMesh.vp[vertexIndexPosition];
+						vertices[index++] = jsonMesh.vp[vertexIndexPosition + 1];
+						vertices[index++] = jsonMesh.vp[vertexIndexPosition + 2];
+					}
 				}
+				geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
 			}
-			geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
-		}
-		else
-		{
-			// NOT INDEXED
-			geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(jsonMesh.vp), 3));
+			else
+			{
+				// NOT INDEXED
+				geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(jsonMesh.vp), 3));
+			}
 		}
 
 		// NORMALS (Face normals)
-		if (jsonMesh.fn && jsonMesh.fn.length && jsonMesh.vi && jsonMesh.vi.length)
+		if (jsonMesh.fn != null && jsonMesh.fn.length && jsonMesh.vi != null && jsonMesh.vi.length)
 		{
 			// INDEXED (remove indices)
 			const normalsSize = 3 * jsonMesh.fn.reduce((acc, value) => (acc + value.length), 0);
@@ -308,7 +310,7 @@ export class ALLoader extends THREE.Loader
 			}
 			geometry.setAttribute('normal', new THREE.BufferAttribute(normals, 3));
 		}
-		else if (jsonMesh.nm)
+		else if (jsonMesh.nm != null && jsonMesh.nm.length)
 		{
 			// NOT INDEXED
 			geometry.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(jsonMesh.nm), 3));
@@ -320,27 +322,30 @@ export class ALLoader extends THREE.Loader
 		}
 
 		// UVS
-		if (jsonMesh.ui && jsonMesh.ui.length)
+		if (jsonMesh.uv != null && jsonMesh.uv.length)
 		{
-			// INDEXED (remove indices)
-			const uvs = new Float32Array(jsonMesh.ui.length * 2);
-			for (let i = 0, sz = jsonMesh.ui.length; i < sz; i++)
+			if (jsonMesh.ui != null && jsonMesh.ui.length)
 			{
-				const index = jsonMesh.ui[i];
-				uvs[2 * i] = jsonMesh.uv[2 * index];
-				uvs[2 * i + 1] = jsonMesh.uv[2 * index + 1];
+				// INDEXED (remove indices)
+				const uvs = new Float32Array(jsonMesh.ui.length * 2);
+				for (let i = 0, sz = jsonMesh.ui.length; i < sz; i++)
+				{
+					const index = jsonMesh.ui[i];
+					uvs[2 * i] = jsonMesh.uv[2 * index];
+					uvs[2 * i + 1] = jsonMesh.uv[2 * index + 1];
+				}
+				geometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
 			}
-			geometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
-		}
-		else if (jsonMesh.uv)
-		{
-			// NOT INDEXED
-			geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(jsonMesh.uv), 2));
+			else
+			{
+				// NOT INDEXED
+				geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(jsonMesh.uv), 2));
+			}
 		}
 
 		// SKIN INDICES / WEIGHTS
 		let mesh;
-		if (loadSkeletons && jsonMesh.si && jsonMesh.sw)
+		if (loadSkeletons && jsonMesh.si != null && jsonMesh.si.length && jsonMesh.sw != null && jsonMesh.sw.length && jsonMesh.vi != null && jsonMesh.vi.length)
 		{
 			const skinIndicesSize = 4 * jsonMesh.vi.reduce((acc, value) => (acc + value.length), 0);
 			const skinIndices = new Uint16Array(skinIndicesSize);
@@ -355,19 +360,15 @@ export class ALLoader extends THREE.Loader
 					const i1 = jsonMesh.si[skinIndexPosition+1];
 					const i2 = jsonMesh.si[skinIndexPosition+2];
 					const i3 = jsonMesh.si[skinIndexPosition+3];
-
 					const w0 = jsonMesh.sw[skinIndexPosition];
 					const w1 = jsonMesh.sw[skinIndexPosition+1];
 					const w2 = jsonMesh.sw[skinIndexPosition+2];
 					const w3 = jsonMesh.sw[skinIndexPosition+3];
-
 					const total = w0 + w1 + w2 + w3;
+
 					if (total < 0.1)
 					{
-						console.warn(skinIndexPosition, "=>", index);
-						console.debug("total=", total);
-						console.debug("IDX", i0, i1, i2, i3);
-						console.debug("WGT", w0, w1, w2, w3);
+						console.warn(`skinIndexPosition=:${index} total=${total} indices=${i0},${i1},${i2},${i3} weights=${w0},${w1},${w2},${w3}`);
 					}
 
 					skinIndices[index] = i0;
@@ -411,7 +412,7 @@ export class ALLoader extends THREE.Loader
 			mesh.userData.animated = true;
 			
 			// SKELETON
-			if (jsonMesh.sk && skeletons)
+			if (jsonMesh.sk != null && skeletons)
 			{
 				const skeleton = skeletons[jsonMesh.sk];
 				if (skeleton)
@@ -434,17 +435,17 @@ export class ALLoader extends THREE.Loader
 			mesh = new THREE.Mesh(geometry, material);
 		}
 
-		if (jsonMesh.ps)
+		if (jsonMesh.ps != null)
 		{
 			mesh.position.fromArray(jsonMesh.ps);
 		}
 
-		if (jsonMesh.rt)
+		if (jsonMesh.rt != null)
 		{
 			mesh.quaternion.fromArray(jsonMesh.rt);
 		}
 
-		if (jsonMesh.sc)
+		if (jsonMesh.sc != null)
 		{
 			mesh.scale.fromArray(jsonMesh.sc);
 		}
@@ -469,13 +470,17 @@ export class ALLoader extends THREE.Loader
 			for (const jsonFrame of jsonTrack.ky)
 			{
 				times.push(jsonFrame.tm);
-				positions.push(...jsonFrame.ps);
-				orientations.push(...jsonFrame.rt);
-				scales.push(...jsonFrame.sc);
+				if (jsonFrame.ps != null) positions.push(...jsonFrame.ps);
+				if (jsonFrame.rt != null) orientations.push(...jsonFrame.rt);
+				if (jsonFrame.sc != null) scales.push(...jsonFrame.sc);
 			}
-			tracks.push(new THREE.VectorKeyframeTrack(`${boneName}.position`, times, positions));
-			tracks.push(new THREE.QuaternionKeyframeTrack(`${boneName}.quaternion`, times, orientations));
-			tracks.push(new THREE.VectorKeyframeTrack(`${boneName}.scale`, times, scales));
+
+			if (times.length)
+			{
+				if (positions.length) tracks.push(new THREE.VectorKeyframeTrack(`${boneName}.position`, times, positions));
+				if (orientations.length) tracks.push(new THREE.QuaternionKeyframeTrack(`${boneName}.quaternion`, times, orientations));
+				if (scales.length) tracks.push(new THREE.VectorKeyframeTrack(`${boneName}.scale`, times, scales));
+			}
 		}
 
 		return new THREE.AnimationClip(animName, jsonAnim.dr, tracks);
