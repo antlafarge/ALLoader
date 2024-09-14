@@ -7,6 +7,8 @@ ALLoader is an Autodesk 3dsMax exporter (MaxScript) to JSON, and a WebGL Three.j
 ## Versions
 ### 3dsMax 2022/2023/2024/2025
 - State : Work in progress
+    - TODO :
+        - Fix skeleton rotation
 - Three.js : [r167](https://github.com/mrdoob/three.js/releases/tag/r167)
 
 ### 3dsMax 2015

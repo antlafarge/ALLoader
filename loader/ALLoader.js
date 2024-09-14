@@ -118,7 +118,7 @@ export class ALLoader extends THREE.Loader
 			for (const meshName in json.meshes)
 			{
 				const jsonMesh = json.meshes[meshName];
-				const mesh = this.parseMesh(jsonMesh, materials, skeletons, loadMaterials, loadSkeletons);
+				const mesh = this.parseMesh(jsonMesh, materials, skeletons);
 				mesh.name = meshName;
 				meshes[meshName] = mesh;
 			}
@@ -242,13 +242,13 @@ export class ALLoader extends THREE.Loader
 		return new THREE.Skeleton(bones);
 	}
 
-	parseMesh(jsonMesh, materials, skeletons, loadMaterials, loadSkeletons)
+	parseMesh(jsonMesh, materials, skeletons)
 	{
 		console.debug("parseMesh", jsonMesh, materials, skeletons);
 
 		// MATERIAL
-		let material = (jsonMesh.mt != null) ? materials[jsonMesh.mt] : null;
-		if (!loadMaterials || material == null)
+		let material = (jsonMesh.mt != null) ? (materials != null ? materials[jsonMesh.mt] : null) : null;
+		if (material == null)
 		{
 			material = new THREE.MeshNormalMaterial();
 		}
@@ -345,7 +345,7 @@ export class ALLoader extends THREE.Loader
 
 		// SKIN INDICES / WEIGHTS
 		let mesh;
-		if (loadSkeletons && jsonMesh.si != null && jsonMesh.si.length && jsonMesh.sw != null && jsonMesh.sw.length && jsonMesh.vi != null && jsonMesh.vi.length)
+		if (jsonMesh.sk != null && skeletons && skeletons[jsonMesh.sk] != null && jsonMesh.si != null && jsonMesh.si.length && jsonMesh.sw != null && jsonMesh.sw.length && jsonMesh.vi != null && jsonMesh.vi.length)
 		{
 			const skinIndicesSize = 4 * jsonMesh.vi.reduce((acc, value) => (acc + value.length), 0);
 			const skinIndices = new Uint16Array(skinIndicesSize);
@@ -409,25 +409,20 @@ export class ALLoader extends THREE.Loader
 
 			// SKINNED_MESH
 			mesh = new THREE.SkinnedMesh(geometry, material);
-			mesh.userData.animated = true;
 			
 			// SKELETON
-			if (jsonMesh.sk != null && skeletons)
+			const skeleton = skeletons[jsonMesh.sk];
+			if (skeleton)
 			{
-				const skeleton = skeletons[jsonMesh.sk];
-				if (skeleton)
+				for (const bone of skeleton.bones)
 				{
-					for (const bone of skeleton.bones)
+					if (bone.userData.parent == -1)
 					{
-						if (bone.userData.parent == -1)
-						{
-							mesh.add(bone);
-						}
+						mesh.add(bone);
 					}
-
-					mesh.bind(skeleton);
-					mesh.userData.skeletonName = jsonMesh.sk;
 				}
+				mesh.bind(skeleton);
+				mesh.userData.skeletonName = jsonMesh.sk;
 			}
 		}
 		else

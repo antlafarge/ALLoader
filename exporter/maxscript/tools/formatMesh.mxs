@@ -112,11 +112,17 @@ fn formatObject obj stream =
 	
 	if (exportMeshVertices) then
 	(
+		--ObjectOffsetTransformInversed = inverse (obj.objectTransform * inverse obj.transform)
+		ObjectOffsetTransform = obj.objectTransform * inverse obj.transform
+		
 		format "%%%\"vp\":%[" comma nl (tabs 3) sp to:stream
 		comma2 = ""
 		for v = 1 to objMesh.numverts do
 		(
-			vert = (point3ForOpenGL (in coordsys local getVert objMesh v))
+			-- TODO : Should work, why?
+			--vert = (point3ForOpenGL (in coordsys ObjectOffsetTransformInversed getVert objMesh v))
+			-- WORKAROUND :
+			vert = (point3ForOpenGL ((getVert objMesh v) * ObjectOffsetTransform))
 			format "%%%,%,%" comma2 sp (fp vert.x) (fp vert.y) (fp vert.z) to:stream
 			comma2 = ","
 		)

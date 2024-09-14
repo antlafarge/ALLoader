@@ -35,9 +35,9 @@ global exportAnimationBonePosition = true
 global exportAnimationBoneRotation = true
 global exportAnimationBoneScale = true
 
-global flipAxis = true
+global flipAxis = false
 global flipAxisMatrix = matrix3 [1,0,0] [0,0,-1] [0,1,0] [0,0,0]
-global formattedPrintFormat = ".6g"
+global formattedPrintFormat = ".4g"
 global compressJson = false
 global TAB = 0
 global TAB_ARRAY = #( "\t" )

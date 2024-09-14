@@ -40,6 +40,7 @@ fn formatSkeleton obj stream =
 				)
 				if (exportSkinBoneRotation) then
 				(
+					-- inverse because 3ds max use left-hand axis rule internally, but it is inverted to use right-hand axis rule on display (MaxScript - Using Node Transform Properties : https://help.autodesk.com/view/MAXDEV/2022/ENU/?guid=GUID-3B001F21-8FE9-4663-A972-E648682A0ACD)
 					format ",%\"rt\":%" sp (formatQuaternion (inverse newTransform.rotation)) to:stream
 				)
 				if (exportSkinBoneScale) then
@@ -49,7 +50,7 @@ fn formatSkeleton obj stream =
 				format "%}%%" sp (if bi != bonesCount then "," else "") nl to:stream
 			)
 			
-			format "%%]%" nl (tabs 2) nl to:stream
+			format "%]%" (tabs 2) nl to:stream
 		)
 	)
 )
