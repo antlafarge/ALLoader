@@ -1,5 +1,5 @@
 -- Return the cached number of tabulations if output is not compressed
-fn tabs tab =
+fn tabs tabsCount =
 (
 	if (compressJson) then
 	(
@@ -7,15 +7,11 @@ fn tabs tab =
 	)
 	else
 	(
-		count = TAB_ARRAY.count
-		if (tab > count) then
+		for tabIndex = TAB_ARRAY.count + 1 to tabsCount do
 		(
-			for tabIndex = count + 1 to tab do
-			(
-				TAB_ARRAY[tabIndex] = TAB_ARRAY[tabIndex - 1] + "\t"
-			)
+			TAB_ARRAY[tabIndex] = TAB_ARRAY[tabIndex - 1] + "\t"
 		)
-		TAB_ARRAY[tab]
+		TAB_ARRAY[tabsCount]
 	)
 )
 
@@ -39,13 +35,10 @@ fn formatQuaternion myQuat =
 fn formatArray pieces =
 (
 	stream = stringstream ""
-	if (pieces != undefined) then
+	count = pieces.count
+	for index = 1 to count do
 	(
-		count = pieces.count
-		for index = 1 to count do
-		(
-			format "%%" (fp pieces[index]) (if index != count then "," else "") to:stream
-		)
+		format "%%" (fp pieces[index]) (if index != count then "," else "") to:stream
 	)
 	stream as string
 )
@@ -53,13 +46,10 @@ fn formatArray pieces =
 fn formatArrayAsInteger pieces =
 (
 	stream = stringstream ""
-	if (pieces != undefined) then
+	count = pieces.count
+	for index = 1 to count do
 	(
-		count = pieces.count
-		for index = 1 to count do
-		(
-			format "%%" (pieces[index] as integer) (if index != count then "," else "") to:stream
-		)
+		format "%%" (pieces[index] as integer) (if index != count then "," else "") to:stream
 	)
 	stream as string
 )
@@ -67,14 +57,11 @@ fn formatArrayAsInteger pieces =
 fn formatUvArray pieces =
 (
 	stream = stringstream ""
-	if (pieces != undefined) then
+	count = pieces.count
+	for index = 1 to count do
 	(
-		count = pieces.count
-		for index = 1 to count do
-		(
-			piece = pieces[index]
-			format "%,%,%%%" (fp piece.x) (fp piece.y) (if index != count then "," else "") sp to:stream
-		)
+		piece = pieces[index]
+		format "%,%,%%%" (fp piece.x) (fp piece.y) (if index != count then "," else "") sp to:stream
 	)
 	stream as string
 )
@@ -139,42 +126,16 @@ fn formatQuatArray pieces =
 	stream as string
 )
 
-fn isBone o =
-(
-	(classof o) == BoneGeometry
-)
-
 fn isGeometry o =
 (
 	((Superclassof o) == GeometryClass) and ((classof o) != BoneGeometry)
 )
 
--- function that compute the relative (from parent) transform matrix and convert it to openGL axis
-fn getRelativeTransformForOpenGL myObject =
-(
-	-- transform of the object converted to OpenGL axis
-	myTransform = (if flipAxis then (myObject.transform * flipAxisMatrix) else myObject.transform)
-	
-	parent = myObject.parent
-	
-	-- if a parent exists
-	if (parent != undefined) then
-	(
-		-- inverse because 3ds max use left-hand axis rule internally, but it is inverted to use right-hand axis rule on display (MaxScript - Using Node Transform Properties : https://help.autodesk.com/view/MAXDEV/2022/ENU/?guid=GUID-3B001F21-8FE9-4663-A972-E648682A0ACD)
-		myTransform *= (inverse (if flipAxis then (parent.transform * flipAxisMatrix) else parent.transform))
-	)
-	
-	-- return converted transform
-	myTransform
-)
-
--- convert a 3d point to openGL axis
 fn point3ForOpenGL myPoint3 =
 (
 	if flipAxis then (myPoint3 * flipAxisMatrix) else myPoint3
 )
 
--- convert a quaternion orientation to openGL axis
 fn quatForOpenGL myQuat =
 (
 	if flipAxis then (myQuat * flipAxisMatrix) else myQuat

@@ -146,7 +146,7 @@ rollout ALExporter "ALLoader exporter"
 	
 	group "Other options"
 	(
-		checkbox flipYZCheckbox "Flip YZ-axis (Poser-like)" checked:flipAxis enabled:false
+		checkbox flipYZCheckbox "Flip YZ-axis (Poser-like)" checked:flipAxis
 		spinner decimalsSpinner "Decimals count" range:[0,9,4] type:#integer scale:1	
 		checkbox compressJsonCheckbox "Compress JSON" checked:compressJson
 	)

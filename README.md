@@ -10,8 +10,6 @@ ALLoader is an Autodesk 3dsMax exporter (MaxScript) to JSON, and a WebGL Three.j
 
 ### 3dsMax 2022
 - State : Pre-released (work in progress)
-- Todo :
-    - Implement `Flip Y-Z axis` option
 - Release : [3ds Max 2022](https://github.com/antlafarge/ALLoader/releases/tag/3dsmax2022)
 - Source : [3dsmax2022](https://github.com/antlafarge/ALLoader/tree/3dsmax2022)
 - Three.js : [r167](https://github.com/mrdoob/three.js/releases/tag/r167)
@@ -55,10 +53,6 @@ ALLoader is an Autodesk 3dsMax exporter (MaxScript) to JSON, and a WebGL Three.j
 - Opacity
 - Timeline playback speed
 
-## Todo
-- Interface
-- Biped
-
 ## FAQ
 Q. Some objects in the scene are not well placed?  
 A. Add a reset XForm on these objects and export.  
@@ -67,3 +61,15 @@ Q. I can't export a biped skeleton from 3DSMax?
 A. Export your scene using the FBX format, close your scene and open the FBX file. This action will convert the biped to a standart skeleton (tree of bones). You can now export your scene using the exporter.  
 
 _You can share feedback or discuss the project in the [discussion tab](https://github.com/antlafarge/ALLoader/discussions)._  
+
+## Todo
+- Check every types of objects are well exported (EditPoly, EditMesh...)
+- UV indices optimization
+    - When disabled :
+        - Use only UVs
+- Vertex indices optimization
+    - When disabled :
+        - Use only vertex positions
+        - Handle properly face normals
+        - Handle properly skin indices and skin weights
+- 3dsMax biped

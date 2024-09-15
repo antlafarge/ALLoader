@@ -1,14 +1,14 @@
 -- check if a key of the array of keys has the specified time
-fn in_array_time arr needle_time =
+fn includesTime arr timeToSearch =
 (
 	for ai = 1 to arr.count do
 	(
-		if (arr[ai].time == needle_time) then
+		if (arr[ai].time == timeToSearch) then
 		(
-			return true
+			return ai
 		)
 	)
-	return false
+	return -1
 )
 
 fn formatAnimation obj stream =
@@ -94,30 +94,36 @@ fn formatAnimation obj stream =
 				oneBone = allBones[i]
 				b = oneBone.bone
 				
-				newTransform = b.transform --(getRelativeTransformForOpenGL b)
+				localTransform = b.transform
 				
 				if (b.parent != undefined) then
 				(
-					newTransform *= inverse b.parent.transform
+					localTransform *= inverse b.parent.transform
 				)
 				else
 				(
-					newTransform *= inverse obj.transform
+					localTransform *= inverse obj.transform
+				)
+				
+				if flipAxis then
+				(
+					localTransform *= flipAxisMatrix
 				)
 				
 				if (
 					k == keyStart or
 					k == keyEnd or
-					in_array_time b.position.controller.keys ktime or
-					in_array_time b.rotation.controller.keys ktime or
-					in_array_time b.scale.controller.keys ktime
+					(includesTime b.position.controller.keys ktime != -1) or
+					(includesTime b.rotation.controller.keys ktime != -1) or
+					(includesTime b.scale.controller.keys ktime != -1)
 				) then
 				(
 					ticksCount = ktime as float
 					btimeInSeconds = (ticksCount / ticksPerSeconds) * timeFactor
 					
-					-- inverse because 3ds max use left-hand axis rule internally, but it is inverted to use right-hand axis rule on display (MaxScript - Using Node Transform Properties : https://help.autodesk.com/view/MAXDEV/2022/ENU/?guid=GUID-3B001F21-8FE9-4663-A972-E648682A0ACD)
-					append oneBone.ky (OneKey tm:btimeInSeconds ps:newTransform.position rt:(inverse newTransform.rotation) sc:newTransform.scale)
+					-- Inverse the rotation because : "Internally, 3ds Max stores rotations in node matrices using the left-hand rule."
+					-- Cf. Maxscript doc : Using Node Transform Properties (https://help.autodesk.com/view/MAXDEV/2022/ENU/?guid=GUID-3B001F21-8FE9-4663-A972-E648682A0ACD)
+					append oneBone.ky (OneKey tm:btimeInSeconds ps:localTransform.position rt:(inverse localTransform.rotation) sc:localTransform.scale)
 				)
 			)
 		)
