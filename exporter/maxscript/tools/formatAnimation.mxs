@@ -94,6 +94,17 @@ fn formatAnimation obj stream =
 				oneBone = allBones[i]
 				b = oneBone.bone
 				
+				newTransform = b.transform --(getRelativeTransformForOpenGL b)
+				
+				if (b.parent != undefined) then
+				(
+					newTransform *= inverse b.parent.transform
+				)
+				else
+				(
+					newTransform *= inverse obj.transform
+				)
+				
 				if (
 					k == keyStart or
 					k == keyEnd or
@@ -104,8 +115,6 @@ fn formatAnimation obj stream =
 				(
 					ticksCount = ktime as float
 					btimeInSeconds = (ticksCount / ticksPerSeconds) * timeFactor
-					
-					newTransform = (getRelativeTransformForOpenGL b)
 					
 					-- inverse because 3ds max use left-hand axis rule internally, but it is inverted to use right-hand axis rule on display (MaxScript - Using Node Transform Properties : https://help.autodesk.com/view/MAXDEV/2022/ENU/?guid=GUID-3B001F21-8FE9-4663-A972-E648682A0ACD)
 					append oneBone.ky (OneKey tm:btimeInSeconds ps:newTransform.position rt:(inverse newTransform.rotation) sc:newTransform.scale)
