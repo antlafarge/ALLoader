@@ -5,10 +5,15 @@ ALLoader is an Autodesk 3dsMax exporter (MaxScript) to JSON, and a WebGL Three.j
 [http://antlafarge.github.io/ALLoader/](http://antlafarge.github.io/ALLoader/)
 
 ## Versions
-### 3dsMax 2022/2023/2024/2025
-- State : Work in progress
-    - TODO :
-        - Fix Flip Y-Z axis option
+### 3dsMax 2023 / 2024 / 2025
+- Planned
+
+### 3dsMax 2022
+- State : Pre-released (work in progress)
+- Todo :
+    - Implement `Flip Y-Z axis` option
+- Release : [3ds Max 2022](https://github.com/antlafarge/ALLoader/releases/tag/3dsmax2022)
+- Source : [3dsmax2022](https://github.com/antlafarge/ALLoader/tree/3dsmax2022)
 - Three.js : [r167](https://github.com/mrdoob/three.js/releases/tag/r167)
 
 ### 3dsMax 2015
@@ -18,6 +23,7 @@ ALLoader is an Autodesk 3dsMax exporter (MaxScript) to JSON, and a WebGL Three.j
 - Three.js : [r71](https://github.com/mrdoob/three.js/releases/tag/r71)
 
 ## Exporter preview
+3ds Max 2022 exporter preview :  
 ![image](exporter-preview.png)
 
 ## How to export meshes and animations
