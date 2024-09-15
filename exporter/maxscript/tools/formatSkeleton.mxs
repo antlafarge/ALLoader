@@ -13,10 +13,14 @@ fn formatSkeleton obj stream =
 			(
 				b = allBones[bi]
 				
+				newTransform = b.transform --(getRelativeTransformForOpenGL b)
+				
 				-- retrive parent boneID
 				parentBoneID = -1
 				if (b.parent != undefined) then
 				(
+					newTransform *= inverse b.parent.transform
+					
 					for bi2 = 1 to bonesCount do
 					(
 						if (b.parent == allBones[bi2]) then
@@ -26,8 +30,10 @@ fn formatSkeleton obj stream =
 						)
 					)
 				)
-				
-				newTransform = (getRelativeTransformForOpenGL b)
+				else
+				(
+					newTransform *= inverse obj.transform
+				)
 				
 				format "%{%\"nm\":\"%\"" (tabs 3) sp b.name to:stream
 				if (exportSkinBoneParent) then

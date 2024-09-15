@@ -97,10 +97,10 @@
 
 			camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 10000);
 			camera.up.set(0, 0, 1);
-			camera.position.set(5, -5, 3);
+			camera.position.set(-5, 5, 2.5);
 
 			controls = new OrbitControls(camera, container);
-			controls.autoRotate = true;
+			//controls.autoRotate = true;
 			controls.autoRotateSpeed = 0.5;
 
 			scene = new THREE.Scene();
@@ -135,14 +135,8 @@
 				const vMin = new THREE.Vector3(+Infinity, +Infinity, +Infinity);
 				const vMax = new THREE.Vector3(-Infinity, -Infinity, -Infinity);
 
-				const meshesCenter = new THREE.Vector3();
-				let meshesCount = 0;
-
 				for (const meshName in data.meshes) {
 					const mesh = data.meshes[meshName];
-
-					meshesCount++;
-					meshesCenter.add(mesh.position);
 
 					mesh.geometry.computeBoundingBox();
 					vMin.min(mesh.geometry.boundingBox.min);
@@ -151,12 +145,6 @@
 					scene.add(mesh);
 
 					createWireframe(mesh);
-
-					// const geometry = new THREE.BoxGeometry(0.1, 0.1, 0.1); 
-					// const material = new THREE.MeshBasicMaterial({ color: 0xffffff}); 
-					// const cube = new THREE.Mesh(geometry, material); 
-					// cube.position.copy(mesh.position);
-					// scene.add(cube);
 
 					if (mesh.skeleton) {
 						skeletonHelper = new THREE.SkeletonHelper(mesh);
@@ -172,23 +160,6 @@
 						mixers.push(mixer);
 					}
 				}
-
-				meshesCenter.divideScalar(meshesCount);
-
-				// Place camera
-				// const size = vMax.clone().sub(vMin);
-				// const mid = size.divideScalar(2).add(vMin);
-				// const dist = size.x + size.y + size.z;
-				//controls.target.copy(vMax);
-				//camera.position.set(mid.x + dist * 0.2, mid.y + dist * 0.3, mid.z + dist * 0.4);
-				//camera.position.copy(vMax).add(mid);
-				//console.log(mid.x, mid.y, mid.z);
-
-				// const geometry = new THREE.BoxGeometry(0.1, 0.1, 0.1); 
-				// const material = new THREE.MeshBasicMaterial({ color: 0xff0000}); 
-				// const cube = new THREE.Mesh(geometry, material); 
-				// cube.position.copy(meshesCenter);
-				//scene.add(cube);
 			}
 
 			function onLoad() {
@@ -201,11 +172,10 @@
 
 			(new ALLoader).load(
 				[
-					//`./examples/data/a.json`,
 					`./examples/data/${modelToLoad}.material.json`,
 					`./examples/data/${modelToLoad}.skeleton.json`,
 					`./examples/data/${modelToLoad}.mesh.json`,
-					`./examples/data/${modelToLoad}.animation.json`
+					//`./examples/data/${modelToLoad}.animation.json`
 				],
 				{
 					texturePath: "examples/textures",
