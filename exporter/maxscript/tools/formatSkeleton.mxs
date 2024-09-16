@@ -34,11 +34,6 @@ fn formatSkeleton obj stream =
 					localTransform *= inverse obj.transform
 				)
 				
-				if flipAxis then
-				(
-					localTransform *= flipAxisMatrix
-				)
-				
 				format "%{%\"nm\":\"%\"" (tabs 3) sp b.name to:stream
 				
 				if (exportSkinBoneParent) then

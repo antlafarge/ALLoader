@@ -105,11 +105,6 @@ fn formatAnimation obj stream =
 					localTransform *= inverse obj.transform
 				)
 				
-				if flipAxis then
-				(
-					localTransform *= flipAxisMatrix
-				)
-				
 				if (
 					k == keyStart or
 					k == keyEnd or
