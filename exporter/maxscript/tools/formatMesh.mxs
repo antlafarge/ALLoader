@@ -82,6 +82,7 @@ fn formatObject obj stream =
 	-- Faces
 	vertex_indices = #()
 	face_normals = #()
+	uv = #()
 	uv_indices = #()
 	for f = 1 to objMesh.numfaces do
 	(
@@ -113,13 +114,28 @@ fn formatObject obj stream =
 		append face_normals[matID] (normal.y)
 		append face_normals[matID] (normal.z)
 		
-		-- UV indices
+		-- UVs
 		if (getNumTVerts objMesh > 0) then
 		(
 			tvface = GetTVFace objMesh f
-			append uv_indices (tvface.x - 1)
-			append uv_indices (tvface.y - 1)
-			append uv_indices (tvface.z - 1)
+			if (exportMeshIndexedUVs) then
+			(
+				append uv_indices (tvface.x - 1)
+				append uv_indices (tvface.y - 1)
+				append uv_indices (tvface.z - 1)
+			)
+			else
+			(
+				tvert = (getTVert objMesh tvface.x)
+				append uv tvert.x
+				append uv tvert.y
+				tvert = (getTVert objMesh tvface.y)
+				append uv tvert.x
+				append uv tvert.y
+				tvert = (getTVert objMesh tvface.z)
+				append uv tvert.x
+				append uv tvert.y
+			)
 		)
 	)
 	
@@ -169,30 +185,45 @@ fn formatObject obj stream =
 		comma = ","
 	)
 	
-	if (exportMeshUVs and objMesh.numTVerts > 0) then
+	if (exportMeshIndexedUVs) then
+	(
+		if (exportMeshUVs and objMesh.numTVerts > 0) then
+		(
+			format "%%%\"uv\":%[" comma nl (tabs 3) sp to:stream
+			comma2 = ""
+			for v = 1 to objMesh.numTVerts do
+			(
+				tvert = (getTVert objMesh v)
+				format "%%%,%" comma2 sp (fp tvert.x) (fp tvert.y) to:stream
+				comma2 = ","
+			)
+			format "%]" sp to:stream
+			comma = ","
+		)
+		
+		if (exportMeshIndexedUVs and uv_indices.count > 0) then
+		(
+			format "%%%\"ui\":%[" comma nl (tabs 3) sp to:stream
+			comma2 = ""
+			for index = 1 to uv_indices.count do
+			(
+				format "%%" comma2 (uv_indices[index] as integer) to:stream
+				comma2 = ","
+			)
+			format "%]" sp to:stream
+			comma = ","
+		)
+	)
+	else if (exportMeshUVs and uv.count > 0) then
 	(
 		format "%%%\"uv\":%[" comma nl (tabs 3) sp to:stream
 		comma2 = ""
-		for v = 1 to objMesh.numTVerts do
+		for index = 1 to uv.count do
 		(
-			tvert = (getTVert objMesh v)
-			format "%%%,%" comma2 sp (fp tvert.x) (fp tvert.y) to:stream
+			format "%%" comma2 (fp uv[index]) to:stream
 			comma2 = ","
 		)
-		format "%]" sp to:stream
-		comma = ","
-	)
-	
-	if (exportMeshIndexedUVs and uv_indices.count > 0) then
-	(
-		format "%%%\"ui\":%[" comma nl (tabs 3) sp to:stream
-		comma2 = ""
-		for index = 1 to uv_indices.count do
-		(
-			format "%%" comma2 (uv_indices[index] as integer) to:stream
-			comma2 = ","
-		)
-		format "%]" sp to:stream
+		format "]" to:stream
 		comma = ","
 	)
 	
