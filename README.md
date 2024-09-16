@@ -9,7 +9,7 @@ ALLoader is an Autodesk 3dsMax exporter (MaxScript) to JSON, and a WebGL Three.j
 - 3dsMax 2024 : Planned
 - 3dsMax 2023 : Planned
 - [3ds Max 2022](https://github.com/antlafarge/ALLoader/releases/tag/3dsmax2022) : Pre-released 
-- [3ds Max 2015](https://github.com/antlafarge/ALLoader/releases/tag/3dsmax2015) : Releasd 
+- [3ds Max 2015](https://github.com/antlafarge/ALLoader/releases/tag/3dsmax2015) : Released 
 
 ## Exporter preview
 3ds Max 2022 exporter preview :  
