@@ -105,6 +105,14 @@ fn formatAnimation obj stream =
 					localTransform *= inverse obj.transform
 				)
 				
+				localRotation = localTransform.rotation
+				
+				if flipAxis then
+				(
+					localTransform *= flipAxisMatrix
+					localRotation *= flipAxisMatrix
+				)
+				
 				if (
 					k == keyStart or
 					k == keyEnd or
@@ -118,7 +126,7 @@ fn formatAnimation obj stream =
 					
 					-- Inverse the rotation because : "Internally, 3ds Max stores rotations in node matrices using the left-hand rule."
 					-- Cf. Maxscript doc : Using Node Transform Properties (https://help.autodesk.com/view/MAXDEV/2022/ENU/?guid=GUID-3B001F21-8FE9-4663-A972-E648682A0ACD)
-					append oneBone.ky (OneKey tm:btimeInSeconds ps:localTransform.position rt:(inverse localTransform.rotation) sc:localTransform.scale)
+					append oneBone.ky (OneKey tm:btimeInSeconds ps:localTransform.position rt:(inverse localRotation) sc:localTransform.scale)
 				)
 			)
 		)

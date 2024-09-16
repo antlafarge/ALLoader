@@ -51,10 +51,12 @@ fn formatObject obj stream =
 	)
 	
 	localTransform = obj.transform
+	localRotation = localTransform.rotation
 	
 	if (flipAxis) then
 	(
 		localTransform *= flipAxisMatrix
+		localRotation *= flipAxisMatrix
 	)
 	
 	if (exportMeshPosition) then
@@ -65,7 +67,7 @@ fn formatObject obj stream =
 	
 	if (exportMeshRotation) then
 	(
-		format "%%%\"rt\":%%" comma nl (tabs 3) sp (formatQuaternion (inverse localTransform.rotation)) to:stream
+		format "%%%\"rt\":%%" comma nl (tabs 3) sp (formatQuaternion (inverse localRotation)) to:stream
 		comma = ","
 	)
 	
@@ -103,7 +105,10 @@ fn formatObject obj stream =
 		
 		-- Normals
 		normal = (getfacenormal objMesh f)
-		--if flipAxis then (normal *= flipAxisMatrix)
+		if flipAxis then
+		(
+			normal *= flipAxisMatrix
+		)
 		append face_normals[matID] (normal.x)
 		append face_normals[matID] (normal.y)
 		append face_normals[matID] (normal.z)
@@ -120,18 +125,17 @@ fn formatObject obj stream =
 	
 	if (exportMeshVertices) then
 	(
-		--ObjectOffsetTransformInversed = inverse (obj.objectTransform * inverse obj.transform)
 		ObjectOffsetTransform = obj.objectTransform * inverse obj.transform
-		
+	
 		format "%%%\"vp\":%[" comma nl (tabs 3) sp to:stream
 		comma2 = ""
 		for v = 1 to objMesh.numverts do
 		(
-			-- TODO : Should work, why?
-			--vert = (in coordsys ObjectOffsetTransformInversed getVert objMesh v)
-			-- WORKAROUND :
 			vert = ((getVert objMesh v) * ObjectOffsetTransform)
-			--if flipAxis then (vert *= flipAxisMatrix)
+			if flipAxis then
+			(
+				vert *= flipAxisMatrix
+			)
 			format "%%%,%,%" comma2 sp (fp vert.x) (fp vert.y) (fp vert.z) to:stream
 			comma2 = ","
 		)
