@@ -25,7 +25,7 @@ fn export objectsToExport exportMaterials exportSkins exportMeshes exportAnimati
 			formatMaterial mat stream
 			firstMat = false
 		)
-		format "%%}" nl (tabs 1) to:stream
+		format "%}" (tabs 1) to:stream
 		started = true
 	)
 	

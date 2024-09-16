@@ -16,12 +16,16 @@ fn launchExport =
 		
 		file = createFile filepath
 		
-		objectsToExport = objects
+		objectsToExport = #()
 		
         if (exportSelection) then
 		(
 			if ((classof $) == ObjectSet) then objectsToExport = $
 			else if ($ != undefined) then objectsToExport = #($)
+		)
+		else
+		(
+			objectsToExport = objects
 		)
 		
 		disableSceneRedraw()
@@ -154,7 +158,7 @@ rollout ALExporter "ALLoader exporter"
 	
 	group "Other options"
 	(
-		checkbox flipYZCheckbox "Flip YZ-axis (Poser-like)" checked:flipAxis
+		checkbox flipYZCheckbox "Convert Z-Up to Y-Up" checked:flipAxis
 		spinner decimalsSpinner "Decimals count" range:[0,9,4] type:#integer scale:1	
 		checkbox compressJsonCheckbox "Compress JSON" checked:compressJson
 	)

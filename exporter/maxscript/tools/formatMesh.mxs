@@ -49,9 +49,9 @@ fn formatObject obj stream =
 		format "%%%\"mt\":%\"%\"" comma nl (tabs 3) sp obj.material.name to:stream
 		comma = ","
 	)
-
+	
 	localTransform = obj.transform
-
+	
 	if (flipAxis) then
 	(
 		localTransform *= flipAxisMatrix
@@ -100,10 +100,10 @@ fn formatObject obj stream =
 		append vertex_indices[matID] (face.x - 1)
 		append vertex_indices[matID] (face.y - 1)
 		append vertex_indices[matID] (face.z - 1)
-	
+		
 		-- Normals
 		normal = (getfacenormal objMesh f)
-		if flipAxis then (normal *= flipAxisMatrix)
+		--if flipAxis then (normal *= flipAxisMatrix)
 		append face_normals[matID] (normal.x)
 		append face_normals[matID] (normal.y)
 		append face_normals[matID] (normal.z)
@@ -131,7 +131,7 @@ fn formatObject obj stream =
 			--vert = (in coordsys ObjectOffsetTransformInversed getVert objMesh v)
 			-- WORKAROUND :
 			vert = ((getVert objMesh v) * ObjectOffsetTransform)
-			if flipAxis then (vert *= flipAxisMatrix)
+			--if flipAxis then (vert *= flipAxisMatrix)
 			format "%%%,%,%" comma2 sp (fp vert.x) (fp vert.y) (fp vert.z) to:stream
 			comma2 = ","
 		)
