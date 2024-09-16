@@ -1,3 +1,8 @@
+fn isGeometry o =
+(
+	((Superclassof o) == GeometryClass) and ((classof o) != BoneGeometry)
+)
+
 -- Return the cached number of tabulations if output is not compressed
 fn tabs tabsCount =
 (
@@ -124,19 +129,4 @@ fn formatQuatArray pieces =
 		)
 	)
 	stream as string
-)
-
-fn isGeometry o =
-(
-	((Superclassof o) == GeometryClass) and ((classof o) != BoneGeometry)
-)
-
-fn point3ForOpenGL myPoint3 =
-(
-	if flipAxis then (myPoint3 * flipAxisMatrix) else myPoint3
-)
-
-fn quatForOpenGL myQuat =
-(
-	if flipAxis then (myQuat * flipAxisMatrix) else myQuat
 )

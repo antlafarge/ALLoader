@@ -102,7 +102,8 @@ fn formatObject obj stream =
 		append vertex_indices[matID] (face.z - 1)
 	
 		-- Normals
-		normal = (point3ForOpenGL (getfacenormal objMesh f))
+		normal = (getfacenormal objMesh f)
+		if flipAxis then (normal *= flipAxisMatrix)
 		append face_normals[matID] (normal.x)
 		append face_normals[matID] (normal.y)
 		append face_normals[matID] (normal.z)
@@ -127,9 +128,10 @@ fn formatObject obj stream =
 		for v = 1 to objMesh.numverts do
 		(
 			-- TODO : Should work, why?
-			--vert = (point3ForOpenGL (in coordsys ObjectOffsetTransformInversed getVert objMesh v))
+			--vert = (in coordsys ObjectOffsetTransformInversed getVert objMesh v)
 			-- WORKAROUND :
-			vert = (point3ForOpenGL ((getVert objMesh v) * ObjectOffsetTransform))
+			vert = ((getVert objMesh v) * ObjectOffsetTransform)
+			if flipAxis then (vert *= flipAxisMatrix)
 			format "%%%,%,%" comma2 sp (fp vert.x) (fp vert.y) (fp vert.z) to:stream
 			comma2 = ","
 		)

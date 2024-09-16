@@ -7,4 +7,9 @@ nl = "\n"
 sp = " "
 
 clearListener()
-export objects false true false false Listener
+
+objectsToExport = objects
+if ((classof $) == ObjectSet) then objectsToExport = $
+else if ($ != undefined) then objectsToExport = #($)
+
+export objectsToExport false true false false Listener

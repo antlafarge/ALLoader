@@ -16,9 +16,17 @@ fn launchExport =
 		
 		file = createFile filepath
 		
-		mySelection = getCurrentSelection()
+		objectsToExport = objects
 		
-        objectsToExport = (if (exportSelection and mySelection.count > 0) then mySelection else objects)
+        if (exportSelection) then
+		(
+			if ((classof $) == ObjectSet) then objectsToExport = $
+			else if ($ != undefined) then objectsToExport = #($)
+		)
+		
+		disableSceneRedraw()
+		
+		suspendEditing()
 		
 		startTime = timeStamp()
 		
@@ -26,11 +34,11 @@ fn launchExport =
 		
 		endTime = timeStamp()
 		
+		resumeEditing()
+		
+		enableSceneRedraw()
+		
 		close file
-		
-		clearselection
-		
-		select mySelection
 		
 		messageBox ("Export completed (" + (((endTime - startTime) / 1000.0) as string) + " seconds).") title:"ALLoader exporter" beep:false
 	)
@@ -208,8 +216,6 @@ rollout ALExporter "ALLoader exporter"
 	)
 )
 
-undo on
-(
-	clearListener()
-	createdialog ALExporter width:208
-)
+clearListener()
+
+createdialog ALExporter width:208
