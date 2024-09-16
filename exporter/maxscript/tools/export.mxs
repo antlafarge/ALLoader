@@ -6,7 +6,7 @@ fn export objectsToExport exportMaterials exportSkins exportMeshes exportAnimati
 	started = false
 	if (exportMaterials) then
 	(
-		format ",%%\"materials\":%{%" nl (tabs 1) sp nl to:stream
+		format ",%%\"materials\":%{" nl (tabs 1) sp to:stream
 		materials = #()
 		for obj in objectsToExport do
 		(
@@ -20,12 +20,12 @@ fn export objectsToExport exportMaterials exportSkins exportMeshes exportAnimati
 		(
 			if (firstMat == false) then
 			(
-				format ",%" nl to:stream
+				format "," to:stream
 			)
 			formatMaterial mat stream
 			firstMat = false
 		)
-		format "%}" (tabs 1) to:stream
+		format "%%}" nl (tabs 1) to:stream
 		started = true
 	)
 	

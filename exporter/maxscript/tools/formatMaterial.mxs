@@ -3,7 +3,7 @@ fn formatMaterial mat stream =
 	if ((classof mat) == PhysicalMaterial) then
 	(
 		comma = ""
-		format "%\"%\":%{" (tabs 2) mat.name sp to:stream
+		format "%%\"%\":%{" nl (tabs 2) mat.name sp to:stream
 		if (exportMaterialBaseColorMap and mat.base_color_map != undefined) then
 		(
 			textureFilePath = mat.base_color_map.bitmap.filename
@@ -27,7 +27,7 @@ fn formatMaterial mat stream =
 			format "%%%\"op\":%%" comma nl (tabs 3) sp (fp (1 - mat.Transparency)) to:stream
 			comma = ","
 		)
-		format "%%}%" nl (tabs 2) nl to:stream
+		format "%%}" nl (tabs 2) to:stream
 	)
 	else if ((classof mat) == MultiMaterial) then
 	(
@@ -50,7 +50,7 @@ fn formatMaterial mat stream =
 			materials.count = materials.count - 1
 		)
 		
-		format "%\"%\":%{%" (tabs 2) mat.name sp nl to:stream
+		format "%%\"%\":%{%" nl (tabs 2) mat.name sp nl to:stream
 		format "%\"ml\":%[%" (tabs 3) sp nl to:stream -- Multi
 
 		-- display sub-material names
@@ -64,14 +64,14 @@ fn formatMaterial mat stream =
 		)
 
 		format "%]%" (tabs 3) nl to:stream
-		format "%}%" (tabs 2) nl to:stream
+		format "%}" (tabs 2) to:stream
 
 		-- recursive parse of sub-materials
 		for index = 1 to materials.count do
 		(
 			if (materials[index] != undefined) then
 			(
-				format "%,%" (tabs 2) nl to:stream
+				format "," to:stream
 				formatMaterial materials[index] stream
 			)
 		)
@@ -89,7 +89,7 @@ fn formatMaterial mat stream =
 		)
 		if (mat != undefined) then
 		(
-			format "%\"%\":%{%" (tabs 2) matName sp nl to:stream
+			format "%%\"%\":%{%" nl (tabs 2) matName sp nl to:stream
 			if (mat.base_color_map != undefined) then
 			(
 				textureFilePath = mat.base_color_map.bitmap.filename
