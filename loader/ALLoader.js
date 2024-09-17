@@ -155,6 +155,8 @@ export class ALLoader extends THREE.Loader {
 
 				const onTextureLoaded = (texture) => {
 					//console.debug(`Texture "${textureUrl}" loaded`);
+					texture.wrapS = THREE.RepeatWrapping;
+					texture.wrapT = THREE.RepeatWrapping;
 				};
 
 				const onTextureProgress = (xhr) => {
