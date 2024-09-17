@@ -4,34 +4,28 @@ import * as path from 'path';
 
 var verbose = false;
 
-http.createServer(function (request, response)
-{
+http.createServer(function (request, response) {
     var ip = (request.headers['x-forwarded-for'] || request.socket.remoteAddress);
     console.log('[' + (new Date()).toISOString() + '] IP[' + ip + ']\trequested ' + request.url);
 
     let filePath = '.' + request.url;
-    if (filePath.includes('?'))
-    {
+    if (filePath.includes('?')) {
         filePath = filePath.split('?')[0];
     }
-    if (filePath == './')
-    {
+    if (filePath == './') {
         filePath = './index.html';
     }
-    if (verbose)
-    {
+    if (verbose) {
         console.log("\tfilePath=" + filePath);
     }
 
     var extname = path.extname(filePath).split('?')[0];
-    if (verbose)
-    {
+    if (verbose) {
         console.log("\textname=" + extname);
     }
 
     var contentType = 'text/html';
-    switch (extname)
-    {
+    switch (extname) {
         case '.htm':
         case '.html':
             contentType = 'text/html';
@@ -47,7 +41,7 @@ http.createServer(function (request, response)
             break;
         case '.png':
             contentType = 'image/png';
-            break;      
+            break;
         case '.jpg':
             contentType = 'image/jpg';
             break;
@@ -59,33 +53,26 @@ http.createServer(function (request, response)
             break;
     }
 
-    if (verbose)
-    {
+    if (verbose) {
         console.log("\tcontentType=" + contentType);
     }
 
-    fs.readFile(filePath, function(error, content)
-    {
-        if (error)
-        {
+    fs.readFile(filePath, function (error, content) {
+        if (error) {
             console.error(error);
-            if(error.code == 'ENOENT')
-            {
-                fs.readFile('./404.html', function(error, content)
-                {
+            if (error.code == 'ENOENT') {
+                fs.readFile('./404.html', function (error, content) {
                     response.writeHead(200, { 'Content-Type': contentType });
                     response.end(content, 'utf-8');
                 });
             }
-            else
-            {
+            else {
                 response.writeHead(500);
-                response.end('Sorry, check with the site admin for error: '+error.code+' ..\n');
+                response.end('Sorry, check with the site admin for error: ' + error.code + ' ..\n');
                 response.end();
             }
         }
-        else
-        {
+        else {
             response.writeHead(200, { 'Content-Type': contentType });
             response.end(content, 'utf-8');
         }

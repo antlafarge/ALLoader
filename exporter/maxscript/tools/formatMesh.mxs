@@ -50,6 +50,8 @@ fn formatObject obj stream =
 		comma = ","
 	)
 	
+	ObjectOffsetTransform = obj.objectTransform * inverse obj.transform
+	
 	localTransform = obj.transform
 	localRotation = localTransform.rotation
 	
@@ -79,11 +81,14 @@ fn formatObject obj stream =
 	
 	objMesh = obj.mesh
     
-	-- Faces
+	vertices = #()
 	vertex_indices = #()
+	vertex_normals = #()
 	face_normals = #()
 	uv = #()
 	uv_indices = #()
+	
+	-- Parse faces
 	for f = 1 to objMesh.numfaces do
 	(
 		-- Get face
@@ -95,8 +100,35 @@ fn formatObject obj stream =
 		-- Create indices array if not existing
 		if (vertex_indices[matID] == undefined) then
 		(
+			vertices[matID] = #()
 			vertex_indices[matID] = #()
 			face_normals[matID] = #()
+			vertex_normals[matID] = #()
+			uv[matID] = #()
+			uv_indices[matID] = #()
+		)
+		
+		-- Vertex
+		if (not exportMeshIndexedVertices) then
+		(
+			vert1 = ((getVert objMesh face.x) * ObjectOffsetTransform)
+			vert2 = ((getVert objMesh face.y) * ObjectOffsetTransform)
+			vert3 = ((getVert objMesh face.z) * ObjectOffsetTransform)
+			if flipAxis then
+			(
+				vert1 *= flipAxisMatrix
+				vert2 *= flipAxisMatrix
+				vert3 *= flipAxisMatrix
+			)
+			append vertices[matID] vert1.x
+			append vertices[matID] vert1.y
+			append vertices[matID] vert1.z
+			append vertices[matID] vert2.x
+			append vertices[matID] vert2.y
+			append vertices[matID] vert2.z
+			append vertices[matID] vert3.x
+			append vertices[matID] vert3.y
+			append vertices[matID] vert3.z
 		)
 		
 		-- Vertex index
@@ -105,14 +137,38 @@ fn formatObject obj stream =
 		append vertex_indices[matID] (face.z - 1)
 		
 		-- Normals
-		normal = (getfacenormal objMesh f)
-		if flipAxis then
+		if (exportMeshFaceNormals) then
 		(
-			normal *= flipAxisMatrix
+			normal = (getfacenormal objMesh f)
+			if flipAxis then
+			(
+				normal *= flipAxisMatrix
+			)
+			append face_normals[matID] (normal.x)
+			append face_normals[matID] (normal.y)
+			append face_normals[matID] (normal.z)
 		)
-		append face_normals[matID] (normal.x)
-		append face_normals[matID] (normal.y)
-		append face_normals[matID] (normal.z)
+		else if (exportMeshVertexNormals) then
+		(
+			normal1 = (getNormal objMesh face.x)
+			normal2 = (getNormal objMesh face.y)
+			normal3 = (getNormal objMesh face.z)
+			if flipAxis then
+			(
+				normal1 *= flipAxisMatrix
+				normal2 *= flipAxisMatrix
+				normal3 *= flipAxisMatrix
+			)
+			append vertex_normals[matID] normal1.x
+			append vertex_normals[matID] normal1.y
+			append vertex_normals[matID] normal1.z
+			append vertex_normals[matID] normal2.x
+			append vertex_normals[matID] normal2.y
+			append vertex_normals[matID] normal2.z
+			append vertex_normals[matID] normal3.x
+			append vertex_normals[matID] normal3.y
+			append vertex_normals[matID] normal3.z
+		)
 		
 		-- UVs
 		if (getNumTVerts objMesh > 0) then
@@ -120,52 +176,62 @@ fn formatObject obj stream =
 			tvface = GetTVFace objMesh f
 			if (exportMeshIndexedUVs) then
 			(
-				append uv_indices (tvface.x - 1)
-				append uv_indices (tvface.y - 1)
-				append uv_indices (tvface.z - 1)
+				append uv_indices[matID] (tvface.x - 1)
+				append uv_indices[matID] (tvface.y - 1)
+				append uv_indices[matID] (tvface.z - 1)
 			)
 			else
 			(
 				tvert = (getTVert objMesh tvface.x)
-				append uv tvert.x
-				append uv tvert.y
+				append uv[matID] tvert.x
+				append uv[matID] tvert.y
 				tvert = (getTVert objMesh tvface.y)
-				append uv tvert.x
-				append uv tvert.y
+				append uv[matID] tvert.x
+				append uv[matID] tvert.y
 				tvert = (getTVert objMesh tvface.z)
-				append uv tvert.x
-				append uv tvert.y
+				append uv[matID] tvert.x
+				append uv[matID] tvert.y
 			)
 		)
-	)
-	
-	if (exportMeshVertices) then
-	(
-		ObjectOffsetTransform = obj.objectTransform * inverse obj.transform
-	
-		format "%%%\"vp\":%[" comma nl (tabs 3) sp to:stream
-		comma2 = ""
-		for v = 1 to objMesh.numverts do
-		(
-			vert = ((getVert objMesh v) * ObjectOffsetTransform)
-			if flipAxis then
-			(
-				vert *= flipAxisMatrix
-			)
-			format "%%%,%,%" comma2 sp (fp vert.x) (fp vert.y) (fp vert.z) to:stream
-			comma2 = ","
-		)
-		format "%]" sp to:stream
-		comma = ","
 	)
 	
 	if (exportMeshIndexedVertices and vertex_indices.count > 0) then
 	(
+		if (exportMeshVertices) then
+		(
+			format "%%%\"vt\":%[" comma nl (tabs 3) sp to:stream
+			comma2 = ""
+			for v = 1 to objMesh.numverts do
+			(
+				vert = ((getVert objMesh v) * ObjectOffsetTransform)
+				if flipAxis then
+				(
+					vert *= flipAxisMatrix
+				)
+				format "%%%,%,%" comma2 sp (fp vert.x) (fp vert.y) (fp vert.z) to:stream
+				comma2 = ","
+			)
+			format "%]" sp to:stream
+			comma = ","
+		)
+		
 		format "%%%\"vi\":%[" comma nl (tabs 3) sp to:stream
 		comma2 = ""
 		for index = 1 to vertex_indices.count do
 		(
 			format "%%%[%]" comma2 nl (tabs 4) (if vertex_indices[index] != undefined then (formatArray vertex_indices[index]) else "") to:stream
+			comma2 = ","
+		)
+		format "%%]" nl (tabs 3) to:stream
+		comma = ","
+	)
+	else if (exportMeshVertices) then
+	(
+		format "%%%\"vt\":%[" comma nl (tabs 3) sp to:stream
+		comma2 = ""
+		for index = 1 to vertices.count do
+		(
+			format "%%%[%]" comma2 nl (tabs 4) (if vertices[index] != undefined then (formatArray vertices[index]) else "") to:stream
 			comma2 = ","
 		)
 		format "%%]" nl (tabs 3) to:stream
@@ -179,6 +245,18 @@ fn formatObject obj stream =
 		for index = 1 to face_normals.count do
 		(
 			format "%%%[%]" comma2 nl (tabs 4) (if face_normals[index] != undefined then (formatArray face_normals[index]) else "") to:stream
+			comma2 = ","
+		)
+		format "%%]" nl (tabs 3) to:stream
+		comma = ","
+	)
+	else if (exportMeshVertexNormals) then
+	(
+		format "%%%\"vn\":%[" comma nl (tabs 3) sp to:stream
+		comma2 = ""
+		for index = 1 to face_normals.count do
+		(
+			format "%%%[%]" comma2 nl (tabs 4) (if face_normals[index] != undefined then (formatArray vertex_normals[index]) else "") to:stream
 			comma2 = ","
 		)
 		format "%%]" nl (tabs 3) to:stream
@@ -207,10 +285,10 @@ fn formatObject obj stream =
 			comma2 = ""
 			for index = 1 to uv_indices.count do
 			(
-				format "%%" comma2 (uv_indices[index] as integer) to:stream
+				format "%%%[%]" comma2 nl (tabs 4) (if uv_indices[index] != undefined then (formatArray uv_indices[index]) else "") to:stream
 				comma2 = ","
 			)
-			format "%]" sp to:stream
+			format "%%]" nl (tabs 3) to:stream
 			comma = ","
 		)
 	)
@@ -220,10 +298,10 @@ fn formatObject obj stream =
 		comma2 = ""
 		for index = 1 to uv.count do
 		(
-			format "%%" comma2 (fp uv[index]) to:stream
+			format "%%%[%]" comma2 nl (tabs 4) (if uv[index] != undefined then (formatArray uv[index]) else "") to:stream
 			comma2 = ","
 		)
-		format "]" to:stream
+		format "%%]" nl (tabs 3) to:stream
 		comma = ","
 	)
 	

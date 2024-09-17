@@ -62,11 +62,12 @@ rollout ALExporter "ALLoader exporter"
 		checkbox exportMeshPositionCheckbox "Position (ps)" checked:exportMeshPosition enabled:exportMeshes
 		checkbox exportMeshRotationCheckbox "Rotation (rt)" checked:exportMeshRotation enabled:exportMeshes
 		checkbox exportMeshScaleCheckbox "Scale (sc)" checked:exportMeshScale enabled:exportMeshes
-		checkbox exportMeshVerticesCheckbox "Vertices (vp)" checked:exportMeshVertices enabled:exportMeshes
+		checkbox exportMeshVerticesCheckbox "Vertices (vt)" checked:exportMeshVertices enabled:exportMeshes
 		checkbox exportMeshIndexedVerticesCheckbox "Indexed vertices (vi)" checked:exportMeshIndexedVertices enabled:exportMeshes
-		checkbox exportMeshFaceNormalsCheckbox "Face normals (fn)" checked:exportMeshFaceNormals enabled:exportMeshes
+		checkbox exportMeshVertexNormalsCheckbox "Vertex normals (vn)" checked:exportMeshVertexNormals enabled:(exportMeshes and not exportMeshFaceNormals)
+		checkbox exportMeshFaceNormalsCheckbox "Face normals (fn)" checked:exportMeshFaceNormals enabled:(exportMeshes and not exportMeshVertexNormals)
 		checkbox exportMeshUVsCheckbox "Texture coordinates (uv)" checked:exportMeshUVs enabled:exportMeshes
-		checkbox exportMeshIndexedUVsCheckbox "Indexed texture coordinates UV (ui)" checked:exportMeshIndexedUVs enabled:exportMeshes
+		checkbox exportMeshIndexedUVsCheckbox "Indexed texture coordinates (ui)" checked:exportMeshIndexedUVs enabled:exportMeshes
 		checkbox exportMeshAssociatedSkinCheckbox "Associated skin (sk)" checked:exportMeshAssociatedSkin enabled:exportMeshes
 		checkbox exportMeshSkinIndicesCheckbox "Skin indices (si)" checked:exportMeshSkinIndices enabled:exportMeshes
 		checkbox exportMeshSkinWeightsCheckbox "Skin weights (sw)" checked:exportMeshSkinWeights enabled:exportMeshes
@@ -80,12 +81,25 @@ rollout ALExporter "ALLoader exporter"
 		exportMeshScaleCheckbox.enabled = exportMeshes
 		exportMeshVerticesCheckbox.enabled = exportMeshes
 		exportMeshIndexedVerticesCheckbox.enabled = exportMeshes
-		exportMeshFaceNormalsCheckbox.enabled = exportMeshes
+		exportMeshVertexNormalsCheckbox.enabled = (exportMeshes and not exportMeshFaceNormals)
+		exportMeshFaceNormalsCheckbox.enabled = (exportMeshes and not exportMeshVertexNormals)
 		exportMeshUVsCheckbox.enabled = exportMeshes
 		exportMeshIndexedUVsCheckbox.enabled = exportMeshes
 		exportMeshAssociatedSkinCheckbox.enabled = exportMeshes
 		exportMeshSkinIndicesCheckbox.enabled = exportMeshes
 		exportMeshSkinWeightsCheckbox.enabled = exportMeshes
+	)
+	
+	on exportMeshVertexNormalsCheckbox changed newValue do
+	(
+		exportMeshVertexNormals = newValue
+		exportMeshFaceNormalsCheckbox.enabled = (exportMeshes and not exportMeshVertexNormals)
+	)
+	
+	on exportMeshFaceNormalsCheckbox changed newValue do
+	(
+		exportMeshFaceNormals = newValue
+		exportMeshVertexNormalsCheckbox.enabled = (exportMeshes and not exportMeshFaceNormals)
 	)
 	
 	-- MATERIALS
@@ -178,6 +192,7 @@ rollout ALExporter "ALLoader exporter"
 		exportMeshScale = exportMeshScaleCheckbox.checked
 		exportMeshVertices = exportMeshVerticesCheckbox.checked
 		exportMeshIndexedVertices = exportMeshIndexedVerticesCheckbox.checked
+		exportMeshVertexNormals = exportMeshVertexNormalsCheckbox.checked
 		exportMeshFaceNormals = exportMeshFaceNormalsCheckbox.checked
 		exportMeshUVs = exportMeshUVsCheckbox.checked
 		exportMeshIndexedUVs = exportMeshIndexedUVsCheckbox.checked
