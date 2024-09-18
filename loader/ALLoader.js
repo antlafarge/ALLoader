@@ -55,8 +55,6 @@ export class ALLoader extends THREE.Loader {
 	}
 
 	parse(json, data) {
-		//console.debug("parse", json, data);
-
 		if (json == null) {
 			return data;
 		}
@@ -74,7 +72,7 @@ export class ALLoader extends THREE.Loader {
 
 			for (const matName in json.materials) {
 				const jsonMat = json.materials[matName];
-				if (jsonMat.ml && jsonMat.ml.length) {
+				if (jsonMat.ml && jsonMat.ml.length > 0) {
 					const materials2 = materials[matName];
 					for (const matName2 of jsonMat.ml) {
 						materials2.push(materials[matName2] ?? null);
@@ -120,8 +118,6 @@ export class ALLoader extends THREE.Loader {
 	}
 
 	parseMaterial(jsonMat, texturePath) {
-		//console.debug("parseMaterial", jsonMat, texturePath);
-
 		let material;
 
 		if (jsonMat.ml) {
@@ -184,8 +180,6 @@ export class ALLoader extends THREE.Loader {
 	}
 
 	parseSkeleton(jsonSkeleton) {
-		//console.debug("parseSkeleton", jsonSkeleton);
-
 		const bones = [];
 
 		for (const jsonBone of jsonSkeleton) {
@@ -209,8 +203,6 @@ export class ALLoader extends THREE.Loader {
 	}
 
 	parseMesh(jsonMesh, materials, skeletons) {
-		//console.debug("parseMesh", jsonMesh, materials, skeletons);
-
 		// MATERIAL
 		let material = (jsonMesh.mt != null) ? (materials != null ? materials[jsonMesh.mt] : null) : null;
 		if (material == null) {
@@ -220,14 +212,14 @@ export class ALLoader extends THREE.Loader {
 		// GEOMETRY
 		const geometry = new THREE.BufferGeometry();
 
-		const expandVertices = (jsonMesh.fn && jsonMesh.fn.length)
-			|| (jsonMesh.vn && jsonMesh.vn.length)
-			|| (jsonMesh.uv && jsonMesh.uv.length);
+		const expandVertices = (jsonMesh.fn && jsonMesh.fn.length > 0)
+			|| (jsonMesh.vn && jsonMesh.vn.length > 0)
+			|| (jsonMesh.uv && jsonMesh.uv.length > 0);
 
 		// VERTICES
-		if (jsonMesh.vt != null && jsonMesh.vt.length) {
+		if (jsonMesh.vt != null && jsonMesh.vt.length > 0) {
 			let vertices;
-			if (jsonMesh.vi != null && jsonMesh.vi.length) {
+			if (jsonMesh.vi != null && jsonMesh.vi.length > 0) {
 				// INDEXED
 				// Groups
 				let index = 0;
@@ -239,7 +231,7 @@ export class ALLoader extends THREE.Loader {
 				}
 				if (expandVertices) {
 					// Vertices
-					vertices = this.expandDataIndexed(jsonMesh.vt, jsonMesh.vi, true, 3);
+					vertices = this.unindexData(jsonMesh.vt, jsonMesh.vi, true, 3);
 				}
 				else {
 					// Indices
@@ -266,12 +258,12 @@ export class ALLoader extends THREE.Loader {
 		}
 
 		// NORMALS
-		if (jsonMesh.vn != null && jsonMesh.vn.length) {
+		if (jsonMesh.vn != null && jsonMesh.vn.length > 0) {
 			// NOT INDEXED
 			const normals2 = this.mergeSubArrays(jsonMesh.vn, true, true);
 			geometry.setAttribute('normal', new THREE.BufferAttribute(normals2, 3));
 		}
-		else if (jsonMesh.fn != null && jsonMesh.fn.length) {
+		else if (jsonMesh.fn != null && jsonMesh.fn.length > 0) {
 			// INDEXED
 			// Expand face normals for each vertex
 			let bufferSize = 0
@@ -305,11 +297,11 @@ export class ALLoader extends THREE.Loader {
 		}
 
 		// UVs
-		if (jsonMesh.uv != null && jsonMesh.uv.length) {
+		if (jsonMesh.uv != null && jsonMesh.uv.length > 0) {
 			let uvs;
-			if (jsonMesh.ui != null && jsonMesh.ui.length) {
+			if (jsonMesh.ui != null && jsonMesh.ui.length > 0) {
 				// INDEXED
-				uvs = this.expandDataIndexed(jsonMesh.uv, jsonMesh.ui, true, 2);
+				uvs = this.unindexData(jsonMesh.uv, jsonMesh.ui, true, 2);
 			}
 			else {
 				// NOT INDEXED
@@ -320,8 +312,12 @@ export class ALLoader extends THREE.Loader {
 
 		// SKIN INDICES / WEIGHTS
 		let mesh;
-		if (jsonMesh.sk != null && skeletons && skeletons[jsonMesh.sk] != null && jsonMesh.si != null && jsonMesh.si.length && jsonMesh.sw != null && jsonMesh.sw.length && jsonMesh.vi != null && jsonMesh.vi.length) {
-			const skinIndicesSize = 4 * jsonMesh.vi.reduce((acc, value) => (acc + value.length), 0);
+		if (jsonMesh.sk != null && skeletons && skeletons[jsonMesh.sk] != null && jsonMesh.si != null && jsonMesh.si.length && jsonMesh.sw != null && jsonMesh.sw.length && jsonMesh.vi != null && jsonMesh.vi.length > 0) {
+			let skinIndicesSize = 0;
+			for (const skinIndices of jsonMesh.vi) {
+				skinIndicesSize += skinIndices.length;
+			}
+			skinIndicesSize *= 4;
 			const skinIndices = new Uint16Array(skinIndicesSize);
 			const skinWeights = new Float32Array(skinIndicesSize);
 			let index = 0;
@@ -337,8 +333,9 @@ export class ALLoader extends THREE.Loader {
 					const w2 = jsonMesh.sw[skinIndexPosition + 2];
 					const w3 = jsonMesh.sw[skinIndexPosition + 3];
 					const total = w0 + w1 + w2 + w3;
-					if (total < 0.1) {
+					if (total == 0) {
 						console.warn(`skinIndexPosition=:${index} total=${total} indices=${i0},${i1},${i2},${i3} weights=${w0},${w1},${w2},${w3}`);
+						total = Number.EPSILON;
 					}
 					skinIndices[index] = i0;
 					skinWeights[index] = w0 / total;
@@ -404,8 +401,6 @@ export class ALLoader extends THREE.Loader {
 	}
 
 	parseAnimation(jsonAnim, animName) {
-		//console.debug("parseAnimation", jsonAnim, animName);
-
 		const tracks = [];
 
 		for (const jsonTrack of jsonAnim.hr) {
@@ -422,10 +417,10 @@ export class ALLoader extends THREE.Loader {
 				if (jsonFrame.sc != null) scales.push(...jsonFrame.sc);
 			}
 
-			if (times.length) {
-				if (positions.length) tracks.push(new THREE.VectorKeyframeTrack(`${boneName}.position`, times, positions));
-				if (orientations.length) tracks.push(new THREE.QuaternionKeyframeTrack(`${boneName}.quaternion`, times, orientations));
-				if (scales.length) tracks.push(new THREE.VectorKeyframeTrack(`${boneName}.scale`, times, scales));
+			if (times.length > 0) {
+				if (positions.length > 0) tracks.push(new THREE.VectorKeyframeTrack(`${boneName}.position`, times, positions));
+				if (orientations.length > 0) tracks.push(new THREE.QuaternionKeyframeTrack(`${boneName}.quaternion`, times, orientations));
+				if (scales.length > 0) tracks.push(new THREE.VectorKeyframeTrack(`${boneName}.scale`, times, scales));
 			}
 		}
 
@@ -453,7 +448,7 @@ export class ALLoader extends THREE.Loader {
 		return buffer;
 	}
 
-	expandDataIndexed(dataIndexed, multiIndices, toFloat32Array, itemSize) {
+	unindexData(dataIndexed, multiIndices, toFloat32Array, itemSize) {
 		let bufferSize = 0
 		for (const indices of multiIndices) {
 			bufferSize += indices.length;
@@ -490,8 +485,8 @@ export class ALLoader extends THREE.Loader {
 		}
 		geometry1.merge(geometry2, null, materialIndexOffset);
 		AnimationUtils.mergeBones(geometry1, geometry2);
-		if (geometry2.name.length) {
-			if (geometry1.name.length) {
+		if (geometry2.name.length > 0) {
+			if (geometry1.name.length > 0) {
 				geometry1.name += "_";
 			}
 			geometry1.name += geometry2.name;
