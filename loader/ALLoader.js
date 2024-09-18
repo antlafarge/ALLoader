@@ -214,7 +214,8 @@ export class ALLoader extends THREE.Loader {
 
 		const expandVertices = (jsonMesh.fn && jsonMesh.fn.length > 0)
 			|| (jsonMesh.vn && jsonMesh.vn.length > 0)
-			|| (jsonMesh.uv && jsonMesh.uv.length > 0);
+			|| (jsonMesh.uv && jsonMesh.uv.length > 0)
+			|| (jsonMesh.si && jsonMesh.si.length > 0);
 
 		// VERTICES
 		if (jsonMesh.vt != null && jsonMesh.vt.length > 0) {
