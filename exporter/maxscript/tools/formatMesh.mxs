@@ -3,11 +3,13 @@ fn processBoneForOneVertex objSkin vertexIndex skinIndices skinWeights =
 	weightCountTotal = skinOps.GetVertexWeightCount objSkin vertexIndex
 	vertexSkinIndices = #()
 	vertexSkinWeights = #()
-	weightIndex = 1
+	weightIndex = 0
 	
 	-- Retrieve BoneIndices and BoneWeights
-	while weightIndex <= weightCountTotal do
+	while weightIndex < weightCountTotal do
 	(
+		weightIndex += 1
+		
 		-- boneIndexes
 		boneIndex = skinOps.GetVertexWeightBoneID objSkin vertexIndex weightIndex
 		append vertexSkinIndices (boneIndex - 1)
@@ -15,8 +17,6 @@ fn processBoneForOneVertex objSkin vertexIndex skinIndices skinWeights =
 		-- skinWeights
 		boneWeight = skinOps.GetVertexWeight objSkin vertexIndex weightIndex
 		append vertexSkinWeights boneWeight
-		
-		weightIndex += 1
 	)
 
 	-- padding empty unused bone slots
