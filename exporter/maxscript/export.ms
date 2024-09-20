@@ -65,11 +65,11 @@ rollout ALExporter "ALLoader exporter"
 		checkbox exportMeshVertexIndicesCheckbox "Vertex indices (vi)" checked:exportMeshVertexIndices enabled:exportMeshes
 		checkbox exportMeshVertexPositionsCheckbox "Vertex positions (vp)" checked:exportMeshVertexPositions enabled:exportMeshes
 		checkbox exportMeshVertexNormalsCheckbox "Vertex normals (vn)" checked:exportMeshVertexNormals enabled:exportMeshes
+		checkbox exportMeshFaceNormalsCheckbox "Face normals (fn)" checked:exportMeshFaceNormals enabled:exportMeshes
 		checkbox exportMeshVertexColorsCheckbox "Vertex colors (vc)" checked:exportMeshVertexColors enabled:exportMeshes
+		checkbox exportMeshFaceColorsCheckbox "Face vertex colors (fc)" checked:exportMeshFaceVertexColors enabled:exportMeshes
 		checkbox exportMeshUVsCheckbox "Texture coordinates (uv)" checked:exportMeshUVs enabled:exportMeshes
 		checkbox exportMeshUVsIndexedCheckbox "Texture coordinates indexed (ui)" checked:exportMeshUVsIndexed enabled:exportMeshes
-		checkbox exportMeshFaceNormalsCheckbox "Face normals (fn)" checked:exportMeshFaceNormals enabled:exportMeshes
-		checkbox exportMeshFaceColorsCheckbox "Face vertex colors (fc)" checked:exportMeshFaceVertexColors enabled:exportMeshes
 		checkbox exportMeshAssociatedSkinCheckbox "Associated skin (sk)" checked:exportMeshAssociatedSkin enabled:exportMeshes
 		checkbox exportMeshSkinIndicesCheckbox "Skin indices (si)" checked:exportMeshSkinIndices enabled:exportMeshes
 		checkbox exportMeshSkinWeightsCheckbox "Skin weights (sw)" checked:exportMeshSkinWeights enabled:exportMeshes

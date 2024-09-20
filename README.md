@@ -25,14 +25,43 @@ ALLoader is an Autodesk 3dsMax exporter (MaxScript) to JSON, and a WebGL Three.j
 - Follow the instructions
 
 ## Exported data
-- Mesh data (name, position, rotation, scale)
-- Vertices with indices
-- Texture coordinates (UV) with indices
-- Face normals
-- Materials & multi-materials
-- skin indices & weights
-- skeleton hierarchy (skin, bones)
-- time keys for bones rigged on a mesh (position, rotation, scale)
+- Meshes
+    - Name (JSON field)
+    - Associated material (mt)
+    - Position (ps)
+    - Rotation (rt)
+    - Scale (sc)
+    - Vertex indices (vi)
+    - Vertex positions (vp)
+    - Vertex normals (vn)
+    - Face normals (fn)
+    - Vertex colors (vc)
+    - Face vertex colors (fc)
+    - Texture coordinates UV indices (ui)
+    - Texture coordinates UV (uv)
+    - Skin indices (si)
+    - Skin weights (sw)
+- Materials
+    - Name (JSON field)
+    - Color (cl)
+    - Color map (cm)
+    - Specular (sp)
+    - Transparency (op)
+- Skeletons
+    - Name (JSON field)
+    - Parent (pr)
+    - Position (ps)
+    - Rotation (rt)
+    - Scale (sc)
+- Animations
+    - Associated skeleton (sk)
+    - Associated mesh (ms)
+    - Bone name (bn)
+    - Hierarchy (hr)
+        - Time (tm)
+        - Position (ps)
+        - Rotation (rt)
+        - Scale (sc)
 
 ## 3ds Max elements supported
 - Axis conversion (Z-up to Y-up)
@@ -43,6 +72,8 @@ ALLoader is an Autodesk 3dsMax exporter (MaxScript) to JSON, and a WebGL Three.j
 - Wire
 - Opacity
 - Timeline playback speed
+- Skin modifier (bones)
+- Vertex paint modifier (Vertex color)
 
 ## FAQ
 Q. Some objects in the scene are not well placed?  
@@ -54,13 +85,6 @@ A. Export your scene using the FBX format, close your scene and open the FBX fil
 _You can share feedback or discuss the project in the [discussion tab](https://github.com/antlafarge/ALLoader/discussions)._  
 
 ## Todo
+- Check gordon skeleton transforms
 - Check every types of objects are well exported (EditPoly, EditMesh...)
-- UV indices optimization
-    - When disabled :
-        - Use only UVs
-- Vertex indices optimization
-    - When disabled :
-        - Use only vertex positions
-        - Handle properly face normals
-        - Handle properly skin indices and skin weights
 - 3dsMax biped

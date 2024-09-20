@@ -226,41 +226,20 @@ export class ALLoader extends THREE.Loader {
 				// INDEXED
 				if (unindexVertices) {
 					vertices = this.unindexData(jsonMesh.vp, jsonMesh.vi, true, 3);
-					// Groups (for multiMaterials)
-					let index = 0;
-					let materialIndex = 0;
-					for (const group of jsonMesh.vi) {
-						geometry.addGroup(index, group.length, materialIndex);
-						index += group.length;
-						materialIndex++;
-					}
+					this.createGroups(jsonMesh.vi, 1, geometry);
 				}
 				else {
 					// Indices
 					const indices = this.mergeSubArrays(jsonMesh.vi, false, false);
 					geometry.setIndex(indices);
 					vertices = new Float32Array(jsonMesh.vp);
-					// Groups (for multiMaterials)
-					let index = 0;
-					let materialIndex = 0;
-					for (const group of jsonMesh.vi) {
-						geometry.addGroup(index, group.length, materialIndex);
-						index += group.length;
-						materialIndex++;
-					}
+					this.createGroups(jsonMesh.vi, 1, geometry);
 				}
 			}
 			else {
 				// NOT INDEXED
 				vertices = this.mergeSubArrays(jsonMesh.vp, true, true);
-				// Groups (for multiMaterials)
-				let index = 0;
-				let materialIndex = 0;
-				for (const group of jsonMesh.vp) {
-					geometry.addGroup((index / 3), (group.length / 3), materialIndex);
-					index += group.length;
-					materialIndex++;
-				}
+				this.createGroups(jsonMesh.vp, 3, geometry);
 			}
 
 			geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
@@ -472,6 +451,17 @@ export class ALLoader extends THREE.Loader {
 			}
 		}
 		return buffer;
+	}
+
+	// Groups (for multiMaterials)
+	createGroups(multiData, divideBy, geometry) {
+		let index = 0;
+		let materialIndex = 0;
+		for (const group of multiData) {
+			geometry.addGroup((index / divideBy), (group.length / divideBy), materialIndex);
+			index += group.length;
+			materialIndex++;
+		}
 	}
 
 	static cloneAnimationData(data, newName) {
