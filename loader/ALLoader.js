@@ -214,7 +214,8 @@ export class ALLoader extends THREE.Loader {
 
 		const expandVertices = (jsonMesh.fn && jsonMesh.fn.length > 0)
 			|| (jsonMesh.vn && jsonMesh.vn.length > 0)
-			|| (jsonMesh.uv && jsonMesh.uv.length > 0);
+			|| (jsonMesh.uv && jsonMesh.uv.length > 0)
+			|| (jsonMesh.si && jsonMesh.si.length > 0);
 
 		// VERTICES
 		if (jsonMesh.vt != null && jsonMesh.vt.length > 0) {
@@ -432,7 +433,7 @@ export class ALLoader extends THREE.Loader {
 		for (const oneArray of multiArrays) {
 			bufferSize += oneArray.length;
 		}
-		const buffer = toTypedArray ? (toFloat32Array ? new Float32Array(bufferSize) : new Uint32Array(bufferSize)) : new Array(bufferSize);
+		const buffer = toTypedArray ? (toFloat32Array ? new Float32Array(bufferSize) : new Uint16Array(bufferSize)) : new Array(bufferSize);
 		let index = 0;
 		let materialIndex = 0;
 		for (const oneArray of multiArrays) {
@@ -454,7 +455,7 @@ export class ALLoader extends THREE.Loader {
 			bufferSize += indices.length;
 		}
 		bufferSize *= itemSize;
-		const buffer = toFloat32Array ? new Float32Array(bufferSize) : Uint32Array(bufferSize);
+		const buffer = toFloat32Array ? new Float32Array(bufferSize) : Uint16Array(bufferSize);
 		let index = 0;
 		for (const indices of multiIndices) {
 			for (let i = 0; i < indices.length; i++) {
