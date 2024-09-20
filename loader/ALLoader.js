@@ -212,7 +212,8 @@ export class ALLoader extends THREE.Loader {
 		// GEOMETRY
 		const geometry = new THREE.BufferGeometry();
 
-		const expandVertices = (jsonMesh.uv && jsonMesh.uv.length > 0) || (jsonMesh.fc && jsonMesh.fc.length > 0);
+		// We must unindex buffers if there are (no vertex indices and vertex positions) or UVs or FaceVertexNormals
+		const unindexVertices = (jsonMesh.vi == null && jsonMesh.vp != null && jsonMesh.vp.length > 0) || (jsonMesh.uv && jsonMesh.uv.length > 0) || (jsonMesh.fn != null && jsonMesh.fn.length > 0) || (jsonMesh.fc && jsonMesh.fc.length > 0);
 
 		// VERTICES
 		if (jsonMesh.vp != null && jsonMesh.vp.length > 0) {
@@ -227,7 +228,7 @@ export class ALLoader extends THREE.Loader {
 					index += group.length;
 					materialIndex++;
 				}
-				if (expandVertices) {
+				if (unindexVertices) {
 					// Vertices
 					vertices = this.unindexData(jsonMesh.vp, jsonMesh.vi, true, 3);
 				}
@@ -256,42 +257,66 @@ export class ALLoader extends THREE.Loader {
 		}
 
 		// NORMALS
-		if (jsonMesh.vn != null && jsonMesh.vn.length > 0) {
-			// NOT INDEXED
-			const normals2 = this.mergeSubArrays(jsonMesh.vn, true, true);
-			geometry.setAttribute('normal', new THREE.BufferAttribute(normals2, 3));
-		}
-		else if (jsonMesh.fn != null && jsonMesh.fn.length > 0) {
-			// INDEXED
-			// Expand face normals for each vertex
-			let bufferSize = 0
-			for (const group of jsonMesh.fn) {
-				bufferSize += group.length;
-			}
-			bufferSize *= 3;
-			const normals = new Float32Array(bufferSize);
-			let index = 0;
-			for (const group of jsonMesh.fn) {
-				for (let i = 0; i < group.length; i += 3) {
-					const fnX = group[i];
-					const fnY = group[i + 1];
-					const fnZ = group[i + 2];
-					normals[index++] = fnX;
-					normals[index++] = fnY;
-					normals[index++] = fnZ;
-					normals[index++] = fnX;
-					normals[index++] = fnY;
-					normals[index++] = fnZ;
-					normals[index++] = fnX;
-					normals[index++] = fnY;
-					normals[index++] = fnZ;
+		if (jsonMesh.fn != null && jsonMesh.fn.length > 0) {
+			if (unindexVertices) {
+				// Expand face normals for each vertex
+				let bufferSize = 0
+				for (const group of jsonMesh.fn) {
+					bufferSize += group.length;
 				}
+				bufferSize *= 3;
+				const normals = new Float32Array(bufferSize);
+				let index = 0;
+				// Duplicate the normal of each face to each vertex of each triangle (x3)
+				for (const group of jsonMesh.fn) {
+					for (let i = 0; i < group.length; i += 3) {
+						const fnX = group[i];
+						const fnY = group[i + 1];
+						const fnZ = group[i + 2];
+						normals[index++] = fnX;
+						normals[index++] = fnY;
+						normals[index++] = fnZ;
+						normals[index++] = fnX;
+						normals[index++] = fnY;
+						normals[index++] = fnZ;
+						normals[index++] = fnX;
+						normals[index++] = fnY;
+						normals[index++] = fnZ;
+					}
+				}
+				geometry.setAttribute('normal', new THREE.BufferAttribute(normals, 3));
+			}
+		}
+
+		if (jsonMesh.vn != null && jsonMesh.vn.length > 0 && geometry.attributes.normal == undefined) {
+			let normals;
+			if (unindexVertices) {
+				normals = this.unindexData(jsonMesh.vn, jsonMesh.vi, true, 3);
+			}
+			else {
+				normals = new Float32Array(jsonMesh.vn);
 			}
 			geometry.setAttribute('normal', new THREE.BufferAttribute(normals, 3));
 		}
-		else {
-			// NO NORMALS, COMPUTE
-			geometry.computeVertexNormals();
+
+		// FACE VERTEX COLORS
+		if (jsonMesh.fc != null && jsonMesh.fc.length > 0) {
+			if (unindexVertices) {
+				const colors = this.mergeSubArrays(jsonMesh.fc, true, true);
+				geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+			}
+		}
+
+		// VERTEX COLORS
+		if (jsonMesh.vc != null && jsonMesh.vc.length > 0 && geometry.attributes.color == undefined) {
+			let colors;
+			if (unindexVertices) {
+				colors = this.unindexData(jsonMesh.vc, jsonMesh.vi, true, 3);
+			}
+			else {
+				colors = new Float32Array(jsonMesh.vc);
+			}
+			geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 		}
 
 		// UVs
@@ -311,43 +336,15 @@ export class ALLoader extends THREE.Loader {
 		// SKIN INDICES / WEIGHTS
 		let mesh;
 		if (jsonMesh.sk != null && skeletons && skeletons[jsonMesh.sk] != null && jsonMesh.si != null && jsonMesh.si.length && jsonMesh.sw != null && jsonMesh.sw.length && jsonMesh.vi != null && jsonMesh.vi.length > 0) {
-			let skinIndicesSize = 0;
-			for (const skinIndices of jsonMesh.vi) {
-				skinIndicesSize += skinIndices.length;
+			let skinIndices;
+			let skinWeights;
+			if (unindexVertices) {
+				skinIndices = this.unindexData(jsonMesh.si, jsonMesh.vi, false, 4);
+				skinWeights = this.unindexData(jsonMesh.sw, jsonMesh.vi, false, 4);
 			}
-			skinIndicesSize *= 4;
-			const skinIndices = new Uint16Array(skinIndicesSize);
-			const skinWeights = new Float32Array(skinIndicesSize);
-			let index = 0;
-			for (const groupVertexIndices of jsonMesh.vi) {
-				for (const vertexIndex of groupVertexIndices) {
-					const skinIndexPosition = vertexIndex * 4;
-					const i0 = jsonMesh.si[skinIndexPosition];
-					const i1 = jsonMesh.si[skinIndexPosition + 1];
-					const i2 = jsonMesh.si[skinIndexPosition + 2];
-					const i3 = jsonMesh.si[skinIndexPosition + 3];
-					const w0 = jsonMesh.sw[skinIndexPosition];
-					const w1 = jsonMesh.sw[skinIndexPosition + 1];
-					const w2 = jsonMesh.sw[skinIndexPosition + 2];
-					const w3 = jsonMesh.sw[skinIndexPosition + 3];
-					const total = w0 + w1 + w2 + w3;
-					if (total == 0) {
-						console.warn(`skinIndexPosition=:${index} total=${total} indices=${i0},${i1},${i2},${i3} weights=${w0},${w1},${w2},${w3}`);
-						total = Number.EPSILON;
-					}
-					skinIndices[index] = i0;
-					skinWeights[index] = w0 / total;
-					index++;
-					skinIndices[index] = i1;
-					skinWeights[index] = w1 / total;
-					index++;
-					skinIndices[index] = i2;
-					skinWeights[index] = w2 / total;
-					index++;
-					skinIndices[index] = i3;
-					skinWeights[index] = w3 / total;
-					index++;
-				}
+			else {
+				skinIndices = new Uint16Array(jsonMesh.si);
+				skinWeights = new Float32Array(jsonMesh.sw);
 			}
 			geometry.setAttribute('skinIndex', new THREE.BufferAttribute(skinIndices, 4));
 			geometry.setAttribute('skinWeight', new THREE.BufferAttribute(skinWeights, 4));
@@ -425,6 +422,7 @@ export class ALLoader extends THREE.Loader {
 		return new THREE.AnimationClip(animName, jsonAnim.dr, tracks);
 	}
 
+	// Concatene all sub-arrays to a typedArray
 	mergeSubArrays(multiArrays, toTypedArray, toFloat32Array) {
 		let bufferSize = 0;
 		for (const oneArray of multiArrays) {
@@ -446,13 +444,14 @@ export class ALLoader extends THREE.Loader {
 		return buffer;
 	}
 
+	// Unindex dataIndexed by using and concatening multiIndices sub-arrays to a typedArray
 	unindexData(dataIndexed, multiIndices, toFloat32Array, itemSize) {
 		let bufferSize = 0
 		for (const indices of multiIndices) {
 			bufferSize += indices.length;
 		}
 		bufferSize *= itemSize;
-		const buffer = toFloat32Array ? new Float32Array(bufferSize) : Uint16Array(bufferSize);
+		const buffer = toFloat32Array ? new Float32Array(bufferSize) : new Uint16Array(bufferSize);
 		let index = 0;
 		for (const indices of multiIndices) {
 			for (let i = 0; i < indices.length; i++) {

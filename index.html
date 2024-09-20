@@ -144,6 +144,11 @@
 					const mesh = data.meshes[meshName];
 
 					mesh.geometry.computeBoundingBox();
+
+					if (mesh.geometry.attributes.normal == undefined) {
+						geometry.computeVertexNormals();
+					}
+
 					vMin.min(mesh.geometry.boundingBox.min);
 					vMax.max(mesh.geometry.boundingBox.max);
 
