@@ -212,37 +212,48 @@ export class ALLoader extends THREE.Loader {
 		// GEOMETRY
 		const geometry = new THREE.BufferGeometry();
 
-		// We must unindex buffers if there are (no vertex indices and vertex positions) or UVs or FaceVertexNormals
-		const unindexVertices = (jsonMesh.vi == null && jsonMesh.vp != null && jsonMesh.vp.length > 0) || (jsonMesh.uv && jsonMesh.uv.length > 0) || (jsonMesh.fn != null && jsonMesh.fn.length > 0) || (jsonMesh.fc && jsonMesh.fc.length > 0);
+		// We must unindex buffers if there are (no VertexIndices and VertexPositions) or UVs or FaceNormals or FaceVertexColors
+		const unindexVertices = ((jsonMesh.vi == null || jsonMesh.vi.length == 0) && jsonMesh.vp != null && jsonMesh.vp.length > 0)
+			|| (jsonMesh.uv != null && jsonMesh.uv.length > 0)
+			|| (jsonMesh.fn != null && jsonMesh.fn.length > 0)
+			|| (jsonMesh.fc != null && jsonMesh.fc.length > 0)
+			|| false;
 
 		// VERTICES
 		if (jsonMesh.vp != null && jsonMesh.vp.length > 0) {
 			let vertices;
 			if (jsonMesh.vi != null && jsonMesh.vi.length > 0) {
 				// INDEXED
-				// Groups
-				let index = 0;
-				let materialIndex = 0;
-				for (const group of jsonMesh.vi) {
-					geometry.addGroup(index, group.length, materialIndex);
-					index += group.length;
-					materialIndex++;
-				}
 				if (unindexVertices) {
-					// Vertices
 					vertices = this.unindexData(jsonMesh.vp, jsonMesh.vi, true, 3);
+					// Groups (for multiMaterials)
+					let index = 0;
+					let materialIndex = 0;
+					for (const group of jsonMesh.vi) {
+						geometry.addGroup(index, group.length, materialIndex);
+						index += group.length;
+						materialIndex++;
+					}
 				}
 				else {
 					// Indices
 					const indices = this.mergeSubArrays(jsonMesh.vi, false, false);
 					geometry.setIndex(indices);
-					// Vertices
 					vertices = new Float32Array(jsonMesh.vp);
+					// Groups (for multiMaterials)
+					let index = 0;
+					let materialIndex = 0;
+					for (const group of jsonMesh.vi) {
+						geometry.addGroup(index, group.length, materialIndex);
+						index += group.length;
+						materialIndex++;
+					}
 				}
 			}
 			else {
 				// NOT INDEXED
-				// Groups
+				vertices = this.mergeSubArrays(jsonMesh.vp, true, true);
+				// Groups (for multiMaterials)
 				let index = 0;
 				let materialIndex = 0;
 				for (const group of jsonMesh.vp) {
@@ -250,9 +261,8 @@ export class ALLoader extends THREE.Loader {
 					index += group.length;
 					materialIndex++;
 				}
-				// Vertices
-				vertices = this.mergeSubArrays(jsonMesh.p, true, true);
 			}
+
 			geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
 		}
 
@@ -288,7 +298,7 @@ export class ALLoader extends THREE.Loader {
 			}
 		}
 
-		if (jsonMesh.vn != null && jsonMesh.vn.length > 0 && geometry.attributes.normal == undefined) {
+		if (jsonMesh.vn != null && jsonMesh.vn.length > 0 && geometry.attributes.normal == null) {
 			let normals;
 			if (unindexVertices) {
 				normals = this.unindexData(jsonMesh.vn, jsonMesh.vi, true, 3);
@@ -308,7 +318,7 @@ export class ALLoader extends THREE.Loader {
 		}
 
 		// VERTEX COLORS
-		if (jsonMesh.vc != null && jsonMesh.vc.length > 0 && geometry.attributes.color == undefined) {
+		if (jsonMesh.vc != null && jsonMesh.vc.length > 0 && geometry.attributes.color == null) {
 			let colors;
 			if (unindexVertices) {
 				colors = this.unindexData(jsonMesh.vc, jsonMesh.vi, true, 3);
