@@ -212,13 +212,10 @@ export class ALLoader extends THREE.Loader {
 		// GEOMETRY
 		const geometry = new THREE.BufferGeometry();
 
-		const expandVertices = (jsonMesh.fn && jsonMesh.fn.length > 0)
-			|| (jsonMesh.vn && jsonMesh.vn.length > 0)
-			|| (jsonMesh.uv && jsonMesh.uv.length > 0)
-			|| (jsonMesh.si && jsonMesh.si.length > 0);
+		const expandVertices = (jsonMesh.uv && jsonMesh.uv.length > 0) || (jsonMesh.fc && jsonMesh.fc.length > 0);
 
 		// VERTICES
-		if (jsonMesh.vt != null && jsonMesh.vt.length > 0) {
+		if (jsonMesh.vp != null && jsonMesh.vp.length > 0) {
 			let vertices;
 			if (jsonMesh.vi != null && jsonMesh.vi.length > 0) {
 				// INDEXED
@@ -232,14 +229,14 @@ export class ALLoader extends THREE.Loader {
 				}
 				if (expandVertices) {
 					// Vertices
-					vertices = this.unindexData(jsonMesh.vt, jsonMesh.vi, true, 3);
+					vertices = this.unindexData(jsonMesh.vp, jsonMesh.vi, true, 3);
 				}
 				else {
 					// Indices
 					const indices = this.mergeSubArrays(jsonMesh.vi, false, false);
 					geometry.setIndex(indices);
 					// Vertices
-					vertices = new Float32Array(jsonMesh.vt);
+					vertices = new Float32Array(jsonMesh.vp);
 				}
 			}
 			else {
@@ -247,13 +244,13 @@ export class ALLoader extends THREE.Loader {
 				// Groups
 				let index = 0;
 				let materialIndex = 0;
-				for (const group of jsonMesh.vt) {
+				for (const group of jsonMesh.vp) {
 					geometry.addGroup((index / 3), (group.length / 3), materialIndex);
 					index += group.length;
 					materialIndex++;
 				}
 				// Vertices
-				vertices = this.mergeSubArrays(jsonMesh.vt, true, true);
+				vertices = this.mergeSubArrays(jsonMesh.p, true, true);
 			}
 			geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
 		}

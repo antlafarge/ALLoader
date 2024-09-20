@@ -133,3 +133,25 @@ fn formatArrayAsInteger pieces stream =
 		format "[]" to:stream
 	)
 )
+
+fn formatArray4AsInteger pieces stream =
+(
+	if pieces != undefined then
+	(
+		format "[" to:stream
+		comma = ""
+		index = 1
+		count = pieces.count
+		while (index <= count) do
+		(
+			format "%%,%,%,%" comma (pieces[index] as integer) (pieces[index+1] as integer) (pieces[index+2] as integer) (pieces[index+3] as integer) to:stream
+			comma = commasp
+			index += 4
+		)
+		format "]" to:stream
+	)
+	else
+	(
+		format "[]" to:stream
+	)
+)

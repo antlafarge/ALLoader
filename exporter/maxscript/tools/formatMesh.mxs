@@ -105,7 +105,7 @@ fn formatObject obj stream =
 		-- Create indices array if not existing
 		if (vertexIndices[matID] == undefined) then
 		(
-			if (not exportMeshVerticesIndexed) then
+			if (not exportMeshVertexIndices) then
 			(
 				vertices[matID] = #()
 				vertexNormals[matID] = #()
@@ -126,10 +126,10 @@ fn formatObject obj stream =
 		append vertexIndices[matID] (face.z - 1)
 		
 		-- If vertices not indexed
-		if (not exportMeshVerticesIndexed) then
+		if (not exportMeshVertexIndices) then
 		(
 			-- Unindex vertices
-			if (not exportMeshVerticesIndexed) then
+			if (not exportMeshVertexIndices) then
 			(
 				vert1 = ((getVert objMesh face.x) * ObjectOffsetTransform)
 				vert2 = ((getVert objMesh face.y) * ObjectOffsetTransform)
@@ -249,7 +249,7 @@ fn formatObject obj stream =
 	)
 	
 	-- INDEXED
-	if (exportMeshVerticesIndexed) then
+	if (exportMeshVertexIndices) then
 	(
 		-- Indices
 		format "%%%\"vi\":%[" comma nl (tabs 3) sp to:stream
@@ -264,9 +264,9 @@ fn formatObject obj stream =
 		comma = ","
 		
 		-- Vertices
-		if (exportMeshVertices) then
+		if (exportMeshVertexPositions) then
 		(
-			format "%%%\"vt\":%[" comma nl (tabs 3) sp to:stream
+			format "%%%\"vp\":%[" comma nl (tabs 3) sp to:stream
 			comma2 = ""
 			for v = 1 to objMesh.numverts do
 			(
@@ -324,9 +324,9 @@ fn formatObject obj stream =
 	else
 	(
 		-- Vertices
-		if (exportMeshVertices) then
+		if (exportMeshVertexPositions) then
 		(
-			format "%%%\"vt\":%[" comma nl (tabs 3) sp to:stream
+			format "%%%\"vp\":%[" comma nl (tabs 3) sp to:stream
 			comma2 = ""
 			for index = 1 to vertices.count do
 			(
@@ -467,27 +467,15 @@ fn formatObject obj stream =
 		
 		if (exportMeshSkinIndices and skinIndices.count > 0) then
 		(
-			format "%%%\"si\":%[" comma nl (tabs 3) sp to:stream
-			comma2 = ""
-			for skinIndex = 1 to skinIndices.count do
-			(
-				format "%%" comma2 (skinIndices[skinIndex] as integer) to:stream
-				comma2 = ","
-			)
-			format "]" to:stream
+			format "%%%\"si\":%" comma nl (tabs 3) sp to:stream
+			formatArray4AsInteger skinIndices stream
 			comma = ","
 		)
 		
 		if (exportMeshSkinWeights and skinWeights.count > 0) then
 		(
-			format "%%%\"sw\":%[" comma nl (tabs 3) sp to:stream
-			comma2 = ""
-			for skinIndex = 1 to skinWeights.count do
-			(
-				format "%%" comma2 (fp skinWeights[skinIndex]) to:stream
-				comma2 = ","
-			)
-			format "]" to:stream
+			format "%%%\"sw\":%" comma nl (tabs 3) sp to:stream
+			formatArray4 skinWeights stream
 			comma = ","
 		)
 	)

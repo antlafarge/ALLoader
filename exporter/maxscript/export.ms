@@ -62,8 +62,8 @@ rollout ALExporter "ALLoader exporter"
 		checkbox exportMeshPositionCheckbox "Position (ps)" checked:exportMeshPosition enabled:exportMeshes
 		checkbox exportMeshRotationCheckbox "Rotation (rt)" checked:exportMeshRotation enabled:exportMeshes
 		checkbox exportMeshScaleCheckbox "Scale (sc)" checked:exportMeshScale enabled:exportMeshes
-		checkbox exportMeshVerticesIndexedCheckbox "Vertex indices (vi)" checked:exportMeshVerticesIndexed enabled:exportMeshes
-		checkbox exportMeshVerticesCheckbox "Vertices (vt)" checked:exportMeshVertices enabled:exportMeshes
+		checkbox exportMeshVertexIndicesCheckbox "Vertex indices (vi)" checked:exportMeshVertexIndices enabled:exportMeshes
+		checkbox exportMeshVertexPositionsCheckbox "Vertex positions (vp)" checked:exportMeshVertexPositions enabled:exportMeshes
 		checkbox exportMeshVertexNormalsCheckbox "Vertex normals (vn)" checked:exportMeshVertexNormals enabled:exportMeshes
 		checkbox exportMeshVertexColorsCheckbox "Vertex colors (vc)" checked:exportMeshVertexColors enabled:exportMeshes
 		checkbox exportMeshUVsCheckbox "Texture coordinates (uv)" checked:exportMeshUVs enabled:exportMeshes
@@ -82,8 +82,8 @@ rollout ALExporter "ALLoader exporter"
 		exportMeshPositionCheckbox.enabled = exportMeshes
 		exportMeshRotationCheckbox.enabled = exportMeshes
 		exportMeshScaleCheckbox.enabled = exportMeshes
-		exportMeshVerticesCheckbox.enabled = exportMeshes
-		exportMeshVerticesIndexedCheckbox.enabled = exportMeshes
+		exportMeshVertexPositionsCheckbox.enabled = exportMeshes
+		exportMeshVertexIndicesCheckbox.enabled = exportMeshes
 		exportMeshVertexNormalsCheckbox.enabled = exportMeshes
 		exportMeshFaceNormalsCheckbox.enabled = exportMeshes
 		exportMeshUVsCheckbox.enabled = exportMeshes
@@ -186,8 +186,8 @@ rollout ALExporter "ALLoader exporter"
 		exportMeshPosition = exportMeshPositionCheckbox.checked
 		exportMeshRotation = exportMeshRotationCheckbox.checked
 		exportMeshScale = exportMeshScaleCheckbox.checked
-		exportMeshVertices = exportMeshVerticesCheckbox.checked
-		exportMeshVerticesIndexed = exportMeshVerticesIndexedCheckbox.checked
+		exportMeshVertexPositions = exportMeshVertexPositionsCheckbox.checked
+		exportMeshVertexIndices = exportMeshVertexIndicesCheckbox.checked
 		exportMeshVertexNormals = exportMeshVertexNormalsCheckbox.checked
 		exportMeshFaceNormals = exportMeshFaceNormalsCheckbox.checked
 		exportMeshUVs = exportMeshUVsCheckbox.checked
