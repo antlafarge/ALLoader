@@ -63,30 +63,33 @@ fn formatObject obj stream =
 	
 	if (exportMeshPosition) then
 	(
-		format "%%%\"ps\":%%" comma nl (tabs 3) sp (formatPoint3 localTransform.position) to:stream
+		format "%%%\"ps\":%%" comma nl (tabs 3) sp (fp localTransform.position) to:stream
 		comma = ","
 	)
 	
 	if (exportMeshRotation) then
 	(
-		format "%%%\"rt\":%%" comma nl (tabs 3) sp (formatQuaternion (inverse localRotation)) to:stream
+		format "%%%\"rt\":%" comma nl (tabs 3) sp to:stream
+		formatQuaternion (inverse localRotation) stream
 		comma = ","
 	)
 	
 	if (exportMeshScale) then
 	(
-		format "%%%\"sc\":%%" comma nl (tabs 3) sp (formatPoint3 localTransform.scale) to:stream
+		format "%%%\"sc\":%%" comma nl (tabs 3) sp (fp localTransform.scale) to:stream
 		comma = ","
 	)
 	
 	objMesh = obj.mesh
     
 	vertices = #()
-	vertex_indices = #()
-	vertex_normals = #()
-	face_normals = #()
-	uv = #()
-	uv_indices = #()
+	vertexIndices = #()
+	vertexNormals = #()
+	faceNormals = #()
+	uvs = #()
+	uvsIndices = #()
+	vertexColors = #()
+	faceColors = #()
 	
 	-- Parse faces
 	for f = 1 to objMesh.numfaces do
@@ -98,105 +101,167 @@ fn formatObject obj stream =
 		matID = getFaceMatID objMesh f
 		
 		-- Create indices array if not existing
-		if (vertex_indices[matID] == undefined) then
+		if (vertexIndices[matID] == undefined) then
 		(
-			vertices[matID] = #()
-			vertex_indices[matID] = #()
-			face_normals[matID] = #()
-			vertex_normals[matID] = #()
-			uv[matID] = #()
-			uv_indices[matID] = #()
-		)
-		
-		-- Vertex
-		if (not exportMeshIndexedVertices) then
-		(
-			vert1 = ((getVert objMesh face.x) * ObjectOffsetTransform)
-			vert2 = ((getVert objMesh face.y) * ObjectOffsetTransform)
-			vert3 = ((getVert objMesh face.z) * ObjectOffsetTransform)
-			if flipAxis then
+			if (not exportMeshVerticesIndexed) then
 			(
-				vert1 *= flipAxisMatrix
-				vert2 *= flipAxisMatrix
-				vert3 *= flipAxisMatrix
+				vertices[matID] = #()
+				vertexNormals[matID] = #()
+				vertexColors[matID] = #()
 			)
-			append vertices[matID] vert1.x
-			append vertices[matID] vert1.y
-			append vertices[matID] vert1.z
-			append vertices[matID] vert2.x
-			append vertices[matID] vert2.y
-			append vertices[matID] vert2.z
-			append vertices[matID] vert3.x
-			append vertices[matID] vert3.y
-			append vertices[matID] vert3.z
+			vertexIndices[matID] = #()
+			faceNormals[matID] = #()
+			if (not exportMeshUVsIndexed) then
+			(
+				uvs[matID] = #()
+			)
+			faceColors[matID] = #()
+			uvsIndices[matID] = #()
 		)
 		
-		-- Vertex index
-		append vertex_indices[matID] (face.x - 1)
-		append vertex_indices[matID] (face.y - 1)
-		append vertex_indices[matID] (face.z - 1)
+		append vertexIndices[matID] (face.x - 1)
+		append vertexIndices[matID] (face.y - 1)
+		append vertexIndices[matID] (face.z - 1)
 		
-		-- Normals
+		-- If vertices not indexed
+		if (not exportMeshVerticesIndexed) then
+		(
+			-- Unindex vertices
+			if (not exportMeshVerticesIndexed) then
+			(
+				vert1 = ((getVert objMesh face.x) * ObjectOffsetTransform)
+				vert2 = ((getVert objMesh face.y) * ObjectOffsetTransform)
+				vert3 = ((getVert objMesh face.z) * ObjectOffsetTransform)
+				if flipAxis then
+				(
+					vert1 *= flipAxisMatrix
+					vert2 *= flipAxisMatrix
+					vert3 *= flipAxisMatrix
+				)
+				append vertices[matID] vert1.x
+				append vertices[matID] vert1.y
+				append vertices[matID] vert1.z
+				append vertices[matID] vert2.x
+				append vertices[matID] vert2.y
+				append vertices[matID] vert2.z
+				append vertices[matID] vert3.x
+				append vertices[matID] vert3.y
+				append vertices[matID] vert3.z
+			)
+			
+			-- Unindex vertex normals
+			if (exportMeshVertexNormals) then
+			(
+				normal1 = (getNormal objMesh face.x)
+				normal2 = (getNormal objMesh face.y)
+				normal3 = (getNormal objMesh face.z)
+				if flipAxis then
+				(
+					normal1 *= flipAxisMatrix
+					normal2 *= flipAxisMatrix
+					normal3 *= flipAxisMatrix
+				)
+				append vertexNormals[matID] normal1.x
+				append vertexNormals[matID] normal1.y
+				append vertexNormals[matID] normal1.z
+				append vertexNormals[matID] normal2.x
+				append vertexNormals[matID] normal2.y
+				append vertexNormals[matID] normal2.z
+				append vertexNormals[matID] normal3.x
+				append vertexNormals[matID] normal3.y
+				append vertexNormals[matID] normal3.z
+			)
+			
+			-- Unindex vertex colors
+			if (exportMeshVertexColors) then
+			(
+				color1 = (getVertColor objMesh face.x)
+				color2 = (getVertColor objMesh face.y)
+				color3 = (getVertColor objMesh face.z)
+				append vertexColors[matID] color1.r
+				append vertexColors[matID] color1.g
+				append vertexColors[matID] color1.b
+				append vertexColors[matID] color2.r
+				append vertexColors[matID] color2.g
+				append vertexColors[matID] color2.b
+				append vertexColors[matID] color3.r
+				append vertexColors[matID] color3.g
+				append vertexColors[matID] color3.b
+			)
+		)
+		
+		-- Face normals
 		if (exportMeshFaceNormals) then
 		(
-			normal = (getfacenormal objMesh f)
+			normal = (getFaceNormal objMesh f)
 			if flipAxis then
 			(
 				normal *= flipAxisMatrix
 			)
-			append face_normals[matID] (normal.x)
-			append face_normals[matID] (normal.y)
-			append face_normals[matID] (normal.z)
+			append faceNormals[matID] normal.x
+			append faceNormals[matID] normal.y
+			append faceNormals[matID] normal.z
 		)
-		else if (exportMeshVertexNormals) then
+		
+		-- Face vertex colors
+		if (exportMeshFaceVertexColors) then
 		(
-			normal1 = (getNormal objMesh face.x)
-			normal2 = (getNormal objMesh face.y)
-			normal3 = (getNormal objMesh face.z)
-			if flipAxis then
-			(
-				normal1 *= flipAxisMatrix
-				normal2 *= flipAxisMatrix
-				normal3 *= flipAxisMatrix
-			)
-			append vertex_normals[matID] normal1.x
-			append vertex_normals[matID] normal1.y
-			append vertex_normals[matID] normal1.z
-			append vertex_normals[matID] normal2.x
-			append vertex_normals[matID] normal2.y
-			append vertex_normals[matID] normal2.z
-			append vertex_normals[matID] normal3.x
-			append vertex_normals[matID] normal3.y
-			append vertex_normals[matID] normal3.z
+			faceColor = (getVCFace objMesh f)
+			color1 = (getVertColor objMesh faceColor.x)
+			color2 = (getVertColor objMesh faceColor.y)
+			color3 = (getVertColor objMesh faceColor.z)
+			append faceColors[matID] color1.r
+			append faceColors[matID] color1.g
+			append faceColors[matID] color1.b
+			append faceColors[matID] color2.r
+			append faceColors[matID] color2.g
+			append faceColors[matID] color2.b
+			append faceColors[matID] color3.r
+			append faceColors[matID] color3.g
+			append faceColors[matID] color3.b
 		)
 		
 		-- UVs
 		if (getNumTVerts objMesh > 0) then
 		(
 			tvface = GetTVFace objMesh f
-			if (exportMeshIndexedUVs) then
+			if (exportMeshUVsIndexed) then
 			(
-				append uv_indices[matID] (tvface.x - 1)
-				append uv_indices[matID] (tvface.y - 1)
-				append uv_indices[matID] (tvface.z - 1)
+				append uvsIndices[matID] (tvface.x - 1)
+				append uvsIndices[matID] (tvface.y - 1)
+				append uvsIndices[matID] (tvface.z - 1)
 			)
 			else
 			(
 				tvert = (getTVert objMesh tvface.x)
-				append uv[matID] tvert.x
-				append uv[matID] tvert.y
 				tvert = (getTVert objMesh tvface.y)
-				append uv[matID] tvert.x
-				append uv[matID] tvert.y
 				tvert = (getTVert objMesh tvface.z)
-				append uv[matID] tvert.x
-				append uv[matID] tvert.y
+				append uvs[matID] tvert.x
+				append uvs[matID] tvert.y
+				append uvs[matID] tvert.x
+				append uvs[matID] tvert.y
+				append uvs[matID] tvert.x
+				append uvs[matID] tvert.y
 			)
 		)
 	)
 	
-	if (exportMeshIndexedVertices and vertex_indices.count > 0) then
+	-- INDEXED
+	if (exportMeshVerticesIndexed) then
 	(
+		-- Indices
+		format "%%%\"vi\":%[" comma nl (tabs 3) sp to:stream
+		comma2 = ""
+		for index = 1 to vertexIndices.count do
+		(
+			format "%%%" comma2 nl (tabs 4) to:stream
+			formatArray3 vertexIndices[index] stream
+			comma2 = ","
+		)
+		format "%%]" nl (tabs 3) to:stream
+		comma = ","
+		
+		-- Vertices
 		if (exportMeshVertices) then
 		(
 			format "%%%\"vt\":%[" comma nl (tabs 3) sp to:stream
@@ -208,103 +273,179 @@ fn formatObject obj stream =
 				(
 					vert *= flipAxisMatrix
 				)
-				format "%%%,%,%" comma2 sp (fp vert.x) (fp vert.y) (fp vert.z) to:stream
-				comma2 = ","
+				format "%%,%,%" comma2 (fp vert.x) (fp vert.y) (fp vert.z) to:stream
+				comma2 = commasp
 			)
-			format "%]" sp to:stream
+			format "]" to:stream
 			comma = ","
 		)
 		
-		format "%%%\"vi\":%[" comma nl (tabs 3) sp to:stream
-		comma2 = ""
-		for index = 1 to vertex_indices.count do
+		-- Vertex normals
+		if (exportMeshVertexNormals) then
 		(
-			format "%%%[%]" comma2 nl (tabs 4) (if vertex_indices[index] != undefined then (formatArray vertex_indices[index]) else "") to:stream
-			comma2 = ","
-		)
-		format "%%]" nl (tabs 3) to:stream
-		comma = ","
-	)
-	else if (exportMeshVertices) then
-	(
-		format "%%%\"vt\":%[" comma nl (tabs 3) sp to:stream
-		comma2 = ""
-		for index = 1 to vertices.count do
-		(
-			format "%%%[%]" comma2 nl (tabs 4) (if vertices[index] != undefined then (formatArray vertices[index]) else "") to:stream
-			comma2 = ","
-		)
-		format "%%]" nl (tabs 3) to:stream
-		comma = ","
-	)
-	
-	if (exportMeshFaceNormals and face_normals.count > 0) then
-	(
-		format "%%%\"fn\":%[" comma nl (tabs 3) sp to:stream
-		comma2 = ""
-		for index = 1 to face_normals.count do
-		(
-			format "%%%[%]" comma2 nl (tabs 4) (if face_normals[index] != undefined then (formatArray face_normals[index]) else "") to:stream
-			comma2 = ","
-		)
-		format "%%]" nl (tabs 3) to:stream
-		comma = ","
-	)
-	else if (exportMeshVertexNormals) then
-	(
-		format "%%%\"vn\":%[" comma nl (tabs 3) sp to:stream
-		comma2 = ""
-		for index = 1 to face_normals.count do
-		(
-			format "%%%[%]" comma2 nl (tabs 4) (if face_normals[index] != undefined then (formatArray vertex_normals[index]) else "") to:stream
-			comma2 = ","
-		)
-		format "%%]" nl (tabs 3) to:stream
-		comma = ","
-	)
-	
-	if (exportMeshIndexedUVs) then
-	(
-		if (exportMeshUVs and objMesh.numTVerts > 0) then
-		(
-			format "%%%\"uv\":%[" comma nl (tabs 3) sp to:stream
+			format "%%%\"vn\":%[" comma nl (tabs 3) sp to:stream
 			comma2 = ""
-			for v = 1 to objMesh.numTVerts do
+			for v = 1 to objMesh.numverts do
 			(
-				tvert = (getTVert objMesh v)
-				format "%%%,%" comma2 sp (fp tvert.x) (fp tvert.y) to:stream
-				comma2 = ","
+				normal = (getNormal objMesh v)
+				if flipAxis then
+				(
+					normal *= flipAxisMatrix
+				)
+				format "%%,%,%" comma2 (fp normal.x) (fp normal.y) (fp normal.z) to:stream
+				comma2 = commasp
 			)
-			format "%]" sp to:stream
+			format "]" to:stream
 			comma = ","
 		)
 		
-		if (exportMeshIndexedUVs and uv_indices.count > 0) then
+		-- Vertex colors
+		if (exportMeshVertexColors) then
 		(
-			format "%%%\"ui\":%[" comma nl (tabs 3) sp to:stream
+			format "%%%\"vc\":%[" comma nl (tabs 3) sp to:stream
 			comma2 = ""
-			for index = 1 to uv_indices.count do
+			for v = 1 to objMesh.numverts do
 			(
-				format "%%%[%]" comma2 nl (tabs 4) (if uv_indices[index] != undefined then (formatArray uv_indices[index]) else "") to:stream
+				normal = (getNormal objMesh v)
+				if flipAxis then
+				(
+					normal *= flipAxisMatrix
+				)
+				format "%%,%,%" comma2 (fp normal.x) (fp normal.y) (fp normal.z) to:stream
+				comma2 = commasp
+			)
+			format "]" to:stream
+			comma = ","
+		)
+	)
+	-- NOT INDEXED
+	else
+	(
+		-- Vertices
+		if (exportMeshVertices) then
+		(
+			format "%%%\"vt\":%[" comma nl (tabs 3) sp to:stream
+			comma2 = ""
+			for index = 1 to vertices.count do
+			(
+				format "%%%" comma2 nl (tabs 4) to:stream
+				formatArray3 vertices[index] stream
+				comma2 = ","
+			)
+			format "%%]" nl (tabs 3) to:stream
+			comma = ","
+		)
+		
+		-- Vertex normals
+		if (exportMeshVertexNormals) then
+		(
+			format "%%%\"vn\":%[" comma nl (tabs 3) sp to:stream
+			comma2 = ""
+			for index = 1 to vertexNormals.count do
+			(
+				format "%%%" comma2 nl (tabs 4) to:stream
+				formatArray3 vertexNormals[index] stream
+				comma2 = ","
+			)
+			format "%%]" nl (tabs 3) to:stream
+			comma = ","
+		)
+		
+		-- Vertex colors
+		if (exportMeshVertexColors) then
+		(
+			format "%%%\"vc\":%[" comma nl (tabs 3) sp to:stream
+			comma2 = ""
+			for index = 1 to vertexColors.count do
+			(
+				format "%%%" comma2 nl (tabs 4) to:stream
+				formatArray3 vertexColors[index] stream
 				comma2 = ","
 			)
 			format "%%]" nl (tabs 3) to:stream
 			comma = ","
 		)
 	)
-	else if (exportMeshUVs and uv.count > 0) then
+	
+	-- Face normals
+	if (exportMeshFaceNormals) then
 	(
-		format "%%%\"uv\":%[" comma nl (tabs 3) sp to:stream
+		format "%%%\"fn\":%[" comma nl (tabs 3) sp to:stream
 		comma2 = ""
-		for index = 1 to uv.count do
+		for index = 1 to faceNormals.count do
 		(
-			format "%%%[%]" comma2 nl (tabs 4) (if uv[index] != undefined then (formatArray uv[index]) else "") to:stream
+			format "%%%" comma2 nl (tabs 4) to:stream
+			formatArray3 faceNormals[index] stream
 			comma2 = ","
 		)
 		format "%%]" nl (tabs 3) to:stream
 		comma = ","
 	)
 	
+	-- Face vertex normals
+	if (exportMeshFaceVertexColors) then
+	(
+		format "%%%\"fc\":%[" comma nl (tabs 3) sp to:stream
+		comma2 = ""
+		for index = 1 to faceColors.count do
+		(
+			format "%%%" comma2 nl (tabs 4) to:stream
+			formatArray3 faceColors[index] stream
+			comma2 = ","
+		)
+		format "%%]" nl (tabs 3) to:stream
+		comma = ","
+	)
+	
+	-- UVs indexed
+	if (exportMeshUVsIndexed) then
+	(
+		-- UV indices
+		if (exportMeshUVsIndexed) then
+		(
+			format "%%%\"ui\":%[" comma nl (tabs 3) sp to:stream
+			comma2 = ""
+			for index = 1 to uvsIndices.count do
+			(
+				format "%%%" comma2 nl (tabs 4) to:stream
+				formatArray3 uvsIndices[index] stream
+				comma2 = ","
+			)
+			format "%%]" nl (tabs 3) to:stream
+			comma = ","
+		)
+		
+		-- UVs
+		if (exportMeshUVs) then
+		(
+			format "%%%\"uv\":%[" comma nl (tabs 3) sp to:stream
+			comma2 = ""
+			for v = 1 to objMesh.numTVerts do
+			(
+				tvert = (getTVert objMesh v)
+				format "%%,%" comma2 (fp tvert.x) (fp tvert.y) to:stream
+				comma2 = commasp
+			)
+			format "%]" sp to:stream
+			comma = ","
+		)
+	)
+	-- UVs
+	else if (exportMeshUVs) then
+	(
+		format "%%%\"uv\":%[" comma nl (tabs 3) sp to:stream
+		comma2 = ""
+		for index = 1 to uvs.count do
+		(
+			format "%%%" comma2 nl (tabs 4) to:stream
+			formatArray2 uvs[index] stream
+			comma2 = ","
+		)
+		format "%%]" nl (tabs 3) to:stream
+		comma = ","
+	)
+	
+	-- Skin
 	objSkin = obj.modifiers[#skin]
 	if ((exportMeshAssociatedSkin or exportMeshSkinIndices or exportMeshSkinWeights) and objSkin != undefined) then
 	(

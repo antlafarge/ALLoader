@@ -151,18 +151,18 @@ fn formatAnimation obj stream =
 				
 				if (exportAnimationBonePosition) then
 				(
-					format ",%\"ps\":%" sp (formatPoint3 oneKey.ps) to:stream
+					format ",%\"ps\":%" sp (fp oneKey.ps) to:stream
 				)
-				
 				
 				if (exportAnimationBoneRotation) then
 				(
-					format ",%\"rt\":%" sp (formatQuaternion oneKey.rt) to:stream
+					format ",%\"rt\":" sp to:stream
+					formatQuaternion oneKey.rt stream
 				)
 				
 				if (exportAnimationBoneScale) then
 				(
-					format ",%\"sc\":%" sp (formatPoint3 oneKey.sc) to:stream
+					format ",%\"sc\":%" sp (fp oneKey.sc) to:stream
 				)
 				
 				format "%}" sp to:stream

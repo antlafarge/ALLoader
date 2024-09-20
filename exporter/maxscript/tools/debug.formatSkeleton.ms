@@ -5,6 +5,7 @@ fileIn "export.mxs"
 
 nl = "\n"
 sp = " "
+commasp = ", "
 
 clearListener()
 

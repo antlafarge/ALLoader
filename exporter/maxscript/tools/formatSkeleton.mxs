@@ -51,19 +51,20 @@ fn formatSkeleton obj stream =
 				
 				if (exportSkinBonePosition) then
 				(
-					format ",%\"ps\":%" sp (formatPoint3 localTransform.position) to:stream
+					format ",%\"ps\":%" sp (fp localTransform.position) to:stream
 				)
 				
 				if (exportSkinBoneRotation) then
 				(
 					-- Inverse the rotation because : "Internally, 3ds Max stores rotations in node matrices using the left-hand rule."
 					-- Cf. Maxscript doc : Using Node Transform Properties (https://help.autodesk.com/view/MAXDEV/2022/ENU/?guid=GUID-3B001F21-8FE9-4663-A972-E648682A0ACD)
-					format ",%\"rt\":%" sp (formatQuaternion (inverse localRotation)) to:stream
+					format ",%\"rt\":" sp to:stream
+					formatQuaternion (inverse localRotation) stream
 				)
 				
 				if (exportSkinBoneScale) then
 				(
-					format ",%\"sc\":%" sp (formatPoint3 localTransform.scale) to:stream
+					format ",%\"sc\":%" sp (fp localTransform.scale) to:stream
 				)
 				
 				format "%}%%" sp (if bi != bonesCount then "," else "") nl to:stream

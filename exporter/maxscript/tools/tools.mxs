@@ -25,108 +25,111 @@ fn fp value =
 	formattedPrint value format:formattedPrintFormat
 )
 
-fn formatPoint3 myPoint3 =
+fn formatQuaternion myQuat stream =
 (
-	fp myPoint3
-)
-
-fn formatQuaternion myQuat =
-(
-	stream = stringstream ""
 	format "[%,%,%,%]" (fp myQuat.x) (fp myQuat.y) (fp myQuat.z) (fp myQuat.w) to:stream
-	stream as string
 )
 
-fn formatArray pieces =
+fn formatArray pieces stream =
 (
-	stream = stringstream ""
-	count = pieces.count
-	for index = 1 to count do
+	if pieces != undefined then
 	(
-		format "%%" (fp pieces[index]) (if index != count then "," else "") to:stream
-	)
-	stream as string
-)
-
-fn formatArrayAsInteger pieces =
-(
-	stream = stringstream ""
-	count = pieces.count
-	for index = 1 to count do
-	(
-		format "%%" (pieces[index] as integer) (if index != count then "," else "") to:stream
-	)
-	stream as string
-)
-
-fn formatUvArray pieces =
-(
-	stream = stringstream ""
-	count = pieces.count
-	for index = 1 to count do
-	(
-		piece = pieces[index]
-		format "%,%,%%%" (fp piece.x) (fp piece.y) (if index != count then "," else "") sp to:stream
-	)
-	stream as string
-)
-
-fn formatPoint3Array pieces =
-(
-	stream = stringstream ""
-	if (pieces != undefined) then
-	(
-		count = pieces.count
-		for index = 1 to count do
+		format "[" to:stream
+		comma = ""
+		for index = 1 to pieces.count do
 		(
-			piece = pieces[index]
-			format "%,%,%%%" (fp piece.x) (fp piece.y) (fp piece.z) (if index != count then "," else "") sp to:stream
+			format "%%" comma (fp pieces[index]) to:stream
+			comma = ","
 		)
+		format "]" to:stream
 	)
-	stream as string
+	else
+	(
+		format "[]" to:stream
+	)
 )
 
-fn formatColorRgbaArray pieces =
+fn formatArray2 pieces stream =
 (
-	stream = stringstream ""
-	if (pieces != undefined) then
+	if pieces != undefined then
 	(
+		format "[" to:stream
+		comma = ""
+		index = 1
 		count = pieces.count
-		for index = 1 to count do
+		while (index < count) do
 		(
-			piece = pieces[index]
-			format "%,%,%,%%%" (fp piece.r) (fp piece.g) (fp piece.b) (fp piece.a) (if index != count then "," else "") sp to:stream
+			format "%%,%" comma (fp pieces[index]) (fp pieces[index+1]) to:stream
+			comma = commasp
+			index += 2
 		)
+		format "]" to:stream
 	)
-	stream as string
+	else
+	(
+		format "[]" to:stream
+	)
 )
 
-fn formatColorRgbArray pieces =
+fn formatArray3 pieces stream =
 (
-	stream = stringstream ""
-	if (pieces != undefined) then
+	if pieces != undefined then
 	(
+		format "[" to:stream
+		comma = ""
+		index = 1
 		count = pieces.count
-		for index = 1 to count do
+		while (index < count) do
 		(
-			piece = pieces[index]
-			format "%,%,%%%" (fp piece.r) (fp piece.g) (fp piece.b) (if index != count then "," else "") sp to:stream
+			format "%%,%,%" comma (fp pieces[index]) (fp pieces[index+1]) (fp pieces[index+2]) to:stream
+			comma = commasp
+			index += 3
 		)
+		format "]" to:stream
 	)
-	stream as string
+	else
+	(
+		format "[]" to:stream
+	)
 )
 
-fn formatQuatArray pieces =
+fn formatArray4 pieces stream =
 (
-	stream = stringstream ""
-	if (pieces != undefined) then
+	if pieces != undefined then
 	(
+		format "[" to:stream
+		comma = ""
+		index = 1
 		count = pieces.count
-		for index = 1 to count do
+		while (index < count) do
 		(
-			myQuat = pieces[index]
-			format "%,%,%,%%%" (fp q4.x) (fp q4.y) (fp q4.z) (fp q4.w) (if count != count then "," else "") sp to:stream
+			format "%%,%,%,%" comma (fp pieces[index]) (fp pieces[index+1]) (fp pieces[index+2]) (fp pieces[index+3]) to:stream
+			comma = commasp
+			index += 4
 		)
+		format "]" to:stream
 	)
-	stream as string
+	else
+	(
+		format "[]" to:stream
+	)
+)
+
+fn formatArrayAsInteger pieces stream =
+(
+	if pieces != undefined then
+	(
+		format "[" to:stream
+		comma = ""
+		for index = 1 to pieces.count do
+		(
+			format "%%" comma (pieces[index] as integer) to:stream
+			comma = ","
+		)
+		format "]" to:stream
+	)
+	else
+	(
+		format "[]" to:stream
+	)
 )
