@@ -83,6 +83,9 @@ fn formatObject obj stream =
 	)
 	
 	objMesh = obj.mesh
+	
+	numTVerts = getNumTVerts objMesh
+	numCPVFaces = getNumCPVVerts objMesh
     
 	vertices = #()
 	vertexIndices = #()
@@ -206,7 +209,7 @@ fn formatObject obj stream =
 		)
 		
 		-- Face vertex colors
-		if (exportMeshFaceVertexColors) then
+		if (exportMeshFaceVertexColors and numCPVFaces > 0) then
 		(
 			faceColor = (getVCFace objMesh f)
 			color1 = (getVertColor objMesh faceColor.x)
@@ -224,27 +227,28 @@ fn formatObject obj stream =
 		)
 		
 		-- UVs
-		if (getNumTVerts objMesh > 0) then
+		if (exportMeshUVsIndexed) then
 		(
-			tvface = GetTVFace objMesh f
-			if (exportMeshUVsIndexed) then
+			if (numTVerts > 0) then
 			(
+				tvface = GetTVFace objMesh f
 				append uvsIndices[matID] (tvface.x - 1)
 				append uvsIndices[matID] (tvface.y - 1)
 				append uvsIndices[matID] (tvface.z - 1)
 			)
-			else
-			(
-				tvert = (getTVert objMesh tvface.x)
-				tvert = (getTVert objMesh tvface.y)
-				tvert = (getTVert objMesh tvface.z)
-				append uvs[matID] tvert.x
-				append uvs[matID] tvert.y
-				append uvs[matID] tvert.x
-				append uvs[matID] tvert.y
-				append uvs[matID] tvert.x
-				append uvs[matID] tvert.y
-			)
+		)
+		else if (exportMeshUVs and numTVerts > 0) then
+		(
+			tvface = GetTVFace objMesh f
+			tvert = (getTVert objMesh tvface.x)
+			tvert = (getTVert objMesh tvface.y)
+			tvert = (getTVert objMesh tvface.z)
+			append uvs[matID] tvert.x
+			append uvs[matID] tvert.y
+			append uvs[matID] tvert.x
+			append uvs[matID] tvert.y
+			append uvs[matID] tvert.x
+			append uvs[matID] tvert.y
 		)
 	)
 	
