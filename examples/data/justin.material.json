@@ -1,0 +1,19 @@
+{
+	"version": "0.1",
+	"materials": {
+		"MultiMat_0": {
+			"ml": [
+				"Toon_COL",
+				"Frames"
+			]
+		},
+		"Toon_COL": {
+			"cm": "Cartoon_Vincent_diffuse.png",
+			"sp": [0,0,0]
+		},
+		"Frames": {
+			"cl": [255,255,255],
+			"sp": [0,0,0]
+		}
+	}
+}

@@ -1,0 +1,19 @@
+{
+	"version": "0.1",
+	"materials": {
+		"MultiMat_0": {
+			"ml": [
+				"DM_Base.jpg",
+				"DM_Face.jpg"
+			]
+		},
+		"DM_Base.jpg": {
+			"cm": "DM_Base.jpg",
+			"sp": [229.5,229.5,229.5]
+		},
+		"DM_Face.jpg": {
+			"cm": "DM_Face.jpg",
+			"sp": [229.5,229.5,229.5]
+		}
+	}
+}

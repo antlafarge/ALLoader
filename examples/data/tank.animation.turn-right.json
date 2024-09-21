@@ -1,7 +1,7 @@
 {
 	"version": "0.1",
 	"animations": {
-		"Anim": {
+		"turn-right": {
 			"sk": "TANK",
 			"ms": "TANK",
 			"dr": 3.36667,

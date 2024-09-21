@@ -59,10 +59,28 @@
 				<p class="text-center">
 					<a href="https://github.com/antlafarge/ALLoader" target="_blank">Github project</a>
 				</p>
-				<a href="index.html?model=tank">
+				<a href="index.html?model=tank&animation=turn-right">
 					<figure class="figure">
-						<img src="examples/thumbs/tank.jpg" class="figure-img img-fluid rounded" alt="...">
-						<figcaption class="figure-caption text-center">Tank</figcaption>
+						<img src="examples/thumbs/tank_turn-right.jpg" class="figure-img img-fluid rounded" alt="Tank (turn right)">
+						<figcaption class="figure-caption text-center">Tank (turn right)</figcaption>
+					</figure>
+				</a>
+				<a href="index.html?model=gordon&animation=idle">
+					<figure class="figure">
+						<img src="examples/thumbs/gordon_idle.jpg" class="figure-img img-fluid rounded" alt="Gordon (idle)">
+						<figcaption class="figure-caption text-center">Gordon (idle)</figcaption>
+					</figure>
+				</a>
+				<a href="index.html?model=justin&animation=idle">
+					<figure class="figure">
+						<img src="examples/thumbs/justin_idle.jpg" class="figure-img img-fluid rounded" alt="Justin (idle)">
+						<figcaption class="figure-caption text-center">Justin (idle)</figcaption>
+					</figure>
+				</a>
+				<a href="index.html?model=justin&animation=walk">
+					<figure class="figure">
+						<img src="examples/thumbs/justin_walk.jpg" class="figure-img img-fluid rounded" alt="Justin (walk)">
+						<figcaption class="figure-caption text-center">Justin (walk)</figcaption>
 					</figure>
 				</a>
 			</div>
@@ -77,15 +95,19 @@
 		import { OrbitControls } from 'OrbitControls';
 		import { ALLoader } from '../loader/ALLoader.js';
 
-		var container, camera, controls, scene, renderer, mesh, meshWire, anim, anim2, meshAnim, meshWireAnim, skeletonHelper, axesHelper, light, animationMixer;
+		let container, camera, controls, scene, renderer, mesh, meshWire, anim, anim2, meshAnim, meshWireAnim, skeletonHelper, axesHelper, light, animationMixer;
 
-		var clock = new THREE.Clock();
+		const clock = new THREE.Clock();
 
-		var reResult = /(\?|&)model=(.+?)(&.*)?$/.exec(window.location.search);
-		var modelToLoad = (reResult ? reResult[2] : "tank");
-		console.log("modelToLoad", modelToLoad);
+		const meshReResult = /(\?|&)model=(.+?)(&.*)?$/.exec(window.location.search);
+		const meshToLoad = (meshReResult ? meshReResult[2] : "tank");
+		console.log("meshToLoad", meshToLoad);
 
-		var mixers = [];
+		const animationReResult = /(\?|&)animation=(.+?)(&.*)?$/.exec(window.location.search);
+		const animationToLoad = (animationReResult ? animationReResult[2] : "turn-right");
+		console.log("animationToLoad", animationToLoad);
+
+		const mixers = [];
 
 		function main() {
 			renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -170,6 +192,9 @@
 						mixers.push(mixer);
 					}
 				}
+				
+				const distance = 1.5 * vMax.distanceTo(vMin);
+				camera.position.set(-distance, distance, distance);
 			}
 
 			function onLoad() {
@@ -182,10 +207,10 @@
 
 			(new ALLoader).load(
 				[
-					`./examples/data/${modelToLoad}.material.json`,
-					`./examples/data/${modelToLoad}.skeleton.json`,
-					`./examples/data/${modelToLoad}.mesh.json`,
-					`./examples/data/${modelToLoad}.animation.json`
+					`./examples/data/${meshToLoad}.material.json`,
+					`./examples/data/${meshToLoad}.skeleton.json`,
+					`./examples/data/${meshToLoad}.mesh.json`,
+					`./examples/data/${meshToLoad}.animation.${animationToLoad}.json`
 				],
 				{
 					texturePath: "examples/textures",
