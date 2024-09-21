@@ -4,9 +4,23 @@ fn formatSkeleton obj stream =
 	if (objSkin != undefined) then
 	(
 		allBones = skinOps.GetBoneNodes objSkin
-		bonesCount = allBones.count
-		if (bonesCount > 0) then
+		
+		if (allBones.count > 0) then
 		(
+			-- The Skin modifier contains only bones attached to any Vertex
+			-- So we we add all parents that are not in bones list
+			for bi3 = 1 to allBones.count do
+			(
+				b = allBones[bi3]
+				
+				if (b.parent != null) then
+				(
+					appendIfUnique allBones b.parent
+				)
+			)
+			
+			bonesCount = allBones.count
+			
 			format "%\"%\":%[%" (tabs 2) obj.name sp nl to:stream
 
 			for bi = 1 to bonesCount do
