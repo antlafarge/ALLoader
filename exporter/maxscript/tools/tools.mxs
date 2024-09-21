@@ -3,6 +3,65 @@ fn isGeometry o =
 	((Superclassof o) == GeometryClass) and ((classof o) != BoneGeometry)
 )
 
+fn compareBonesFunc b1 b2 =
+(
+	if (b1 == b2) then
+	(
+		return 0
+	)
+	else
+	(
+		if (b1.name < b2.name) then
+		(
+			return -1
+		)
+		else
+		(
+			return 1
+		)
+	)
+)
+
+fn getAllBonesSorted bonesFromSkin =
+(
+	allBonesSorted = copy bonesFromSkin #noMap
+
+	-- The Skin modifier contains only bones attached to any Vertex
+	-- So we we add all parents that are not in bones list
+	for bi = 1 to allBonesSorted.count do
+	(
+		p = allBonesSorted[bi].parent
+		
+		if (p != null) then
+		(
+			appendIfUnique allBonesSorted p
+		)
+	)
+	
+	qsort allBonesSorted compareBonesFunc
+	allBonesSorted
+)
+
+fn getAllBonesReindexed bonesFromSkin allBonesSorted =
+(
+	allBonesReindexed = copy bonesFromSkin #noMap
+	
+	-- reindex bones because we sort by name
+	for bi = 1 to allBonesReindexed.count do
+	(
+		for bi2 = 1 to allBonesSorted.count do
+		(
+			if (allBonesReindexed[bi] == allBonesSorted[bi2]) then
+			(
+				allBonesReindexed[bi] = bi2
+				break
+			)
+		)
+	)
+	
+	allBonesReindexed
+)
+
 -- Return the cached number of tabulations if output is not compressed
 fn tabs tabsCount =
 (

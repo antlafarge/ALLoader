@@ -70,17 +70,17 @@ fn formatAnimation obj stream =
 		
 		initialSliderTimePos = sliderTime
 		
-		bonesCount = skinOps.GetNumberBones objSkin
-		allBones = #()
-		struct OneBone (bone=undefined, bn=undefined, ky=#())
+		bonesFromSkin = skinOps.GetBoneNodes objSkin
+		allBonesSorted =  getAllBonesSorted bonesFromSkin
+		
+		struct OneBone (bn=undefined, ky=#())
 		struct OneKey (tm=undefined, ps=undefined, rt=undefined, sc=undefined)
+		allBones = #()
 		
 		-- Initialize array
-		for i = 1 to bonesCount do
+		for bi = 1 to allBonesSorted.count do
 		(
-			bname = skinOps.GetBoneName objSkin i 1
-			b = getNodeByName bname
-			append allBones (OneBone bone:b bn:bname)
+			append allBones (OneBone bn:allBonesSorted[bi])
 		)
 		
 		-- Extract data (by parsing all frames only one time by mesh)
@@ -89,10 +89,10 @@ fn formatAnimation obj stream =
 			sliderTime = k
 			ktime = (k as time)
 			
-			for i = 1 to bonesCount do
+			for bi = 1 to allBones.count do
 			(
-				oneBone = allBones[i]
-				b = oneBone.bone
+				oneBone = allBones[bi]
+				b = oneBone.bn
 				
 				localTransform = b.transform
 				
@@ -133,12 +133,12 @@ fn formatAnimation obj stream =
 		
 		-- Write data
 		comma2 = ""
-		for i = 1 to bonesCount do
+		for i = 1 to allBones.count do
 		(
 			oneBone = allBones[i]
 			
 			format "%%%{" comma2 nl (tabs 4) to:stream
-			format "%%\"bn\":%\"%\"" nl (tabs 5) sp oneBone.bn to:stream
+			format "%%\"bn\":%\"%\"" nl (tabs 5) sp oneBone.bn.name to:stream
 			format ",%%\"ky\":%[" nl (tabs 5) sp to:stream
 			
 			keyCount = oneBone.ky.count

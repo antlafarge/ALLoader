@@ -3,29 +3,17 @@ fn formatSkeleton obj stream =
 	objSkin = obj.modifiers[#skin]
 	if (objSkin != undefined) then
 	(
-		allBones = skinOps.GetBoneNodes objSkin
+		bonesFromSkin = skinOps.GetBoneNodes objSkin
+		allBonesSorted = getAllBonesSorted bonesFromSkin
+		bonesCount = allBonesSorted.count
 		
-		if (allBones.count > 0) then
+		if (bonesCount > 0) then
 		(
-			-- The Skin modifier contains only bones attached to any Vertex
-			-- So we we add all parents that are not in bones list
-			for bi3 = 1 to allBones.count do
-			(
-				b = allBones[bi3]
-				
-				if (b.parent != null) then
-				(
-					appendIfUnique allBones b.parent
-				)
-			)
-			
-			bonesCount = allBones.count
-			
 			format "%\"%\":%[%" (tabs 2) obj.name sp nl to:stream
-
+			
 			for bi = 1 to bonesCount do
 			(
-				b = allBones[bi]
+				b = allBonesSorted[bi]
 				
 				localTransform = b.transform
 				
@@ -34,7 +22,7 @@ fn formatSkeleton obj stream =
 				(	
 					for bi2 = 1 to bonesCount do
 					(
-						if (b.parent == allBones[bi2]) then
+						if (b.parent == allBonesSorted[bi2]) then
 						(
 							parentBoneID = bi2 - 1
 							break

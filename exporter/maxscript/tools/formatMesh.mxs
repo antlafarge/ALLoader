@@ -1,4 +1,4 @@
-fn processBoneForOneVertex objSkin vertexIndex skinIndices skinWeights =
+fn processBoneForOneVertex objSkin vertexIndex allBonesReindexed skinIndices skinWeights =
 (
 	weightCountTotal = skinOps.GetVertexWeightCount objSkin vertexIndex
 	vertexSkinIndices = #()
@@ -12,7 +12,7 @@ fn processBoneForOneVertex objSkin vertexIndex skinIndices skinWeights =
 		
 		-- boneIndexes
 		boneIndex = skinOps.GetVertexWeightBoneID objSkin vertexIndex weightIndex
-		append vertexSkinIndices (boneIndex - 1)
+		append vertexSkinIndices (allBonesReindexed[boneIndex] - 1)
 		
 		-- skinWeights
 		boneWeight = skinOps.GetVertexWeight objSkin vertexIndex weightIndex
@@ -455,12 +455,16 @@ fn formatObject obj stream =
 	objSkin = obj.modifiers[#skin]
 	if ((exportMeshAssociatedSkin or exportMeshSkinIndices or exportMeshSkinWeights) and objSkin != undefined) then
 	(
+		bonesFromSkin = skinOps.GetBoneNodes objSkin
+		allBonesSorted = getAllBonesSorted bonesFromSkin
+		allBonesReindexed = getAllBonesReindexed bonesFromSkin allBonesSorted
+		
 		skinIndices = #()
 		skinWeights = #()
 		
 		for vertexIndex = 1 to objMesh.numverts do
 		(
-			processBoneForOneVertex objSkin vertexIndex skinIndices skinWeights
+			processBoneForOneVertex objSkin vertexIndex allBonesReindexed skinIndices skinWeights
 		)
 		
 		if (exportMeshAssociatedSkin) then
