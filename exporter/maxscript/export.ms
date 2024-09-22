@@ -8,6 +8,58 @@ fileIn "tools/export.mxs"
 
 fn launchExport =
 (
+	exportMeshes = RolloutMeshes.exportMeshesCheckbox.checked
+	exportMeshAssociatedMaterial = RolloutMeshes.exportMeshAssociatedMaterialCheckbox.checked
+	exportMeshPosition = RolloutMeshes.exportMeshPositionCheckbox.checked
+	exportMeshRotation = RolloutMeshes.exportMeshRotationCheckbox.checked
+	exportMeshScale = RolloutMeshes.exportMeshScaleCheckbox.checked
+	exportMeshVertexPositions = RolloutMeshes.exportMeshVertexPositionsCheckbox.checked
+	exportMeshVertexIndices = RolloutMeshes.exportMeshVertexIndicesCheckbox.checked
+	exportMeshVertexNormals = RolloutMeshes.exportMeshVertexNormalsCheckbox.checked
+	exportMeshFaceNormals = RolloutMeshes.exportMeshFaceNormalsCheckbox.checked
+	exportMeshUVs = RolloutMeshes.exportMeshUVsCheckbox.checked
+	exportMeshUVsIndexed = RolloutMeshes.exportMeshUVsIndexedCheckbox.checked
+	exportMeshVertexColors = RolloutMeshes.exportMeshVertexColorsCheckbox.checked
+	exportMeshFaceVertexColors = RolloutMeshes.exportMeshFaceColorsCheckbox.checked
+	exportMeshAssociatedSkin = RolloutMeshes.exportMeshAssociatedSkinCheckbox.checked
+	exportMeshSkinIndices = RolloutMeshes.exportMeshSkinIndicesCheckbox.checked
+	exportMeshSkinWeights = RolloutMeshes.exportMeshSkinWeightsCheckbox.checked
+
+	exportMaterials = RolloutMaterials.exportMaterialsCheckbox.checked
+	exportMaterialBaseColor = RolloutMaterials.exportMaterialBaseColorCheckbox.checked
+	exportMaterialBaseColorMap = RolloutMaterials.exportMaterialBaseColorMapCheckbox.checked
+	exportMaterialBaseColorOnlyIfNoBaseColorMap = RolloutMaterials.exportMaterialBaseColorOnlyIfNoBaseColorMapCheckbox.checked
+	exportMaterialSpecularColor = RolloutMaterials.exportMaterialSpecularColorCheckbox.checked
+	exportMaterialTransparency = RolloutMaterials.exportMaterialTransparencyCheckbox.checked
+	
+	exportSkins = RolloutSkins.exportSkinsCheckbox.checked
+	exportSkinsUnusedChildBones = exportSkinsUnusedChildBonesCheckbox.checked
+	exportSkinBoneParent = RolloutSkins.exportSkinBoneParentCheckbox.checked
+	exportSkinBonePosition = RolloutSkins.exportSkinBonePositionCheckbox.checked
+	exportSkinBoneRotation = RolloutSkins.exportSkinBoneRotationCheckbox.checked
+	exportSkinBoneScale = RolloutSkins.exportSkinBoneScaleCheckbox.checked
+	
+	exportAnimations = RolloutAnimations.exportAnimationsCheckbox.checked
+	exportAnimationsName = RolloutAnimations.exportAnimationsNameEditText.text
+	exportAnimationsUnusedChildBones = RolloutAnimations.exportAnimationsUnusedChildBonesCheckbox.checked
+	exportAnimationAssociatedSkin = RolloutAnimations.exportAnimationAssociatedSkinCheckbox.checked
+	exportAnimationAssociatedMesh = RolloutAnimations.exportAnimationAssociatedMeshCheckbox.checked
+	exportAnimationBonePosition = RolloutAnimations.exportAnimationBonePositionCheckbox.checked
+	exportAnimationBoneRotation = RolloutAnimations.exportAnimationBoneRotationCheckbox.checked
+	exportAnimationBoneScale = RolloutAnimations.exportAnimationBoneScaleCheckbox.checked
+	
+	exportSelection = (if RolloutExport.exportObjectsRadiobuttons.state == 1 then true else false)
+	flipAxis = RolloutExport.flipYZCheckbox.checked
+	formattedPrintFormat = "." + ((RolloutExport.decimalsSpinner.value + 1) as string) + "g"
+	compressJson = RolloutExport.compressJsonCheckbox.checked
+	
+	if (not compressJson) then
+	(
+		nl = "\n"
+		sp = " "
+		commasp = ", "
+	)
+	
 	filepath = getSaveFileName caption:"File location" types:"JSON (json)|*.json|Plain Text (txt)|*.txt|All Files|*.*|"
 	
 	if (filepath != undefined) then
@@ -48,15 +100,11 @@ fn launchExport =
 	)
 )
 
-rollout ALExporter "ALLoader exporter"
+rollout RolloutMeshes ""
 (
-	radiobuttons exportObjectsRadiobuttons "Export" labels:#("selection", "all objects") default:1 columns:2
+	checkbox exportMeshesCheckbox "Meshes" checked:exportMeshes
 	
-	-- MESHES
-	
-	checkbox exportMeshesCheckbox "Export meshes" checked:exportMeshes
-	
-	Group "Meshes options"
+	Group ""
 	(
 		checkbox exportMeshAssociatedMaterialCheckbox "Associated material (mt)" checked:exportMeshAssociatedMaterial enabled:exportMeshes
 		checkbox exportMeshPositionCheckbox "Position (ps)" checked:exportMeshPosition enabled:exportMeshes
@@ -94,12 +142,13 @@ rollout ALExporter "ALLoader exporter"
 		exportMeshSkinIndicesCheckbox.enabled = exportMeshes
 		exportMeshSkinWeightsCheckbox.enabled = exportMeshes
 	)
-	
-	-- MATERIALS
-	
-	checkbox exportMaterialsCheckbox "Export materials" checked:exportMaterials
+)
 
-	Group "Materials options"
+rollout RolloutMaterials ""
+(
+	checkbox exportMaterialsCheckbox "Materials" checked:exportMaterials
+
+	Group ""
 	(
 		checkbox exportMaterialBaseColorCheckbox "Base color (cl)" checked:exportMaterialBaseColor enabled:exportMaterials
 		checkbox exportMaterialBaseColorMapCheckbox "Base color map (cm)" checked:exportMaterialBaseColorMap enabled:exportMaterials
@@ -117,13 +166,15 @@ rollout ALExporter "ALLoader exporter"
 		exportMaterialSpecularColorCheckbox.enabled = exportMaterials
 		exportMaterialTransparencyCheckbox.enabled = exportMaterials
 	)
+)
+
+rollout RolloutSkins ""
+(
+	checkbox exportSkinsCheckbox "Skins" checked:exportSkins
 	
-	-- SKINS
-	
-	checkbox exportSkinsCheckbox "Export Skins" checked:exportSkins
-	
-	Group "Skins options"
+	Group ""
 	(
+		checkbox exportSkinsUnusedChildBonesCheckbox "Unused child bones" checked:exportSkinsUnusedChildBones enabled:exportSkins
 		checkbox exportSkinBoneParentCheckbox "Bone parent (pr)" checked:exportSkinBoneParent enabled:exportSkins
 		checkbox exportSkinBonePositionCheckbox "Bone position (ps)" checked:exportSkinBonePosition enabled:exportSkins
 		checkbox exportSkinBoneRotationCheckbox "Bone rotation (rt)" checked:exportSkinBoneRotation enabled:exportSkins
@@ -133,19 +184,22 @@ rollout ALExporter "ALLoader exporter"
 	on exportSkinsCheckbox changed newValue do
 	(
 		exportSkins = newValue
+		exportSkinsUnusedChildBonesCheckbox.enabled = exportSkins
 		exportSkinBoneParentCheckbox.enabled = exportSkins
 		exportSkinBonePositionCheckbox.enabled = exportSkins
 		exportSkinBoneRotationCheckbox.enabled = exportSkins
 		exportSkinBoneScaleCheckbox.enabled = exportSkins
 	)
-	
-	-- ANIMATIONS
-	
-	checkbox exportAnimationsCheckbox "Export Animations" checked:exportAnimations
+)
 
-	Group "Animations options"
+rollout RolloutAnimations ""
+(
+	checkbox exportAnimationsCheckbox "Animations" checked:exportAnimations
+
+	Group ""
 	(
 		edittext exportAnimationsNameEditText "Animation name" text:exportAnimationsName labelOnTop:true enabled:exportAnimations
+		checkbox exportAnimationsUnusedChildBonesCheckbox "Unused child bones" checked:exportAnimationAssociatedSkin enabled:exportAnimations
 		checkbox exportAnimationAssociatedSkinCheckbox "Associated skin (sk)" checked:exportAnimationAssociatedSkin enabled:exportAnimations
 		checkbox exportAnimationAssociatedMeshCheckbox "Associated mesh (ms)" checked:exportAnimationAssociatedMesh enabled:exportAnimations
 		checkbox exportAnimationBonePositionCheckbox "Bone position (ps)" checked:exportAnimationBonePosition enabled:exportAnimations
@@ -157,83 +211,60 @@ rollout ALExporter "ALLoader exporter"
 	(
 		exportAnimations = newValue
 		exportAnimationsNameEditText.enabled = exportAnimations
+		exportAnimationsUnusedChildBonesCheckbox.enabled = exportAnimations
 		exportAnimationAssociatedSkinCheckbox.enabled = exportAnimations
 		exportAnimationAssociatedMeshCheckbox.enabled = exportAnimations
 		exportAnimationBonePositionCheckbox.enabled = exportAnimations
 		exportAnimationBoneRotationCheckbox.enabled = exportAnimations
 		exportAnimationBoneScaleCheckbox.enabled = exportAnimations
 	)
-	
-	-- OPTIONS
-	
-	group "Other options"
+)
+
+rollout RolloutExport ""
+(
+	group "Options"
 	(
 		checkbox flipYZCheckbox "Convert Z-Up to Y-Up" checked:flipAxis
 		spinner decimalsSpinner "Decimals count" range:[0,9,4] type:#integer scale:1	
 		checkbox compressJsonCheckbox "Compress JSON" checked:compressJson
 	)
-
-	-- EXPORT BUTTON
 	
-	button exportButton "Export"
+	group "Export"
+	(
+		radiobuttons exportObjectsRadiobuttons "" labels:#("selection", "all objects") default:1 columns:2 
+		button exportButton "Go"
+	)
 	
 	on exportButton pressed do
 	(
-		exportSelection = (if exportObjectsRadiobuttons.state == 1 then true else false)
-		
-		exportMeshes = exportMeshesCheckbox.checked
-		exportMeshAssociatedMaterial = exportMeshAssociatedMaterialCheckbox.checked
-		exportMeshPosition = exportMeshPositionCheckbox.checked
-		exportMeshRotation = exportMeshRotationCheckbox.checked
-		exportMeshScale = exportMeshScaleCheckbox.checked
-		exportMeshVertexPositions = exportMeshVertexPositionsCheckbox.checked
-		exportMeshVertexIndices = exportMeshVertexIndicesCheckbox.checked
-		exportMeshVertexNormals = exportMeshVertexNormalsCheckbox.checked
-		exportMeshFaceNormals = exportMeshFaceNormalsCheckbox.checked
-		exportMeshUVs = exportMeshUVsCheckbox.checked
-		exportMeshUVsIndexed = exportMeshUVsIndexedCheckbox.checked
-		exportMeshVertexColors = exportMeshVertexColorsCheckbox.checked
-		exportMeshFaceVertexColors = exportMeshFaceColorsCheckbox.checked
-		exportMeshAssociatedSkin = exportMeshAssociatedSkinCheckbox.checked
-		exportMeshSkinIndices = exportMeshSkinIndicesCheckbox.checked
-		exportMeshSkinWeights = exportMeshSkinWeightsCheckbox.checked
-
-		exportMaterials = exportMaterialsCheckbox.checked
-		exportMaterialBaseColor = exportMaterialBaseColorCheckbox.checked
-		exportMaterialBaseColorMap = exportMaterialBaseColorMapCheckbox.checked
-		exportMaterialBaseColorOnlyIfNoBaseColorMap = exportMaterialBaseColorOnlyIfNoBaseColorMapCheckbox.checked
-		exportMaterialSpecularColor = exportMaterialSpecularColorCheckbox.checked
-		exportMaterialTransparency = exportMaterialTransparencyCheckbox.checked
-		
-		exportSkins = exportSkinsCheckbox.checked
-		exportSkinBoneParent = exportSkinBoneParentCheckbox.checked
-		exportSkinBonePosition = exportSkinBonePositionCheckbox.checked
-		exportSkinBoneRotation = exportSkinBoneRotationCheckbox.checked
-		exportSkinBoneScale = exportSkinBoneScaleCheckbox.checked
-		
-		exportAnimations = exportAnimationsCheckbox.checked
-		exportAnimationsName = exportAnimationsNameEditText.text
-		exportAnimationAssociatedSkin = exportAnimationAssociatedSkinCheckbox.checked
-		exportAnimationAssociatedMesh = exportAnimationAssociatedMeshCheckbox.checked
-		exportAnimationBonePosition = exportAnimationBonePositionCheckbox.checked
-		exportAnimationBoneRotation = exportAnimationBoneRotationCheckbox.checked
-		exportAnimationBoneScale = exportAnimationBoneScaleCheckbox.checked
-		
-		flipAxis = flipYZCheckbox.checked
-		formattedPrintFormat = "." + ((decimalsSpinner.value + 1) as string) + "g"
-		compressJson = compressJsonCheckbox.checked
-		
-		if (not compressJson) then
-		(
-			nl = "\n"
-			sp = " "
-			commasp = ", "
-		)
-		
 		launchExport()
 	)
 )
 
-clearListener()
+width = 512
+meshesHeight = 367
+materialsHeight = 177
+skinsHeight = 177
+animationsHeight = 234
+exportHeight = 178
+height = (amax (materialsHeight + animationsHeight + exportHeight) (meshesHeight + skinsHeight))
+exportPosY = height - exportHeight
 
-createdialog ALExporter width:224
+rollout RolloutALExporter "ALLoader exporter"
+(
+    subRollout subRolloutMeshes pos:[0,0] width:(width/2) height:meshesHeight
+    subRollout subRolloutMaterials pos:[(width/2),0] width:(width/2) height:materialsHeight
+    subRollout subRolloutSkins pos:[0,meshesHeight] width:(width/2) height:skinsHeight
+    subRollout subRolloutAnimations pos:[(width/2),materialsHeight] width:(width/2) height:animationsHeight
+    subRollout subRolloutExport pos:[(width/2),(exportPosY)] width:(width/2) height:exportHeight
+)
+
+--clearListener()
+
+createDialog RolloutALExporter width:width height:height
+
+addSubRollout RolloutALExporter.subRolloutMeshes RolloutMeshes
+addSubRollout RolloutALExporter.subRolloutMaterials RolloutMaterials
+addSubRollout RolloutALExporter.subRolloutSkins RolloutSkins
+addSubRollout RolloutALExporter.subRolloutAnimations RolloutAnimations
+addSubRollout RolloutALExporter.subRolloutExport RolloutExport

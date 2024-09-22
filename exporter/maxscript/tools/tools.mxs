@@ -22,7 +22,7 @@ fn compareBonesFunc b1 b2 =
 	)
 )
 
-fn getAllBonesSorted bonesFromSkin =
+fn getAllBonesSorted bonesFromSkin exportChildBones =
 (
 	allBonesSorted = copy bonesFromSkin #noMap
 
@@ -30,11 +30,19 @@ fn getAllBonesSorted bonesFromSkin =
 	-- So we we add all parents that are not in bones list
 	for bi = 1 to allBonesSorted.count do
 	(
-		p = allBonesSorted[bi].parent
+		b = allBonesSorted[bi]
 		
-		if (p != null) then
+		if (b.parent != null) then
 		(
-			appendIfUnique allBonesSorted p
+			appendIfUnique allBonesSorted b.parent
+		)
+		
+		if (exportChildBones) then
+		(
+			for c in b.children do
+			(
+				appendIfUnique allBonesSorted c
+			)
 		)
 	)
 	

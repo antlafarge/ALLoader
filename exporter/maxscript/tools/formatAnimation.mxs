@@ -63,7 +63,6 @@ fn formatAnimation obj stream =
 		
 		format "%%%\"hr\":%[" comma nl (tabs 3) sp to:stream
 		
-		-- get start and end of the animation
 		keyStart = (animationRange.start as integer) / 160
 		keyEnd = (animationRange.end as integer) / 160
 		keyCount = keyEnd - keyStart + 1
@@ -71,7 +70,7 @@ fn formatAnimation obj stream =
 		initialSliderTimePos = sliderTime
 		
 		bonesFromSkin = skinOps.GetBoneNodes objSkin
-		allBonesSorted =  getAllBonesSorted bonesFromSkin
+		allBonesSorted =  getAllBonesSorted bonesFromSkin exportAnimationsUnusedChildBones
 		
 		struct OneBone (bn=undefined, ky=#())
 		struct OneKey (tm=undefined, ps=undefined, rt=undefined, sc=undefined)

@@ -25,6 +25,7 @@ global exportMaterialSpecularColor = true
 global exportMaterialTransparency = true
 
 global exportSkins = true
+global exportSkinsUnusedChildBones = true
 global exportSkinBoneParent = true
 global exportSkinBonePosition = true
 global exportSkinBoneRotation = true
@@ -32,6 +33,7 @@ global exportSkinBoneScale = true
 
 global exportAnimations = true
 global exportAnimationsName = "Anim"
+global exportAnimationsUnusedChildBones = true
 global exportAnimationAssociatedSkin = true
 global exportAnimationAssociatedMesh = true
 global exportAnimationBonePosition = true

@@ -85,6 +85,5 @@ A. Export your scene using the FBX format, close your scene and open the FBX fil
 _You can share feedback or discuss the project in the [discussion tab](https://github.com/antlafarge/ALLoader/discussions)._  
 
 ## Todo
-- Add option to export full skeleton (including all child bones)
 - Check every types of objects are well exported (EditPoly, EditMesh...)
 - 3dsMax biped
