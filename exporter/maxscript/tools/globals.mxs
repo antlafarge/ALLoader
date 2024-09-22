@@ -1,5 +1,3 @@
-global exportSelection = true
-
 global exportMeshes = true
 global exportMeshAssociatedMaterial = true
 global exportMeshPosition = true
@@ -25,7 +23,6 @@ global exportMaterialSpecularColor = true
 global exportMaterialTransparency = true
 
 global exportSkins = true
-global exportSkinsUnusedChildBones = true
 global exportSkinBoneParent = true
 global exportSkinBonePosition = true
 global exportSkinBoneRotation = true
@@ -33,13 +30,14 @@ global exportSkinBoneScale = true
 
 global exportAnimations = true
 global exportAnimationsName = "Anim"
-global exportAnimationsUnusedChildBones = true
 global exportAnimationAssociatedSkin = true
 global exportAnimationAssociatedMesh = true
 global exportAnimationBonePosition = true
 global exportAnimationBoneRotation = true
 global exportAnimationBoneScale = true
 
+global exportSelection = true
+global completeBoneStructure = true
 global flipAxis = false
 global flipAxisMatrix = matrix3 [1,0,0] [0,0,-1] [0,1,0] [0,0,0]
 global formattedPrintFormat = ".4g"

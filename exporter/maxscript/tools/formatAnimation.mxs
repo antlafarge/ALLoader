@@ -70,7 +70,7 @@ fn formatAnimation obj stream =
 		initialSliderTimePos = sliderTime
 		
 		bonesFromSkin = skinOps.GetBoneNodes objSkin
-		allBonesSorted =  getAllBonesSorted bonesFromSkin exportAnimationsUnusedChildBones
+		allBonesSorted =  getAllBonesSorted bonesFromSkin
 		
 		struct OneBone (bn=undefined, ky=#())
 		struct OneKey (tm=undefined, ps=undefined, rt=undefined, sc=undefined)

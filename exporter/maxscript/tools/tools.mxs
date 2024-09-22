@@ -22,32 +22,72 @@ fn compareBonesFunc b1 b2 =
 	)
 )
 
-fn getAllBonesSorted bonesFromSkin exportChildBones =
+-- Add children to reorder items (sorted by most higher in hierarchy first)
+fn addChildrenRecursive children allBones final =
 (
-	allBonesSorted = copy bonesFromSkin #noMap
+	tmp = #()
+	
+	for bi = 1 to children.count do
+	(
+		c = children[bi]
+		
+		if ((findItem allBones c) != 0) then
+		(
+			append tmp c
+		)
+	)
+	
+	qsort tmp compareBonesFunc
+	
+	join final tmp
+	
+	for bi = 1 to tmp.count do
+	(
+		c = tmp[bi]
+		
+		addChildrenRecursive c.children allBones final
+	)
+)
 
+fn getAllBonesSorted bonesFromSkin =
+(
+	allBones = copy bonesFromSkin #noMap
+	
+	noParents = #()
+	
 	-- The Skin modifier contains only bones attached to any Vertex
 	-- So we we add all parents that are not in bones list
-	for bi = 1 to allBonesSorted.count do
+	for bi = 1 to allBones.count do
 	(
-		b = allBonesSorted[bi]
+		b = allBones[bi]
 		
 		if (b.parent != null) then
 		(
-			appendIfUnique allBonesSorted b.parent
+			appendIfUnique allBones b.parent
+		)
+		else
+		(
+			append noParents b
 		)
 		
-		if (exportChildBones) then
+		if (completeBoneStructure) then
 		(
 			for c in b.children do
 			(
-				appendIfUnique allBonesSorted c
+				appendIfUnique allBones c
 			)
 		)
 	)
 	
-	qsort allBonesSorted compareBonesFunc
-	allBonesSorted
+	-- Sort by name
+	--allBonesSorted = allBones
+	--qsort allBonesSorted compareBonesFunc
+	--allBonesSorted
+	
+	-- Sort by hierarchy / name
+	final = #()
+	addChildrenRecursive noParents allBones final
+	final
 )
 
 fn getAllBonesReindexed bonesFromSkin allBonesSorted =

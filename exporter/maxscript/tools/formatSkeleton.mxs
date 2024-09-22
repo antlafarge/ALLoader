@@ -4,7 +4,7 @@ fn formatSkeleton obj stream =
 	if (objSkin != undefined) then
 	(
 		bonesFromSkin = skinOps.GetBoneNodes objSkin
-		allBonesSorted = getAllBonesSorted bonesFromSkin exportSkinsUnusedChildBones
+		allBonesSorted = getAllBonesSorted bonesFromSkin
 		bonesCount = allBonesSorted.count
 		
 		if (bonesCount > 0) then
