@@ -1,5 +1,12 @@
 # ALLoader  
-ALLoader is an Autodesk 3dsMax exporter (MaxScript) to JSON, and a WebGL Three.js loader (Javascript) which supports skinned, rigged and animated meshes.
+ALLoader is an **Autodesk 3dsMax** exporter (`MaxScript`) to `JSON` format; and a **WebGL Three.js** loader (`Javascript`) which supports **skinned**, **rigged** and **animated** meshes.
+
+The loader supports to load the meshes, materials, skeletons and animations from separate files by passing an `array` of `path files` on first (`urls`) argument of `ALLoader.load()` function.  
+In this case, load the data in this order :
+1. Materials
+2. Skeletons
+3. Meshes
+4. Animations
 
 ### Live demos
 [http://antlafarge.github.io/ALLoader/](http://antlafarge.github.io/ALLoader/)
@@ -16,13 +23,17 @@ ALLoader is an Autodesk 3dsMax exporter (MaxScript) to JSON, and a WebGL Three.j
 ![image](exporter-preview.png)
 
 ## How to export meshes and animations
-- Open 3ds Max and your scene *(all meshes will be exported)*
-- Open the **Utilities** tab in the right lateral tool bar
+- Open 3ds Max and your scene
+- If you want to export only some meshes, select these meshes
+- Open the **Utilities** tab in the right lateral tool bar (Top right)
 - Clic on **MAXScript** button
 - Clic on **Run Script** button
 - Go to the **exporters** folder of ALLoader
-- Run the **exporter.ms** script
-- Follow the instructions
+- Run the **export.ms** script
+- Customize the settings for the export
+- Clic on **Export** button
+- Choose the target file and clic **Save** button
+- Enjoy!
 
 ## Exported data
 - Meshes
