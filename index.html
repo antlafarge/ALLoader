@@ -15,6 +15,7 @@
 	<script type="importmap">
 		{
 			"imports": {
+				"ALLoader": "./loader/ALLoader.js",
 				"three": "./examples/libs/three.js/build/three.module.js",
 				"OrbitControls": "./examples/libs/three.js/examples/jsm/controls/OrbitControls.js",
 				"stats.module":"./examples/libs/three.js/examples/jsm/libs/stats.module.js",
@@ -97,7 +98,7 @@
 	<script type="module">
 		import * as THREE from 'three';
 		import { OrbitControls } from 'OrbitControls';
-		import { ALLoader } from '../loader/ALLoader.js';
+		import { ALLoader } from 'ALLoader';
 
 		let container, camera, controls, scene, renderer, mesh, meshWire, anim, anim2, meshAnim, meshWireAnim, skeletonHelper, axesHelper, light, animationMixer;
 
