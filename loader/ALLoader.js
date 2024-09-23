@@ -23,7 +23,11 @@ export class ALLoader extends THREE.Loader {
 			loadMaterials = true,
 			loadSkeletons = true,
 			loadMeshes = true,
-			loadAnimations = true
+			loadAnimations = true,
+			materialsCount = 0,
+			skeletonsCount = 0,
+			meshesCount = 0,
+			animationsCount = 0
 		} = data;
 
 		const loader = new THREE.FileLoader(this.manager);
@@ -34,7 +38,7 @@ export class ALLoader extends THREE.Loader {
 
 		loader.load(url, (text) => {
 			try {
-				onLoad(this.parse(text, { texturePath, materials, skeletons, meshes, animations, loadMaterials, loadSkeletons, loadMeshes, loadAnimations }));
+				onLoad(this.parse(text, { texturePath, materials, skeletons, meshes, animations, loadMaterials, loadSkeletons, loadMeshes, loadAnimations, materialsCount, skeletonsCount, meshesCount, animationsCount }));
 			}
 			catch (ex) {
 				if (onError) {
@@ -64,12 +68,12 @@ export class ALLoader extends THREE.Loader {
 		// MATERIALS
 		if (loadMaterials && json.materials) {
 			for (const matName in json.materials) {
+				data.materialsCount++;
 				const jsonMat = json.materials[matName];
 				const material = this.parseMaterial(jsonMat, texturePath);
 				material.name = matName;
 				materials[matName] = material;
 			}
-
 			for (const matName in json.materials) {
 				const jsonMat = json.materials[matName];
 				if (jsonMat.ml && jsonMat.ml.length > 0) {
@@ -84,6 +88,7 @@ export class ALLoader extends THREE.Loader {
 		// SKELETONS
 		if (loadSkeletons && json.skeletons) {
 			for (const skeName in json.skeletons) {
+				data.skeletonsCount++;
 				const jsonSkeleton = json.skeletons[skeName];
 				const skeleton = this.parseSkeleton(jsonSkeleton);
 				skeleton.name = skeName;
@@ -94,6 +99,7 @@ export class ALLoader extends THREE.Loader {
 		// MESHES
 		if (loadMeshes && json.meshes) {
 			for (const meshName in json.meshes) {
+				data.meshesCount++;
 				const jsonMesh = json.meshes[meshName];
 				const mesh = this.parseMesh(jsonMesh, materials, skeletons);
 				mesh.name = meshName;
@@ -104,6 +110,7 @@ export class ALLoader extends THREE.Loader {
 		// ANIMATIONS
 		if (loadAnimations && json.animations) {
 			for (const animName in json.animations) {
+				data.animationsCount++;
 				const jsonAnimation = json.animations[animName];
 				const animation = this.parseAnimation(jsonAnimation, animName);
 				animations[animName] = animation;
@@ -329,7 +336,7 @@ export class ALLoader extends THREE.Loader {
 			let skinWeights;
 			if (unindexVertices) {
 				skinIndices = this.unindexData(jsonMesh.si, jsonMesh.vi, false, 4);
-				skinWeights = this.unindexData(jsonMesh.sw, jsonMesh.vi, false, 4);
+				skinWeights = this.unindexData(jsonMesh.sw, jsonMesh.vi, true, 4);
 			}
 			else {
 				skinIndices = new Uint16Array(jsonMesh.si);

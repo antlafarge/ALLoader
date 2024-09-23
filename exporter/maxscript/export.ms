@@ -238,11 +238,11 @@ rollout RolloutExport ""
 )
 
 width = 512
-meshesHeight = 357 + 10
-materialsHeight = 167
-skinsHeight = 148 + 10
-animationsHeight = 205 + 10
-exportHeight = 197
+meshesHeight = 374
+materialsHeight = 174
+skinsHeight = 154
+animationsHeight = 214
+exportHeight = 206
 height = (amax (meshesHeight + materialsHeight) (skinsHeight + animationsHeight + exportHeight))
 exportPosY = skinsHeight + animationsHeight
 

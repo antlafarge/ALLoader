@@ -61,25 +61,29 @@
 				</p>
 				<a href="index.html?model=tank&animation=turn-right">
 					<figure class="figure">
-						<img src="examples/thumbs/tank_turn-right.jpg" class="figure-img img-fluid rounded" alt="Tank (turn right)">
+						<img src="examples/thumbs/tank_turn-right.jpg" class="figure-img img-fluid rounded"
+							alt="Tank (turn right)">
 						<figcaption class="figure-caption text-center">Tank (turn right)</figcaption>
 					</figure>
 				</a>
 				<a href="index.html?model=gordon&animation=idle">
 					<figure class="figure">
-						<img src="examples/thumbs/gordon_idle.jpg" class="figure-img img-fluid rounded" alt="Gordon (idle)">
+						<img src="examples/thumbs/gordon_idle.jpg" class="figure-img img-fluid rounded"
+							alt="Gordon (idle)">
 						<figcaption class="figure-caption text-center">Gordon (idle)</figcaption>
 					</figure>
 				</a>
 				<a href="index.html?model=justin&animation=idle">
 					<figure class="figure">
-						<img src="examples/thumbs/justin_idle.jpg" class="figure-img img-fluid rounded" alt="Justin (idle)">
+						<img src="examples/thumbs/justin_idle.jpg" class="figure-img img-fluid rounded"
+							alt="Justin (idle)">
 						<figcaption class="figure-caption text-center">Justin (idle)</figcaption>
 					</figure>
 				</a>
 				<a href="index.html?model=justin&animation=walk">
 					<figure class="figure">
-						<img src="examples/thumbs/justin_walk.jpg" class="figure-img img-fluid rounded" alt="Justin (walk)">
+						<img src="examples/thumbs/justin_walk.jpg" class="figure-img img-fluid rounded"
+							alt="Justin (walk)">
 						<figcaption class="figure-caption text-center">Justin (walk)</figcaption>
 					</figure>
 				</a>
@@ -109,6 +113,14 @@
 
 		const mixers = [];
 
+		// Y-UP AXIS
+		//const up = new THREE.Vector3(0, 1, 0);
+		//const cameraPosUnity = new THREE.Vector3(-1, 1, 1);
+
+		// Z-UP AXIS
+		const up = new THREE.Vector3(0, 0, 1);
+		const cameraPosUnity = new THREE.Vector3(-1, -1, 1);
+
 		function main() {
 			renderer = new THREE.WebGLRenderer({ antialias: true });
 			renderer.setClearColor(new THREE.Color(0x7f7f7f));
@@ -118,17 +130,13 @@
 			container.appendChild(renderer.domElement);
 
 			camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 10000);
-			// Y-UP AXIS
-			camera.up.set(0, 1, 0);
-			camera.position.set(-6, 6, 6);
-			// Z-UP AXIS
-			//camera.up.set(0, 0, 1);
-			//camera.position.set(-6, -6, 6);
+			camera.up.copy(up);
+			camera.position.copy(cameraPosUnity).multiplyScalar(2);
 
 			controls = new OrbitControls(camera, container);
-			//controls.autoRotate = true;
-			controls.autoRotateSpeed = -0.1;
 			controls.target.set(0, 0, 0);
+			//controls.autoRotate = true;
+			//controls.autoRotateSpeed = -0.1;
 
 			scene = new THREE.Scene();
 
@@ -159,9 +167,6 @@
 			function processMesh(data) {
 				console.log("processMesh", data);
 
-				const vMin = new THREE.Vector3(+Infinity, +Infinity, +Infinity);
-				const vMax = new THREE.Vector3(-Infinity, -Infinity, -Infinity);
-
 				for (const meshName in data.meshes) {
 					const mesh = data.meshes[meshName];
 
@@ -170,9 +175,6 @@
 					}
 
 					mesh.geometry.computeBoundingBox();
-
-					vMin.min(mesh.geometry.boundingBox.min);
-					vMax.max(mesh.geometry.boundingBox.max);
 
 					scene.add(mesh);
 
@@ -191,10 +193,11 @@
 						});
 						mixers.push(mixer);
 					}
+
+					const midZ = ((mesh.geometry.boundingBox.max.z - mesh.geometry.boundingBox.min.z) * mesh.scale.z / 2) + (mesh.geometry.boundingBox.min.z * mesh.scale.z);
+					controls.target.z = midZ;
+					camera.position.copy(cameraPosUnity).multiplyScalar(mesh.geometry.boundingBox.min.distanceTo(mesh.geometry.boundingBox.max) * mesh.scale.z * 0.6).add(controls.target);
 				}
-				
-				const distance = 1.5 * vMax.distanceTo(vMin);
-				camera.position.set(-distance, distance, distance);
 			}
 
 			function onLoad() {
