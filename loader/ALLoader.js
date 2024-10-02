@@ -139,19 +139,6 @@ export class ALLoader extends THREE.Loader {
 				material.color.set(jsonMat.cl[0] / 255, jsonMat.cl[1] / 255, jsonMat.cl[2] / 255);
 			}
 
-			// SPECULAR
-			if (jsonMat.sp != null) {
-				material.specular.set(jsonMat.sp[0] / 255, jsonMat.sp[1] / 255, jsonMat.sp[2] / 255);
-			}
-
-			// OPACITY
-			if (jsonMat.op != null) {
-				material.opacity = jsonMat.op;
-				if (material.opacity != 1) {
-					material.transparent = true;
-				}
-			}
-
 			// COLOR MAP (TEXTURE)
 			if (jsonMat.cm != null) {
 				const textureUrl = `${texturePath}/${jsonMat.cm}`;
@@ -171,6 +158,61 @@ export class ALLoader extends THREE.Loader {
 				};
 
 				material.map = (new THREE.TextureLoader()).load(textureUrl, onTextureLoaded, onTextureProgress, onTextureError);
+			}
+
+			// SPECULAR
+			if (jsonMat.sp != null) {
+				material.specular.set(jsonMat.sp[0] / 255, jsonMat.sp[1] / 255, jsonMat.sp[2] / 255);
+			}
+
+			// SPECULAR MAP (TEXTURE)
+			if (jsonMat.sm != null) {
+				const textureUrl = `${texturePath}/${jsonMat.sm}`;
+
+				const onTextureLoaded = (texture) => {
+					//console.debug(`Texture "${textureUrl}" loaded`);
+					texture.wrapS = THREE.RepeatWrapping;
+					texture.wrapT = THREE.RepeatWrapping;
+				};
+
+				const onTextureProgress = (xhr) => {
+					//console.debug(`${textureUrl} (${xhr.loaded / xhr.total * 100}%)`);
+				};
+
+				const onTextureError = (xhr) => {
+					console.debug(`Texture "${textureUrl}" load failed`);
+				};
+
+				material.specularMap = (new THREE.TextureLoader()).load(textureUrl, onTextureLoaded, onTextureProgress, onTextureError);
+			}
+
+			// SPECULAR MAP (TEXTURE)
+			if (jsonMat.bm != null) {
+				const textureUrl = `${texturePath}/${jsonMat.bm}`;
+
+				const onTextureLoaded = (texture) => {
+					//console.debug(`Texture "${textureUrl}" loaded`);
+					texture.wrapS = THREE.RepeatWrapping;
+					texture.wrapT = THREE.RepeatWrapping;
+				};
+
+				const onTextureProgress = (xhr) => {
+					//console.debug(`${textureUrl} (${xhr.loaded / xhr.total * 100}%)`);
+				};
+
+				const onTextureError = (xhr) => {
+					console.debug(`Texture "${textureUrl}" load failed`);
+				};
+
+				material.bumpMap = (new THREE.TextureLoader()).load(textureUrl, onTextureLoaded, onTextureProgress, onTextureError);
+			}
+
+			// OPACITY
+			if (jsonMat.op != null) {
+				material.opacity = jsonMat.op;
+				if (material.opacity != 1) {
+					material.transparent = true;
+				}
 			}
 
 			if (jsonMat.sd != null) {
