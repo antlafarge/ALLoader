@@ -107,9 +107,10 @@ rollout RolloutMaterials ""
 	(
 		checkbox exportMaterialBaseColorCheckbox "Base color (cl)" checked:exportMaterialBaseColor enabled:exportMaterials
 		checkbox exportMaterialBaseColorMapCheckbox "Base color map (cm)" checked:exportMaterialBaseColorMap enabled:exportMaterials
-		checkbox exportMaterialBaseColorOnlyIfNoBaseColorMapCheckbox "Base color only if no base color map" checked:exportMaterialBaseColorOnlyIfNoBaseColorMap enabled:exportMaterials
 		checkbox exportMaterialSpecularColorCheckbox "Specular color (sp)" checked:exportMaterialSpecularColor enabled:exportMaterials
-		checkbox exportMaterialTransparencyCheckbox "Transparency (op)" checked:exportMaterialTransparency enabled:exportMaterials
+		checkbox exportMaterialSpecularMapCheckbox "Specular map (sm)" checked:exportMaterialSpecularMap enabled:exportMaterials
+		checkbox exportMaterialBumpMapCheckbox "Bump map (sm)" checked:exportMaterialBumpMap enabled:exportMaterials
+		checkbox exportMaterialTransparencyCheckbox "Opacity (op)" checked:exportMaterialTransparency enabled:exportMaterials
 	)
 	
 	on exportMaterialsCheckbox changed newValue do
@@ -209,8 +210,9 @@ rollout RolloutExport ""
 		exportMaterials = RolloutMaterials.exportMaterialsCheckbox.checked
 		exportMaterialBaseColor = RolloutMaterials.exportMaterialBaseColorCheckbox.checked
 		exportMaterialBaseColorMap = RolloutMaterials.exportMaterialBaseColorMapCheckbox.checked
-		exportMaterialBaseColorOnlyIfNoBaseColorMap = RolloutMaterials.exportMaterialBaseColorOnlyIfNoBaseColorMapCheckbox.checked
 		exportMaterialSpecularColor = RolloutMaterials.exportMaterialSpecularColorCheckbox.checked
+		exportMaterialSpecularMap = RolloutMaterials.exportMaterialSpecularMapCheckbox.checked
+		exportMaterialBumpMap = RolloutMaterials.exportMaterialBumpMapCheckbox.checked
 		exportMaterialTransparency = RolloutMaterials.exportMaterialTransparencyCheckbox.checked
 		
 		exportSkins = RolloutSkins.exportSkinsCheckbox.checked
@@ -238,10 +240,10 @@ rollout RolloutExport ""
 )
 
 width = 512
-meshesHeight = 374
-materialsHeight = 174
-skinsHeight = 154
-animationsHeight = 214
+meshesHeight = 375
+materialsHeight = 195
+skinsHeight = 155
+animationsHeight = 215
 exportHeight = 206
 height = (amax (meshesHeight + materialsHeight) (skinsHeight + animationsHeight + exportHeight))
 exportPosY = skinsHeight + animationsHeight

@@ -4,7 +4,12 @@ fn formatMaterial mat stream =
 	(
 		comma = ""
 		format "%%\"%\":%{" nl (tabs 2) mat.name sp to:stream
-		if (exportMaterialBaseColorMap and mat.base_color_map != undefined) then
+		if (exportMaterialBaseColor) then
+		(
+			format "%%%\"cl\":%[%,%,%]" comma nl (tabs 3) sp (fp mat.Base_Color.r) (fp mat.Base_Color.g) (fp mat.Base_Color.b) to:stream
+			comma = ","
+		)
+		if (exportMaterialBaseColorMap and mat.base_color_map_on and mat.base_color_map != undefined) then
 		(
 			textureFilePath = mat.base_color_map.bitmap.filename
 			tokens = (filterString textureFilePath "\\")
@@ -12,14 +17,25 @@ fn formatMaterial mat stream =
 			format "%%%\"cm\":%\"%\"" comma nl (tabs 3) sp textureFileName to:stream
 			comma = ","
 		)
-		if (exportMaterialBaseColor and (not exportMaterialBaseColorMap or not exportMaterialBaseColorOnlyIfNoBaseColorMap or mat.base_color_map == undefined)) then
-		(
-			format "%%%\"cl\":%[%,%,%]" comma nl (tabs 3) sp (fp mat.Base_Color.r) (fp mat.Base_Color.g) (fp mat.Base_Color.b) to:stream
-			comma = ","
-		)
 		if (exportMaterialSpecularColor) then
 		(
 			format "%%%\"sp\":%[%,%,%]" comma nl (tabs 3) sp (fp mat.refl_color.r) (fp mat.refl_color.g) (fp mat.refl_color.b) to:stream
+			comma = ","
+		)
+		if (exportMaterialSpecularMap and mat.reflectivity_map_on and mat.reflectivity_map != undefined) then
+		(
+			textureFilePath = mat.reflectivity_map.bitmap.filename
+			tokens = (filterString textureFilePath "\\")
+			textureFileName = tokens[tokens.count]
+			format "%%%\"sm\":%\"%\"" comma nl (tabs 3) sp textureFileName to:stream
+			comma = ","
+		)
+		if (exportMaterialBumpMap and mat.bump_map_on and mat.bump_map != undefined) then
+		(
+			textureFilePath = mat.bump_map.bitmap.filename
+			tokens = (filterString textureFilePath "\\")
+			textureFileName = tokens[tokens.count]
+			format "%%%\"bm\":%\"%\"" comma nl (tabs 3) sp textureFileName to:stream
 			comma = ","
 		)
 		if (exportMaterialTransparency and mat.Transparency > 0) then
