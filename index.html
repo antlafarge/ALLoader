@@ -159,7 +159,7 @@
 			scene.add(light2);
 
 			function createWireframe(mesh) {
-				const material = new THREE.MeshBasicMaterial({ color: 0xffffff, opacity: 0.3, transparent: true, wireframe: true });
+				const material = new THREE.MeshBasicMaterial({ color: 0xffffff, opacity: 0.1, transparent: true, wireframe: true });
 				let newMesh;
 				if (mesh instanceof THREE.SkinnedMesh) {
 					newMesh = new THREE.SkinnedMesh(mesh.geometry, material);
