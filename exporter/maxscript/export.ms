@@ -109,7 +109,7 @@ rollout RolloutMaterials ""
 		checkbox exportMaterialBaseColorMapCheckbox "Base color map (cm)" checked:exportMaterialBaseColorMap enabled:exportMaterials
 		checkbox exportMaterialSpecularColorCheckbox "Specular color (sp)" checked:exportMaterialSpecularColor enabled:exportMaterials
 		checkbox exportMaterialSpecularMapCheckbox "Specular map (sm)" checked:exportMaterialSpecularMap enabled:exportMaterials
-		checkbox exportMaterialBumpMapCheckbox "Bump map (sm)" checked:exportMaterialBumpMap enabled:exportMaterials
+		checkbox exportMaterialBumpMapCheckbox "Bump map (bm)" checked:exportMaterialBumpMap enabled:exportMaterials
 		checkbox exportMaterialTransparencyCheckbox "Opacity (op)" checked:exportMaterialTransparency enabled:exportMaterials
 	)
 	
