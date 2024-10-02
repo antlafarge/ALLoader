@@ -88,6 +88,13 @@
 						<figcaption class="figure-caption text-center">Justin (walk)</figcaption>
 					</figure>
 				</a>
+				<a href="index.html?model=wall&animation=">
+					<figure class="figure">
+						<img src="examples/thumbs/wall.jpg" class="figure-img img-fluid rounded"
+							alt="Justin (walk)">
+						<figcaption class="figure-caption text-center">Wall (specular map + bump map)</figcaption>
+					</figure>
+				</a>
 			</div>
 			<div class="col-md-10 main-window">
 				<div id="canvas-container"></div>
@@ -104,11 +111,11 @@
 
 		const clock = new THREE.Clock();
 
-		const meshReResult = /(\?|&)model=(.+?)(&.*)?$/.exec(window.location.search);
+		const meshReResult = /(\?|&)model=(.*?)(&.*)?$/.exec(window.location.search);
 		const meshToLoad = (meshReResult ? meshReResult[2] : "tank");
 		console.log("meshToLoad", meshToLoad);
 
-		const animationReResult = /(\?|&)animation=(.+?)(&.*)?$/.exec(window.location.search);
+		const animationReResult = /(\?|&)animation=(.*?)(&.*)?$/.exec(window.location.search);
 		const animationToLoad = (animationReResult ? animationReResult[2] : "turn-right");
 		console.log("animationToLoad", animationToLoad);
 
@@ -146,6 +153,10 @@
 
 			light = new THREE.AmbientLight(0xffffff);
 			scene.add(light);
+
+			const light2 = new THREE.PointLight(0xffffff, 10, 0, 2);
+			light2.position.set(0, -2, 0);
+			scene.add(light2);
 
 			function createWireframe(mesh) {
 				const material = new THREE.MeshBasicMaterial({ color: 0xffffff, opacity: 0.3, transparent: true, wireframe: true });

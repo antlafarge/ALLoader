@@ -1,0 +1,12 @@
+{
+	"version": "0.1",
+	"materials": {
+		"Material #27": {
+			"cl": [127.5,127.5,127.5],
+			"cm": "bricks-009_d100.jpg",
+			"sp": [255,255,255],
+			"sm": "bricks-009_s050-g100.jpg",
+			"bm": "bricks-009_b015.jpg"
+		}
+	}
+}
